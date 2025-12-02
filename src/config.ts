@@ -156,7 +156,7 @@ export const RENDERER = {
 
 export const DIRECTIONAL_LIGHT_PRESETS = {
   day: {
-    color: 0xffffff,
+    color: 0xfff2cc,
     intensity: 6,
     position: { x: 55, y: 55, z: 55 },
     shadow: {
@@ -190,80 +190,6 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
       normalBias: 0.005,
       mapSize: { x: 2048, y: 2048 },
     },
-  },
-};
-
-export const LIST = {
-  x: 60,
-  y: 50,
-  scale: 0.5,
-  listItems: ['SHEEP',
-    'GRAPE',
-    'CORN',
-    'STRABERRY',
-    'COW',
-    'CHICKEN',
-    'TOMATO'],
-  listID: [
-    'sheep_1',
-    'grape_1',
-    'corn_1',
-    'strawberry_1',
-    'cow_1',
-    'chicken_1',
-    'tomato_1',
-  ],
-  texOpen: 'shop_open',
-  texClose: 'shop_close',
-  labelStyle: {
-    fontFamily: 'Arial',
-    fontSize: 36,
-    fill: '#ffffff',
-    stroke: { color: '#4a1850', width: 2, lineJoin: 'round' },
-    dropShadow: {
-      color: 'RGBA(0, 0, 0, 0.5)',
-      blur: 4,
-      angle: Math.PI / 6,
-      distance: 6,
-    },
-    wordWrap: true,
-    wordWrapWidth: 440,
-  },
-  itemStyle: {
-    fontFamily: 'Arial',
-    fontSize: 13,
-    fill: '#ffffff',
-    stroke: { color: '#4a1850', width: 2, lineJoin: 'round' },
-    dropShadow: {
-      color: 'RGBA(0, 0, 0, 0.5)',
-      blur: 2,
-      angle: Math.PI / 6,
-      distance: 2,
-    },
-    wordWrap: true,
-    wordWrapWidth: 440,
-  },
-  selectItems: {
-    width: 200,
-    height: 50,
-    backgroundColor: 'RGBA(245, 66, 66, 0.5)',
-    hoverColor: 'RGBA(245, 66, 66, 0.7)',
-  },
-  scrollBox: {
-    width: 200,
-    height: 350,
-    radius: 30,
-    offset: {
-      x: 200,
-      y: -200,
-    },
-  },
-  openBgSprite: {
-    x: 20,
-    scale: 0.3,
-  },
-  closedBgSprite: {
-    scale: 0.3,
   },
 };
 
