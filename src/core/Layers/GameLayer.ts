@@ -187,9 +187,7 @@ export class GameLayer {
         0.5
     );
 
-    if (isMobile) {
       this.orbitControls.enabled = false;
-    }
 
     gsap.delayedCall(2, () => {
       EventBus.emit('GRID_ITEMS:SHOW');

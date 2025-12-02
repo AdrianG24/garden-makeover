@@ -257,6 +257,7 @@ function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): v
 
         orientationDelay = gsap.delayedCall(0.01, () => {
           gameLayer.adjustCameraForOrientation();
+
         });
       }
     });
