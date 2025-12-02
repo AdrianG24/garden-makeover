@@ -28,6 +28,7 @@ export class GameLayer {
   private orbitControls!: OrbitControls;
   private particleSystem: BatchedRenderer;
   private cameraInfoDisplay: HTMLDivElement | null = null;
+  private ambientLight: THREE.AmbientLight | null = null;
 
   constructor(canvasElement: HTMLCanvasElement, showDebug: boolean = false) {
     this.clock = new THREE.Clock();
@@ -229,9 +230,28 @@ export class GameLayer {
 
     this.threeScene.add(rimLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.5);
-    ambientLight.position.set(0, 30, 0);
-    this.threeScene.add(ambientLight);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.5);
+    this.ambientLight.position.set(0, 30, 0);
+    this.threeScene.add(this.ambientLight);
+
+    this.setupLightingEventListeners();
+  }
+
+  private setupLightingEventListeners(): void {
+    EventBus.on('LIGHTING:TOGGLE', () => {
+      if (!this.lightingController) return;
+
+      this.lightingController.toggleDayNight();
+
+      const targetIntensity = this.lightingController.currentMode === 'night' ? 0.3 : 0.5;
+      if (this.ambientLight) {
+        gsap.to(this.ambientLight, {
+          intensity: targetIntensity,
+          duration: 1.5,
+          ease: 'power2.inOut',
+        });
+      }
+    });
   }
 
   public update(pixiRenderer: WebGLRenderer, pixiStage: Container): void {

@@ -9,6 +9,8 @@ import { LevelingSystem } from './core/Components/LevelingSystem';
 import { GridItemPlacement } from './core/Components/GridItemPlacement';
 import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
+import { DayNightToggle } from './core/Components/DayNightToggle';
+import { TutorialGuide } from './core/Components/TutorialGuide';
 import { EventBus } from './core/Controllers/EventController';
 import { ItemController } from './core/Controllers/ItemController';
 import { loadAllAudioAssets } from './core/Utils/AudioManager';
@@ -163,6 +165,8 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
 
   const itemSelector = new ItemSelector();
 
+  const dayNightToggle = new DayNightToggle();
+
   const gridItemPlacement = new GridItemPlacement();
   gridItemPlacement.setCamera(gameLayer.camera);
   gridItemPlacement.setGridConfig({
@@ -174,6 +178,32 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     columns: 16
   });
 
+  const isMobile = window.innerWidth < 768;
+  const tutorialGuide = new TutorialGuide({
+    steps: [
+      {
+        position: {
+          x: window.innerWidth / 2,
+          y: window.innerHeight - (isMobile ? 120 : 150)
+        },
+        text: 'Select an item'
+      },
+      {
+        position: {
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        },
+        text: 'Place it on the farm'
+      }
+    ],
+    handAnimationDuration: 0.8,
+    loopAnimation: {
+      scaleMin: 0.9,
+      scaleMax: 1.15,
+      duration: 0.8
+    }
+  });
+
   EventBus.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addToLayer(animationContainer as Container);
   });
@@ -183,8 +213,10 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
 
   uiLayer.addToLayer(levelingSystem);
   uiLayer.addToLayer(balanceDisplay);
+  uiLayer.addToLayer(dayNightToggle);
   uiLayer.addToLayer(gridItemPlacement);
   uiLayer.addToLayer(itemSelector);
+  uiLayer.addToLayer(tutorialGuide.containerElement);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
@@ -202,6 +234,7 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     const height = window.innerHeight;
     levelingSystem.resize(width);
     balanceDisplay.resize(width);
+    dayNightToggle.resize(width);
     itemSelector.resize(width, height);
   });
 }
@@ -231,13 +264,11 @@ function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): v
 
       EventBus.emit('UI:RESIZE');
 
-      // Перевіряємо орієнтацію ПІСЛЯ того як все оновилось
       const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
       const orientationChanged = lastOrientation !== currentOrientation;
 
       if (orientationChanged && window.innerWidth < 768) {
         lastOrientation = currentOrientation;
-        // Ще трохи чекаємо щоб 100% розміри оновились
         setTimeout(() => {
           gameLayer.adjustCameraForOrientation();
         }, 100);

@@ -1,6 +1,5 @@
 import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js';
 
-// Simple asset loader - no singleton, just functions
 const loader = new GLTFLoader();
 const cache = new Map<string, GLTF>();
 

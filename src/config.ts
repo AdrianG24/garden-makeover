@@ -34,17 +34,6 @@ export const manifest = {
 };
 
 export const sceneManagerConfig: SceneControllerConfiguration = {
-//   scenes: [
-//     {
-//       name: 'Base',
-//       models: [
-//         { name: 'ground', url: 'assets/models/ground.glb', position: [0, 0, 10] },
-//         { name: 'objects', url: 'assets/models/objects.glb', position: [0, 5, 100] },
-//         { name: 'sky', url: 'assets/models/skybox.glb', position: [0, 50, 0] },
-//       ],
-//     },
-//   ],
-// };
 
   scenes: [
     {

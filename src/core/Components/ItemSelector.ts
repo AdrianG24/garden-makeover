@@ -365,6 +365,8 @@ export class ItemSelector extends Container {
 
       itemController.currentItemId = option.modelId;
 
+      EventBus.emit('HELPER:NEXT:STEP');
+
       EventBus.emit('GRID:PLACE_AT_POSITION', {
         itemId: option.modelId,
         row: this.currentPlacement.gridPosition.row,

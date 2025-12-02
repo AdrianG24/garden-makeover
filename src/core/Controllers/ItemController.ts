@@ -1,9 +1,8 @@
 import { EventBus } from './EventController';
 
-// Simple item controller - no singleton, public properties
 export const ItemController = {
   balance: 90,
-  levelStartBalance: 0,
+  levelStartBalance: 90,
   currentItemId: null as string | null,
 
   costs: {

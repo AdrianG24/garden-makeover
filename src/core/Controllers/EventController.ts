@@ -1,6 +1,5 @@
 import { Signal } from 'micro-signals';
 
-// Simple event bus - no singleton, no logging, just signals
 const signals: Record<string, Signal<unknown>> = {};
 
 function getSignal(eventName: string): Signal<unknown> {
