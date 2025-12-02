@@ -1,11 +1,9 @@
 import * as THREE from 'three';
 import { Assets } from 'pixi.js';
 import { Container, WebGLRenderer } from 'pixi.js';
-import gsap from 'gsap';
 
 import { GameLayer } from './core/Layers/GameLayer';
 import { UILayer } from './core/Layers/UILayer';
-import { NotificationDialog } from './core/Components/NotificationDialog';
 import { WelcomeScreen } from './core/Components/WelcomeScreen';
 import { LevelingSystem } from './core/Components/LevelingSystem';
 import { GridItemPlacement } from './core/Components/GridItemPlacement';
@@ -13,7 +11,7 @@ import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { EventBus } from './core/Controllers/EventController';
 import { ItemController } from './core/Controllers/ItemController';
-import { loadAllAudioAssets, playSoundEffect } from './core/Utils/AudioManager';
+import { loadAllAudioAssets } from './core/Utils/AudioManager';
 import { manifest, DEBUG } from './config';
 
 export async function createGameScene(): Promise<void> {
@@ -176,17 +174,6 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     columns: 16
   });
 
-  const successDialog = new NotificationDialog(' GREAT JOB!\nKEEP GOING.');
-
-  EventBus.attachOnceListener('HELPER:HIDE', () => {
-    successDialog.visible = true;
-    successDialog.alpha = 0;
-    gsap.to(successDialog, { alpha: 1, duration: 0.5 });
-    playSoundEffect('sound_popup_chest', false);
-  });
-
-  successDialog.visible = false;
-
   EventBus.attachListener('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addToLayer(animationContainer as Container);
   });
@@ -198,7 +185,6 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
   uiLayer.addToLayer(balanceDisplay);
   uiLayer.addToLayer(gridItemPlacement);
   uiLayer.addToLayer(itemSelector);
-  uiLayer.addToLayer(successDialog);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
