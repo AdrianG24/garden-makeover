@@ -27,10 +27,6 @@ export class LevelingSystem extends Container {
   private levels: LevelConfig[] = [];
   private currentGoals: LevelGoal[] = [];
 
-  private readonly BAR_WIDTH = 200;
-  private readonly BAR_HEIGHT = 20;
-  private readonly PADDING = 20;
-
   constructor() {
     super();
     this.initializeLevels();
@@ -81,9 +77,18 @@ export class LevelingSystem extends Container {
   }
 
   private createLevelUI(): void {
+    const isMobile = window.innerWidth < 768;
+    const panelWidth = isMobile ? 200 : 260;
+    const panelHeight = isMobile ? 75 : 100;
+    const padding = isMobile ? 12 : 20;
+    const barWidth = isMobile ? 150 : 200;
+    const barHeight = isMobile ? 15 : 20;
+    const levelFontSize = isMobile ? 18 : 24;
+    const progressFontSize = isMobile ? 12 : 14;
+
     const panel = new Graphics();
     panel.fill(0x000000, 0.6);
-    panel.roundRect(0, 0, 260, 100, 10);
+    panel.roundRect(0, 0, panelWidth, panelHeight, 10);
     panel.endFill();
     this.addChild(panel);
 
@@ -91,23 +96,23 @@ export class LevelingSystem extends Container {
       'Level 1',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 24,
+        fontSize: levelFontSize,
         fontWeight: 'bold',
         fill: '#FFD700',
         stroke: { color: '#000000', width: 3, join: 'round' }
       })
     );
-    this.levelText.position.set(this.PADDING, this.PADDING);
+    this.levelText.position.set(padding, padding);
     this.addChild(this.levelText);
 
     this.progressBackground = new Graphics();
     this.progressBackground.fill(0x333333, 0.8);
     this.progressBackground.roundRect(
-      this.PADDING,
-      this.PADDING + 35,
-      this.BAR_WIDTH,
-      this.BAR_HEIGHT,
-      this.BAR_HEIGHT / 2
+      padding,
+      padding + (isMobile ? 28 : 35),
+      barWidth,
+      barHeight,
+      barHeight / 2
     );
     this.progressBackground.endFill();
     this.addChild(this.progressBackground);
@@ -119,7 +124,7 @@ export class LevelingSystem extends Container {
       '0/1',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 14,
+        fontSize: progressFontSize,
         fontWeight: 'bold',
         fill: '#FFFFFF',
         stroke: { color: '#000000', width: 2, join: 'round' }
@@ -127,12 +132,13 @@ export class LevelingSystem extends Container {
     );
     this.progressText.anchor.set(0.5, 0.5);
     this.progressText.position.set(
-      this.PADDING + this.BAR_WIDTH / 2,
-      this.PADDING + 35 + this.BAR_HEIGHT / 2
+      padding + barWidth / 2,
+      padding + (isMobile ? 28 : 35) + barHeight / 2
     );
     this.addChild(this.progressText);
 
-    this.position.set(20, 20);
+    const positionPadding = isMobile ? 10 : 20;
+    this.position.set(positionPadding, positionPadding);
   }
 
   private setupEventListeners(): void {
@@ -284,6 +290,7 @@ export class LevelingSystem extends Container {
 
   private showCongratulationsPopup(): void {
     const congratsContainer = new Container();
+    const isMobile = window.innerWidth < 768;
 
     const overlay = new Graphics();
     overlay.fill(0x000000, 0.7);
@@ -294,19 +301,25 @@ export class LevelingSystem extends Container {
     const popupContainer = new Container();
     popupContainer.position.set(window.innerWidth / 2, window.innerHeight / 2);
 
+    const popupWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 500;
+    const popupHeight = isMobile ? Math.min(window.innerHeight - 100, 360) : 400;
+    const halfWidth = popupWidth / 2;
+    const halfHeight = popupHeight / 2;
+
     const popupBg = new Graphics();
     popupBg.fill(0x4CAF50, 1);
-    popupBg.roundRect(-250, -200, 500, 400, 20);
+    popupBg.roundRect(-halfWidth, -halfHeight, popupWidth, popupHeight, isMobile ? 15 : 20);
     popupBg.endFill();
 
-    popupBg.stroke({ width: 8, color: 0xFFD700 });
-    popupBg.roundRect(-250, -200, 500, 400, 20);
+    popupBg.stroke({ width: isMobile ? 5 : 8, color: 0xFFD700 });
+    popupBg.roundRect(-halfWidth, -halfHeight, popupWidth, popupHeight, isMobile ? 15 : 20);
     popupContainer.addChild(popupBg);
 
-    for (let i = 0; i < 20; i++) {
+    const starCount = isMobile ? 12 : 20;
+    for (let i = 0; i < starCount; i++) {
       const star = new Graphics();
       star.fill(0xFFFF00, 0.8);
-      star.star(-230 + Math.random() * 460, -180 + Math.random() * 360, 5, 8);
+      star.star(-halfWidth + 20 + Math.random() * (popupWidth - 40), -halfHeight + 20 + Math.random() * (popupHeight - 40), 5, isMobile ? 6 : 8);
       star.endFill();
       popupContainer.addChild(star);
     }
@@ -315,53 +328,54 @@ export class LevelingSystem extends Container {
       'CONGRATULATIONS!',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 48,
+        fontSize: isMobile ? 28 : 48,
         fontWeight: 'bold',
         fill: '#FFD700',
-        stroke: { color: '#000000', width: 6, join: 'round' }
+        stroke: { color: '#000000', width: isMobile ? 4 : 6, join: 'round' }
       })
     );
     congratsTitle.anchor.set(0.5);
-    congratsTitle.position.set(0, -100);
+    congratsTitle.position.set(0, isMobile ? -halfHeight + 60 : -100);
     popupContainer.addChild(congratsTitle);
 
     const successText = new Text(
-      'You completed all levels!',
+      isMobile ? 'You completed\nall levels!' : 'You completed all levels!',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 28,
+        fontSize: isMobile ? 20 : 28,
         fontWeight: 'bold',
         fill: '#FFFFFF',
-        stroke: { color: '#000000', width: 4, join: 'round' }
+        stroke: { color: '#000000', width: isMobile ? 3 : 4, join: 'round' },
+        align: 'center'
       })
     );
     successText.anchor.set(0.5);
-    successText.position.set(0, -20);
+    successText.position.set(0, isMobile ? -10 : -20);
     popupContainer.addChild(successText);
 
     const farmText = new Text(
       '🎉 🌾 🐄 🐔 🌟',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 40
+        fontSize: isMobile ? 28 : 40
       })
     );
     farmText.anchor.set(0.5);
-    farmText.position.set(0, 40);
+    farmText.position.set(0, isMobile ? 50 : 40);
     popupContainer.addChild(farmText);
 
     const descText = new Text(
       'Your farm is now thriving!\nGreat job, farmer!',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 24,
+        fontSize: isMobile ? 16 : 24,
         fill: '#FFFFFF',
-        stroke: { color: '#000000', width: 3, join: 'round' },
+        stroke: { color: '#000000', width: isMobile ? 2 : 3, join: 'round' },
         align: 'center'
       })
     );
     descText.anchor.set(0.5);
-    descText.position.set(0, 110);
+    descText.position.set(0, isMobile ? halfHeight - 50 : 110);
     popupContainer.addChild(descText);
 
     congratsContainer.addChild(popupContainer);
@@ -398,6 +412,11 @@ export class LevelingSystem extends Container {
   private updateDisplay(): void {
     this.levelText.text = `Level ${this.currentLevel + 1}`;
 
+    const isMobile = window.innerWidth < 768;
+    const padding = isMobile ? 12 : 20;
+    const barWidth = isMobile ? 150 : 200;
+    const barHeight = isMobile ? 15 : 20;
+
     const totalGoals = this.currentGoals.length;
     const completedGoals = this.currentGoals.filter(g => g.completed).length;
     const progress = totalGoals > 0 ? completedGoals / totalGoals : 0;
@@ -405,11 +424,11 @@ export class LevelingSystem extends Container {
     this.progressBar.clear();
     this.progressBar.fill(0x4CAF50, 1);
     this.progressBar.roundRect(
-      this.PADDING,
-      this.PADDING + 35,
-      this.BAR_WIDTH * progress,
-      this.BAR_HEIGHT,
-      this.BAR_HEIGHT / 2
+      padding,
+      padding + (isMobile ? 28 : 35),
+      barWidth * progress,
+      barHeight,
+      barHeight / 2
     );
     this.progressBar.endFill();
 

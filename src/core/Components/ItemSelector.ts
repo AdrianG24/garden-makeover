@@ -48,6 +48,8 @@ export class ItemSelector extends Container {
   }
 
   private createSelectorUI(): void {
+    const isMobile = window.innerWidth < 768;
+
     this.overlay = new Graphics();
     this.overlay.fill(0x000000, 0.7);
     this.overlay.rect(0, 0, window.innerWidth, window.innerHeight);
@@ -59,26 +61,32 @@ export class ItemSelector extends Container {
     this.panel = new Container();
     this.panel.position.set(window.innerWidth / 2, window.innerHeight / 2);
 
+    const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 360) : 560;
+    const panelHeight = isMobile ? Math.min(window.innerHeight - 40, 500) : 480;
+    const halfWidth = panelWidth / 2;
+    const halfHeight = panelHeight / 2;
+
     const panelBg = new Graphics();
     panelBg.fill(0x2c5f2d, 1);
-    panelBg.roundRect(-280, -220, 560, 480, 15);
+    panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 15);
     panelBg.endFill();
     panelBg.stroke({ width: 4, color: 0xFFD700 });
-    panelBg.roundRect(-280, -220, 560, 480, 15);
+    panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 15);
     this.panel.addChild(panelBg);
 
+    const titleSize = isMobile ? 24 : 32;
     const title = new Text(
       'Select Item',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 32,
+        fontSize: titleSize,
         fontWeight: 'bold',
         fill: '#FFD700',
         stroke: { color: '#000000', width: 4, join: 'round' }
       })
     );
     title.anchor.set(0.5);
-    title.position.set(0, -170);
+    title.position.set(0, -halfHeight + 30);
     this.panel.addChild(title);
 
     this.itemOptions = [
@@ -91,18 +99,18 @@ export class ItemSelector extends Container {
       { type: 'grape', textureKey: 'grape', modelId: 'grape_1', label: 'Grape' }
     ];
 
-    const itemsPerRow = 3;
-    const itemSpacing = 130;
-    const startY = -80;
-    const startX = -125;
+    const itemsPerRow = isMobile ? 3 : 3;
+    const itemSpacing = isMobile ? 100 : 130;
+    const startY = isMobile ? -halfHeight + 80 : -80;
+    const startX = isMobile ? -(itemSpacing * (itemsPerRow - 1)) / 2 : -125;
 
     this.itemOptions.forEach((option, index) => {
       const row = Math.floor(index / itemsPerRow);
       const col = index % itemsPerRow;
       const x = startX + col * itemSpacing;
-      const y = startY + row * 120;
+      const y = startY + row * (isMobile ? 100 : 120);
 
-      const itemContainer = this.createItemOption(option, x, y);
+      const itemContainer = this.createItemOption(option, x, y, isMobile);
       this.panel.addChild(itemContainer);
     });
 
@@ -130,6 +138,8 @@ export class ItemSelector extends Container {
   }
 
   private showNotEnoughMoneyPopup(): void {
+    const isMobile = window.innerWidth < 768;
+
     const popupOverlay = new Graphics();
     popupOverlay.fill(0x000000, 0.85);
     popupOverlay.rect(0, 0, window.innerWidth, window.innerHeight);
@@ -139,67 +149,78 @@ export class ItemSelector extends Container {
     const popup = new Container();
     popup.position.set(window.innerWidth / 2, window.innerHeight / 2);
 
+    const popupWidth = isMobile ? Math.min(window.innerWidth - 60, 320) : 500;
+    const popupHeight = isMobile ? 300 : 360;
+    const halfWidth = popupWidth / 2;
+    const halfHeight = popupHeight / 2;
+
     const popupBg = new Graphics();
     popupBg.fill(0xFF5555, 1);
-    popupBg.roundRect(-250, -180, 500, 360, 20);
+    popupBg.roundRect(-halfWidth, -halfHeight, popupWidth, popupHeight, 20);
     popupBg.endFill();
-    popupBg.stroke({ width: 6, color: 0xFFFFFF });
-    popupBg.roundRect(-250, -180, 500, 360, 20);
+    popupBg.stroke({ width: isMobile ? 4 : 6, color: 0xFFFFFF });
+    popupBg.roundRect(-halfWidth, -halfHeight, popupWidth, popupHeight, 20);
     popup.addChild(popupBg);
 
+    const emojiSize = isMobile ? 40 : 60;
     const sadEmoji = new Text(
       '😢',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 60
+        fontSize: emojiSize
       })
     );
     sadEmoji.anchor.set(0.5);
-    sadEmoji.position.set(0, -100);
+    sadEmoji.position.set(0, -halfHeight + 60);
     popup.addChild(sadEmoji);
 
+    const titleSize = isMobile ? 24 : 36;
     const titleText = new Text(
       'Not Enough Money!',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 36,
+        fontSize: titleSize,
         fontWeight: 'bold',
         fill: '#FFFFFF',
-        stroke: { color: '#000000', width: 5, join: 'round' }
+        stroke: { color: '#000000', width: isMobile ? 3 : 5, join: 'round' }
       })
     );
     titleText.anchor.set(0.5);
-    titleText.position.set(0, -30);
+    titleText.position.set(0, -halfHeight + 110);
     popup.addChild(titleText);
 
+    const messageSize = isMobile ? 16 : 22;
     const messageText = new Text(
       'Unfortunately, you don\'t have\nenough money to buy anything.\nLet\'s retry this level!',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 22,
+        fontSize: messageSize,
         fill: '#FFFFFF',
-        stroke: { color: '#000000', width: 3, join: 'round' },
+        stroke: { color: '#000000', width: 2, join: 'round' },
         align: 'center'
       })
     );
     messageText.anchor.set(0.5);
-    messageText.position.set(0, 45);
+    messageText.position.set(0, 0);
     popup.addChild(messageText);
 
     const retryButton = new Container();
-    retryButton.position.set(0, 130);
+    retryButton.position.set(0, halfHeight - 60);
 
+    const buttonWidth = isMobile ? 160 : 200;
+    const buttonHeight = isMobile ? 50 : 60;
     const buttonBg = new Graphics();
     buttonBg.fill(0xFFD700, 1);
-    buttonBg.roundRect(-100, -30, 200, 60, 10);
+    buttonBg.roundRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 10);
     buttonBg.endFill();
     retryButton.addChild(buttonBg);
 
+    const buttonFontSize = isMobile ? 20 : 28;
     const buttonText = new Text(
       'Retry Level',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 28,
+        fontSize: buttonFontSize,
         fontWeight: 'bold',
         fill: '#000000'
       })
@@ -242,7 +263,7 @@ export class ItemSelector extends Container {
     });
   }
 
-  private createItemOption(option: ItemOption, x: number, y: number): Container {
+  private createItemOption(option: ItemOption, x: number, y: number, isMobile: boolean): Container {
     const container = new Container();
     container.position.set(x, y);
 
@@ -250,44 +271,49 @@ export class ItemSelector extends Container {
     const cost = itemController.getItemCost(option.type);
     const canAfford = itemController.getBalance() >= cost;
 
+    const boxSize = isMobile ? 70 : 100;
+    const halfBox = boxSize / 2;
+    const iconSize = isMobile ? 40 : 50;
+
     const bg = new Graphics();
     if (canAfford) {
       bg.fill(0x4CAF50, 0.9);
-      bg.roundRect(-50, -40, 100, 100, 10);
+      bg.roundRect(-halfBox, -halfBox + 5, boxSize, boxSize, 10);
       bg.endFill();
       bg.stroke({ width: 4, color: 0xFFFFFF });
-      bg.roundRect(-50, -40, 100, 100, 10);
+      bg.roundRect(-halfBox, -halfBox + 5, boxSize, boxSize, 10);
     } else {
       bg.fill(0x666666, 0.5);
-      bg.roundRect(-50, -40, 100, 100, 10);
+      bg.roundRect(-halfBox, -halfBox + 5, boxSize, boxSize, 10);
       bg.endFill();
       bg.stroke({ width: 3, color: 0x333333 });
-      bg.roundRect(-50, -40, 100, 100, 10);
+      bg.roundRect(-halfBox, -halfBox + 5, boxSize, boxSize, 10);
     }
     container.addChild(bg);
 
     const texture = Assets.get(option.textureKey);
     const icon = new Sprite(texture);
     icon.anchor.set(0.5);
-    icon.position.set(0, -10);
-    icon.width = icon.height = 50;
+    icon.position.set(0, -5);
+    icon.width = icon.height = iconSize;
     if (!canAfford) {
       icon.alpha = 0.4;
     }
     container.addChild(icon);
 
+    const fontSize = isMobile ? 14 : 18;
     const costText = new Text(
       `$${cost}`,
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 18,
+        fontSize: fontSize,
         fontWeight: 'bold',
         fill: canAfford ? '#FFD700' : '#FF0000',
-        stroke: { color: '#000000', width: 3, join: 'round' }
+        stroke: { color: '#000000', width: 2, join: 'round' }
       })
     );
     costText.anchor.set(0.5);
-    costText.position.set(0, 35);
+    costText.position.set(0, halfBox - 10);
     container.addChild(costText);
 
     if (canAfford) {

@@ -161,11 +161,20 @@ export class GameLayer {
       });
     });
 
+    const isMobile = window.innerWidth < 768;
+    const cameraOffset = isMobile ?
+      new THREE.Vector3(CAMERA.pos.x + 10, CAMERA.pos.y + 15, CAMERA.pos.z + 20) :
+      new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
+
     this.cameraController.moveCameraToTarget(
-        new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25),
+        cameraOffset,
         2,
         0.3
     );
+
+    if (isMobile) {
+      this.orbitControls.enabled = false;
+    }
 
     gsap.delayedCall(1.5, () => {
       EventBus.emitEvent('GRID_ITEMS:SHOW');
@@ -176,6 +185,10 @@ export class GameLayer {
 
   private setupOrbitControls(): void {
     this.orbitControls = new OrbitControls(this.camera, this.webglRenderer.domElement);
+
+    const isMobile = window.innerWidth < 768;
+    this.orbitControls.enabled = !isMobile;
+
     this.orbitControls.enableDamping = true;
     this.orbitControls.dampingFactor = 0.05;
     this.orbitControls.screenSpacePanning = false;

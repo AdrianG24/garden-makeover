@@ -13,9 +13,14 @@ export class BalanceDisplay extends Container {
   }
 
   private createBalanceUI(): void {
+    const isMobile = window.innerWidth < 768;
+    const width = isMobile ? 120 : 180;
+    const height = isMobile ? 45 : 60;
+    const fontSize = isMobile ? 20 : 28;
+
     this.background = new Graphics();
     this.background.fill(0x000000, 0.6);
-    this.background.roundRect(0, 0, 180, 60, 10);
+    this.background.roundRect(0, 0, width, height, 10);
     this.background.endFill();
     this.addChild(this.background);
 
@@ -23,17 +28,18 @@ export class BalanceDisplay extends Container {
       '$0',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 28,
+        fontSize: fontSize,
         fontWeight: 'bold',
         fill: '#FFD700',
         stroke: { color: '#000000', width: 3, join: 'round' }
       })
     );
     this.balanceText.anchor.set(0.5);
-    this.balanceText.position.set(90, 30);
+    this.balanceText.position.set(width / 2, height / 2);
     this.addChild(this.balanceText);
 
-    this.position.set(window.innerWidth - 200, 20);
+    const padding = isMobile ? 10 : 20;
+    this.position.set(window.innerWidth - width - padding, padding);
   }
 
   private setupEventListeners(): void {
@@ -53,6 +59,9 @@ export class BalanceDisplay extends Container {
   }
 
   public resize(width: number): void {
-    this.position.set(width - 200, 20);
+    const isMobile = width < 768;
+    const balanceWidth = isMobile ? 120 : 180;
+    const padding = isMobile ? 10 : 20;
+    this.position.set(width - balanceWidth - padding, padding);
   }
 }

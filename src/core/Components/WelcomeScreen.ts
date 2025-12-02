@@ -32,14 +32,20 @@ export class WelcomeScreen extends Container {
 
   private createWelcomePanel(): Container {
     const panel = new Container();
+    const isMobile = window.innerWidth < 768;
+
+    const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 600;
+    const panelHeight = isMobile ? Math.min(window.innerHeight - 80, 420) : 500;
+    const halfWidth = panelWidth / 2;
+    const halfHeight = panelHeight / 2;
 
     const panelBackground = new Graphics();
     panelBackground.fill(0x4a7c59, 1);
-    panelBackground.roundRect(-300, -250, 600, 500, 20);
+    panelBackground.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, isMobile ? 15 : 20);
     panelBackground.endFill();
 
-    panelBackground.lineStyle(8, 0xf4e4c1, 1);
-    panelBackground.roundRect(-300, -250, 600, 500, 20);
+    panelBackground.lineStyle(isMobile ? 5 : 8, 0xf4e4c1, 1);
+    panelBackground.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, isMobile ? 15 : 20);
 
     panel.addChild(panelBackground);
 
@@ -47,34 +53,34 @@ export class WelcomeScreen extends Container {
       '🌾 Welcome to Garden Makeover! 🌾',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 32,
+        fontSize: isMobile ? 20 : 32,
         fill: '#f4e4c1',
         fontWeight: 'bold',
         align: 'center',
-        stroke: { color: '#2c5f2d', width: 4 },
+        stroke: { color: '#2c5f2d', width: isMobile ? 3 : 4 },
       })
     );
     titleText.anchor.set(0.5);
-    titleText.position.set(0, -150);
+    titleText.position.set(0, isMobile ? -halfHeight + 40 : -150);
     panel.addChild(titleText);
 
     const descriptionText = new Text(
-      'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
+      isMobile ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?' : 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 24,
+        fontSize: isMobile ? 16 : 24,
         fill: '#ffffff',
         align: 'center',
-        lineHeight: 35,
+        lineHeight: isMobile ? 24 : 35,
         stroke: { color: '#2c5f2d', width: 2 },
       })
     );
     descriptionText.anchor.set(0.5);
-    descriptionText.position.set(0, -20);
+    descriptionText.position.set(0, isMobile ? 0 : -20);
     panel.addChild(descriptionText);
 
     const buyButton = this.createBuyButton();
-    buyButton.position.set(0, 150);
+    buyButton.position.set(0, isMobile ? halfHeight - 50 : 150);
     panel.addChild(buyButton);
 
     panel.position.set(window.innerWidth / 2, window.innerHeight / 2);
@@ -87,13 +93,19 @@ export class WelcomeScreen extends Container {
     button.eventMode = 'static';
     button.cursor = 'pointer';
 
+    const isMobile = window.innerWidth < 768;
+    const buttonWidth = isMobile ? 220 : 300;
+    const buttonHeight = isMobile ? 55 : 80;
+    const halfWidth = buttonWidth / 2;
+    const halfHeight = buttonHeight / 2;
+
     const buttonBackground = new Graphics();
     buttonBackground.fill(0x86c232, 1);
-    buttonBackground.roundRect(-150, -40, 300, 80, 15);
+    buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
     buttonBackground.endFill();
 
-    buttonBackground.lineStyle(4, 0xf4e4c1, 1);
-    buttonBackground.roundRect(-150, -40, 300, 80, 15);
+    buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
+    buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
 
     button.addChild(buttonBackground);
 
@@ -101,10 +113,10 @@ export class WelcomeScreen extends Container {
       '🏡 BUY YOUR FARM 🏡',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: 32,
+        fontSize: isMobile ? 20 : 32,
         fill: '#ffffff',
         fontWeight: 'bold',
-        stroke: { color: '#2c5f2d', width: 3 },
+        stroke: { color: '#2c5f2d', width: isMobile ? 2 : 3 },
       })
     );
     buttonText.anchor.set(0.5);
@@ -114,20 +126,20 @@ export class WelcomeScreen extends Container {
       gsap.to(button.scale, { x: 1.1, y: 1.1, duration: 0.2 });
       buttonBackground.clear();
       buttonBackground.fill(0x9ed63a, 1);
-      buttonBackground.roundRect(-150, -40, 300, 80, 15);
+      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
       buttonBackground.endFill();
-      buttonBackground.lineStyle(4, 0xf4e4c1, 1);
-      buttonBackground.roundRect(-150, -40, 300, 80, 15);
+      buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
+      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
     });
 
     button.on('pointerout', () => {
       gsap.to(button.scale, { x: 1, y: 1, duration: 0.2 });
       buttonBackground.clear();
       buttonBackground.fill(0x86c232, 1);
-      buttonBackground.roundRect(-150, -40, 300, 80, 15);
+      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
       buttonBackground.endFill();
-      buttonBackground.lineStyle(4, 0xf4e4c1, 1);
-      buttonBackground.roundRect(-150, -40, 300, 80, 15);
+      buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
+      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
     });
 
     button.on('pointerdown', () => {

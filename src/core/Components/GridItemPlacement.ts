@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { EventBus } from '../Controllers/EventController';
 import { playSoundEffect } from '../Utils/AudioManager';
 import { worldToScreen } from '../Utils/UtilityFunctions';
+import { GAME_GRID_CONFIG } from '../../config';
 
 
 interface ItemPlacement {
@@ -179,7 +180,7 @@ export class GridItemPlacement extends Container {
     const offsetZ = startZ + totalGridDepth / 2 - cubeSize / 2;
 
     const x = col * (cubeSize + gap) + offsetX;
-    const y = 6;
+    const y = GAME_GRID_CONFIG.GAME_OBJECT_Y;
     const z = -row * (cubeSize + gap) + offsetZ;
 
     return new THREE.Vector3(x, y, z);
@@ -208,24 +209,28 @@ export class GridItemPlacement extends Container {
     this.allLevelPlacements.forEach((placements, level) => {
       placements.forEach(placement => {
         const itemContainer = new Container();
+        const isMobile = window.innerWidth < 768;
+        const circleSize = isMobile ? 35 : 50;
 
         const background = new Graphics();
         background.fill(0x4CAF50, 0.8);
-        background.circle(0, 0, 50);
+        background.circle(0, 0, circleSize);
         background.endFill();
 
-        background.lineStyle(4, 0xFFFFFF, 1);
-        background.circle(0, 0, 50);
+        background.lineStyle(isMobile ? 3 : 4, 0xFFFFFF, 1);
+        background.circle(0, 0, circleSize);
         itemContainer.addChild(background);
+
+        const fontSize = isMobile ? 22 : 60;
 
         const questionMark = new Text(
           '?',
           new TextStyle({
             fontFamily: 'Arial',
-            fontSize: 60,
+            fontSize: fontSize,
             fontWeight: 'bold',
             fill: '#FFFFFF',
-            stroke: { color: '#000000', width: 4, join: 'round' }
+            stroke: { color: '#000000', width: isMobile ? 2 : 4, join: 'round' }
           })
         );
         questionMark.anchor.set(0.5);
