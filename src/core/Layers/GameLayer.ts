@@ -170,9 +170,11 @@ export class GameLayer {
     let cameraOffset: THREE.Vector3;
     if (isMobile) {
       if (isPortrait) {
-        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 5, CAMERA.pos.y + 12, CAMERA.pos.z + 15);
+        const portraitDistance = 18;
+        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 15, CAMERA.pos.z + portraitDistance);
       } else {
-        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 5, CAMERA.pos.z + 5);
+        const landscapeDistance = 1;
+        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 4, CAMERA.pos.z + landscapeDistance);
       }
     } else {
       cameraOffset = new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
@@ -189,7 +191,7 @@ export class GameLayer {
     }
 
     gsap.delayedCall(2, () => {
-      EventBus.emitEvent('GRID_ITEMS:SHOW');
+      EventBus.emit('GRID_ITEMS:SHOW');
     });
   }
 
@@ -252,7 +254,7 @@ export class GameLayer {
       this.orbitControls.update();
     }
 
-    EventBus.emitEvent('GAME:UPDATE');
+    EventBus.emit('GAME:UPDATE');
 
     this.webglRenderer.resetState();
     this.webglRenderer.render(this.threeScene, this.camera);
@@ -290,9 +292,11 @@ export class GameLayer {
 
     let cameraOffset: THREE.Vector3;
     if (isPortrait) {
-      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 5, CAMERA.pos.y + 12, CAMERA.pos.z + 15);
+      const portraitDistance = 18;
+      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 15, CAMERA.pos.z + portraitDistance);
     } else {
-      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 5, CAMERA.pos.z + 5);
+      const landscapeDistance = 1;
+      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 4, CAMERA.pos.z + landscapeDistance);
     }
 
     this.cameraController.moveCameraToTarget(cameraOffset, 1, 0);

@@ -174,11 +174,11 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     columns: 16
   });
 
-  EventBus.attachListener('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
+  EventBus.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addToLayer(animationContainer as Container);
   });
 
-  EventBus.attachListener('LEVEL:HIDE_ANIMATION', () => {
+  EventBus.on('LEVEL:HIDE_ANIMATION', () => {
   });
 
   uiLayer.addToLayer(levelingSystem);
@@ -188,16 +188,16 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
-  EventBus.emitEvent('HELPER:SHOW');
+  EventBus.emit('HELPER:SHOW');
 
-  const itemController = ItemController.getInstance();
-  itemController.saveLevelStartBalance();
+  const itemController = ItemController;
+  itemController.saveStartBalance();
 
-  EventBus.attachListener('GAME:UPDATE', () => {
+  EventBus.on('GAME:UPDATE', () => {
     gridItemPlacement.updatePositions();
   });
 
-  EventBus.attachListener('UI:RESIZE', () => {
+  EventBus.on('UI:RESIZE', () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
     levelingSystem.resize(width);
@@ -225,20 +225,24 @@ function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): v
   const handleResize = (): void => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
-      const orientationChanged = lastOrientation !== currentOrientation;
-
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
 
-      EventBus.emitEvent('UI:RESIZE');
+      EventBus.emit('UI:RESIZE');
+
+      // Перевіряємо орієнтацію ПІСЛЯ того як все оновилось
+      const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+      const orientationChanged = lastOrientation !== currentOrientation;
 
       if (orientationChanged && window.innerWidth < 768) {
         lastOrientation = currentOrientation;
-        gameLayer.adjustCameraForOrientation();
+        // Ще трохи чекаємо щоб 100% розміри оновились
+        setTimeout(() => {
+          gameLayer.adjustCameraForOrientation();
+        }, 100);
       }
-    }, 150);
+    }, 200);
   };
 
   window.addEventListener('resize', handleResize);

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { AssetLoaderController } from './AssetLoaderController';
+import { loadGLTF } from './AssetLoaderController';
 import { InteractiveGroup } from 'three/addons/interactive/InteractiveGroup.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { checkIfAnimationExists, getAnimationByIdentifier } from '../Utils/UtilityFunctions';
@@ -24,7 +24,7 @@ export interface SceneControllerConfiguration {
 
 export class SceneController {
   private sceneReference: THREE.Scene;
-  private assetLoader = AssetLoaderController.getInstance();
+  
   private loadedModelsMap = new Map<string, THREE.Object3D>();
 
   public animationMixers: THREE.AnimationMixer[] = [];
@@ -61,7 +61,7 @@ export class SceneController {
     interactiveSceneGroup.name = sceneConfig.name;
 
     for (const modelConfig of sceneConfig.models) {
-      const loadedModel = await this.assetLoader.loadGLTFModel(modelConfig.url);
+      const loadedModel = await loadGLTF(modelConfig.url);
       const modelAnimationClips: THREE.AnimationClip[] | undefined = loadedModel.animations;
 
       if (modelAnimationClips && modelAnimationClips.length) {

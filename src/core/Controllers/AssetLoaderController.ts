@@ -1,41 +1,15 @@
-import * as THREE from 'three';
 import { GLTFLoader, GLTF } from 'three/addons/loaders/GLTFLoader.js';
 
+// Simple asset loader - no singleton, just functions
+const loader = new GLTFLoader();
+const cache = new Map<string, GLTF>();
 
-export class AssetLoaderController {
-  private static controllerInstance: AssetLoaderController;
-
-  private gltfModelLoader: GLTFLoader;
-  private assetCacheMap: Map<string, GLTF | THREE.Texture>;
-
-  private constructor() {
-    this.gltfModelLoader = new GLTFLoader();
-    this.assetCacheMap = new Map();
+export async function loadGLTF(path: string): Promise<GLTF> {
+  if (cache.has(path)) {
+    return cache.get(path)!;
   }
 
-  public static getInstance(): AssetLoaderController {
-    if (!AssetLoaderController.controllerInstance) {
-      AssetLoaderController.controllerInstance = new AssetLoaderController();
-    }
-    return AssetLoaderController.controllerInstance;
-  }
-
-  async loadGLTFModel(filePath: string): Promise<GLTF> {
-    if (this.assetCacheMap.has(filePath)) {
-      return this.assetCacheMap.get(filePath) as GLTF;
-    }
-
-    return new Promise((resolvePromise, rejectPromise) => {
-      this.gltfModelLoader.load(
-        filePath,
-        (loadedModel: GLTF) => {
-          this.assetCacheMap.set(filePath, loadedModel);
-
-          resolvePromise(loadedModel);
-        },
-        undefined,
-        rejectPromise
-      );
-    });
-  }
+  const gltf = await loader.loadAsync(path);
+  cache.set(path, gltf);
+  return gltf;
 }

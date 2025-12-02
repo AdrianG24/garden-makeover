@@ -16,11 +16,11 @@ export class CameraController {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('CAMERA:RESET', () => {
+    EventBus.on('CAMERA:RESET', () => {
       this.resetCameraToInitialPosition();
     });
 
-    EventBus.attachListener('CAMERA:ZOOM', () => {
+    EventBus.on('CAMERA:ZOOM', () => {
       this.moveCameraToTarget(
         new THREE.Vector3(
           this.initialCameraPosition.x,
@@ -30,7 +30,7 @@ export class CameraController {
       );
     });
 
-    EventBus.attachListener('CAMERA:SHAKE', () => {
+    EventBus.on('CAMERA:SHAKE', () => {
       this.applyCameraShake();
     });
   }

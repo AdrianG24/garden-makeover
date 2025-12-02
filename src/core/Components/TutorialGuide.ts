@@ -70,16 +70,16 @@ export class TutorialGuide {
   }
 
   private registerEventListeners(): void {
-    EventBus.attachOnceListener('HELPER:SHOW', () => {
+    EventBus.once('HELPER:SHOW', () => {
       this.handPointerSprite.visible = true;
       this.initializeFirstStep();
     });
 
-    EventBus.attachOnceListener('HELPER:HIDE', () => {
+    EventBus.once('HELPER:HIDE', () => {
       this.containerElement.visible = false;
     });
 
-    EventBus.attachListener('HELPER:NEXT:STEP', () => {
+    EventBus.on('HELPER:NEXT:STEP', () => {
       this.advanceToNextStep();
     });
   }

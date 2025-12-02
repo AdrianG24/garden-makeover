@@ -64,7 +64,7 @@ export class InteractiveGrid {
   }
 
   private registerEventHandlers(): void {
-    EventBus.attachListener(
+    EventBus.on(
       'GRID:CLEAR_CELL',
       (payload: unknown) => {
         const data = payload as { row: number; col: number };
@@ -78,19 +78,19 @@ export class InteractiveGrid {
       }
     );
 
-    EventBus.attachListener('GRID:CLEAR_ALL', () => {
+    EventBus.on('GRID:CLEAR_ALL', () => {
       this.clearAllCells();
     });
 
-    EventBus.attachListener('GRID:CLEAR_LEVEL_ITEMS', () => {
+    EventBus.on('GRID:CLEAR_LEVEL_ITEMS', () => {
       this.clearCurrentLevelItems();
     });
 
-    EventBus.attachListener('GRID:UPDATE_LEVEL', (level: unknown) => {
+    EventBus.on('GRID:UPDATE_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
     });
 
-    EventBus.attachOnceListener('GRID:ENABLE', () => {
+    EventBus.once('GRID:ENABLE', () => {
       gsap.delayedCall(GAME_GRID_CONFIG.CLICK_DELAY, () => {
         this.isInteractionEnabled = false;
       });
@@ -98,11 +98,11 @@ export class InteractiveGrid {
       this.updateCellVisibilityForTutorial();
     });
 
-    EventBus.attachListener('GRID:TOGGLE', (isVisible: unknown) => {
+    EventBus.on('GRID:TOGGLE', (isVisible: unknown) => {
       this.setGridCellsVisibility(isVisible as boolean);
     });
 
-    EventBus.attachListener(
+    EventBus.on(
       'GRID:PLACE_AT_POSITION',
       (payload: unknown) => {
         const data = payload as { itemId: string; row: number; col: number };
@@ -235,14 +235,14 @@ export class InteractiveGrid {
 
     this.refreshGridDisplay();
 
-    const itemController = ItemController.getInstance();
-    itemController.currentlySelectedItemId = null;
+    const itemController = ItemController;
+    itemController.currentItemId = null;
   }
 
   private placeInitialObjects(): void {
     if (!this.gridConfiguration.baseObjects) return;
 
-    const itemController = ItemController.getInstance();
+    const itemController = ItemController;
 
     for (const objectData of this.gridConfiguration.baseObjects) {
       const { row, col, id } = objectData;
@@ -255,7 +255,7 @@ export class InteractiveGrid {
         this.gridConfiguration.filledColor!
       );
 
-      itemController.currentlySelectedItemId = id;
+      itemController.currentItemId = id;
       const instantiatedObject = this.sceneControllerReference.createInstanceFromClick(id);
 
       if (instantiatedObject) {
@@ -358,13 +358,13 @@ export class InteractiveGrid {
     });
 
     if (this.isTutorialMode) {
-      EventBus.emitEvent('HELPER:HIDE');
+      EventBus.emit('HELPER:HIDE');
     }
 
     const cellColumn = Math.round((clickedCell.position.x - this.gridOffsetX) / (cellSize + gapSize));
     const cellRow = Math.round(-(clickedCell.position.z - this.gridOffsetZ) / (cellSize + gapSize));
 
-    EventBus.emitEvent('GRID:CELL_CLICK', {
+    EventBus.emit('GRID:CELL_CLICK', {
       row: cellRow,
       col: cellColumn,
       selected: clickedCell.userData.selected,
@@ -377,10 +377,10 @@ export class InteractiveGrid {
         this.gridConfiguration.filledColor!
       );
 
-      const itemController = ItemController.getInstance();
-      if (itemController.currentlySelectedItemId) {
+      const itemController = ItemController;
+      if (itemController.currentItemId) {
         const instantiatedGameObject = this.sceneControllerReference.createInstanceFromClick(
-          itemController.currentlySelectedItemId
+          itemController.currentItemId
         );
 
         if (instantiatedGameObject) {

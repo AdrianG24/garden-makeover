@@ -43,7 +43,7 @@ export class BalanceDisplay extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('BALANCE:UPDATED', (balance: unknown) => {
+    EventBus.on('BALANCE:UPDATED', (balance: unknown) => {
       this.updateBalance(balance as number);
     });
   }

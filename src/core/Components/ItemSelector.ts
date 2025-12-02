@@ -33,7 +33,7 @@ export class ItemSelector extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('ITEM_SELECTOR:SHOW', (placement: unknown) => {
+    EventBus.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
       this.showSelector(placement as ItemPlacement);
     });
   }
@@ -125,9 +125,9 @@ export class ItemSelector extends Container {
       duration: 0.4,
       ease: 'back.out(1.7)',
       onComplete: () => {
-        const itemController = ItemController.getInstance();
+        const itemController = ItemController;
         const hasAffordableItem = this.itemOptions.some(option =>
-          itemController.getBalance() >= itemController.getItemCost(option.type)
+          itemController.balance >= itemController.getCost(option.type)
         );
 
         if (!hasAffordableItem) {
@@ -244,7 +244,7 @@ export class ItemSelector extends Container {
     retryButton.on('pointerdown', () => {
       playSoundEffect('sound_click', false);
       this.hideSelector();
-      EventBus.emitEvent('LEVEL:RETRY_CURRENT');
+      EventBus.emit('LEVEL:RETRY_CURRENT');
     });
 
     popup.addChild(retryButton);
@@ -269,9 +269,9 @@ export class ItemSelector extends Container {
     const container = new Container();
     container.position.set(x, y);
 
-    const itemController = ItemController.getInstance();
-    const cost = itemController.getItemCost(option.type);
-    const canAfford = itemController.getBalance() >= cost;
+    const itemController = ItemController;
+    const cost = itemController.getCost(option.type);
+    const canAfford = itemController.balance >= cost;
 
     const boxSize = isMobile ? 70 : 100;
     const halfBox = boxSize / 2;
@@ -358,20 +358,20 @@ export class ItemSelector extends Container {
   }
 
   private selectItem(option: ItemOption, cost: number): void {
-    const itemController = ItemController.getInstance();
+    const itemController = ItemController;
 
-    if (this.currentPlacement && itemController.spendBalance(cost)) {
+    if (this.currentPlacement && itemController.spend(cost)) {
       playSoundEffect('sound_click', false);
 
-      itemController.currentlySelectedItemId = option.modelId;
+      itemController.currentItemId = option.modelId;
 
-      EventBus.emitEvent('GRID:PLACE_AT_POSITION', {
+      EventBus.emit('GRID:PLACE_AT_POSITION', {
         itemId: option.modelId,
         row: this.currentPlacement.gridPosition.row,
         col: this.currentPlacement.gridPosition.col
       });
 
-      EventBus.emitEvent('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
+      EventBus.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
 
       this.hideSelector();
     }

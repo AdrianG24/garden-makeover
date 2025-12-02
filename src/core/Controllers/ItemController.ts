@@ -1,77 +1,57 @@
 import { EventBus } from './EventController';
 
-export class ItemController {
-  private static controllerInstance: ItemController;
+// Simple item controller - no singleton, public properties
+export const ItemController = {
+  balance: 90,
+  levelStartBalance: 0,
+  currentItemId: null as string | null,
 
-  public currentlySelectedItemId: string | null = null;
-  private balance: number = 0;
-  private levelStartBalance: number = 0;
+  costs: {
+    cow: 100,
+    sheep: 70,
+    chicken: 60,
+    corn: 50,
+    tomato: 45,
+    strawberry: 40,
+    grape: 35,
+  } as Record<string, number>,
 
-  private constructor() {
-    this.calculateInitialBalance();
-  }
+  rewards: {
+    1: 200,
+    2: 250,
+    3: 300,
+    4: 350,
+  } as Record<number, number>,
 
-  public static getInstance(): ItemController {
-    if (!ItemController.controllerInstance) {
-      ItemController.controllerInstance = new ItemController();
-    }
-    return ItemController.controllerInstance;
-  }
+  init(): void {
+    EventBus.emit('BALANCE:UPDATED', this.balance);
+  },
 
-  private calculateInitialBalance(): void {
-    this.balance = 90;
-    EventBus.emitEvent('BALANCE:UPDATED', this.balance);
-  }
+  addReward(level: number): void {
+    const reward = this.rewards[level] || 200;
+    this.balance += reward;
+    EventBus.emit('BALANCE:UPDATED', this.balance);
+  },
 
-  public addLevelReward(level: number): void {
-    const rewards: Record<number, number> = {
-      1: 200,
-      2: 250,
-      3: 300,
-      4: 350
-    };
-    const reward = rewards[level] || 200;
-    this.addBalance(reward);
-  }
-
-  public saveLevelStartBalance(): void {
+  saveStartBalance(): void {
     this.levelStartBalance = this.balance;
-  }
+  },
 
-  public restoreLevelStartBalance(): void {
+  restoreStartBalance(): void {
     this.balance = this.levelStartBalance;
-    EventBus.emitEvent('BALANCE:UPDATED', this.balance);
-  }
+    EventBus.emit('BALANCE:UPDATED', this.balance);
+  },
 
-  public getBalance(): number {
-    return this.balance;
-  }
-
-  public spendBalance(amount: number): boolean {
+  spend(amount: number): boolean {
     if (this.balance >= amount) {
       this.balance -= amount;
-      EventBus.emitEvent('BALANCE:UPDATED', this.balance);
+      EventBus.emit('BALANCE:UPDATED', this.balance);
       return true;
     }
     return false;
-  }
+  },
 
-  public addBalance(amount: number): void {
-    this.balance += amount;
-    EventBus.emitEvent('BALANCE:UPDATED', this.balance);
-  }
-
-  public getItemCost(itemType: string): number {
-    const costs: Record<string, number> = {
-      cow: 100,
-      sheep: 70,
-      chicken: 60,
-      corn: 50,
-      tomato: 45,
-      strawberry: 40,
-      grape: 35
-    };
-    return costs[itemType] || 70;
-  }
-
-}
+  getCost(itemType: string): number {
+    return this.costs[itemType] || 70;
+  },
+};

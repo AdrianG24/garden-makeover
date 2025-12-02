@@ -142,28 +142,28 @@ export class LevelingSystem extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    EventBus.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       this.completeGoal(goalId as string);
     });
 
-    EventBus.attachListener('LEVEL:RESET', () => {
+    EventBus.on('LEVEL:RESET', () => {
       this.resetProgress();
     });
 
-    EventBus.attachListener('LEVEL:RETRY_CURRENT', () => {
+    EventBus.on('LEVEL:RETRY_CURRENT', () => {
       this.retryCurrentLevel();
     });
   }
 
   private retryCurrentLevel(): void {
-    const itemController = ItemController.getInstance();
-    itemController.restoreLevelStartBalance();
+    const itemController = ItemController;
+    itemController.restoreStartBalance();
 
     this.currentGoals.forEach(g => g.completed = false);
     this.updateDisplay();
 
-    EventBus.emitEvent('GRID:CLEAR_LEVEL_ITEMS');
-    EventBus.emitEvent('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
+    EventBus.emit('GRID:CLEAR_LEVEL_ITEMS');
+    EventBus.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
   }
 
   private completeGoal(goalId: string): void {
@@ -180,8 +180,8 @@ export class LevelingSystem extends Container {
   }
 
   private levelUp(): void {
-    const itemController = ItemController.getInstance();
-    itemController.addLevelReward(this.currentLevel + 1);
+    const itemController = ItemController;
+    itemController.addReward(this.currentLevel + 1);
 
     this.currentLevel++;
     playSoundEffect('sound_popup_chest', false);
@@ -193,10 +193,10 @@ export class LevelingSystem extends Container {
         this.currentGoals = [...this.levels[this.currentLevel].goals];
         this.updateDisplay();
 
-        itemController.saveLevelStartBalance();
+        itemController.saveStartBalance();
 
-        EventBus.emitEvent('GRID:UPDATE_LEVEL', this.currentLevel + 1);
-        EventBus.emitEvent('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
+        EventBus.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
+        EventBus.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
 
       }, 2000);
     } else {
@@ -251,7 +251,7 @@ export class LevelingSystem extends Container {
     this.levelUpAnimation.alpha = 0;
     this.levelUpAnimation.scale.set(0.5);
 
-    EventBus.emitEvent('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
+    EventBus.emit('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
 
     gsap.to(this.levelUpAnimation, {
       alpha: 1,
@@ -282,7 +282,7 @@ export class LevelingSystem extends Container {
       delay: 1.5,
       ease: 'power2.in',
       onComplete: () => {
-        EventBus.emitEvent('LEVEL:HIDE_ANIMATION');
+        EventBus.emit('LEVEL:HIDE_ANIMATION');
         this.levelUpAnimation = null;
       }
     });
@@ -380,7 +380,7 @@ export class LevelingSystem extends Container {
 
     congratsContainer.addChild(popupContainer);
 
-    EventBus.emitEvent('LEVEL:SHOW_ANIMATION', congratsContainer);
+    EventBus.emit('LEVEL:SHOW_ANIMATION', congratsContainer);
     playSoundEffect('sound_popup_chest', false);
 
     congratsContainer.alpha = 0;

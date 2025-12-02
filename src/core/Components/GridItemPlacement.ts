@@ -275,20 +275,20 @@ export class GridItemPlacement extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('GRID_ITEMS:SHOW', () => {
+    EventBus.on('GRID_ITEMS:SHOW', () => {
       this.showItems();
     });
 
-    EventBus.attachListener('GRID_ITEMS:HIDE', () => {
+    EventBus.on('GRID_ITEMS:HIDE', () => {
       this.hideItems();
     });
 
-    EventBus.attachListener('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
+    EventBus.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.showItems();
     });
 
-    EventBus.attachListener('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
+    EventBus.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.showAllItemsForCurrentLevel();
     });
@@ -343,9 +343,9 @@ export class GridItemPlacement extends Container {
 
     playSoundEffect('sound_click', false);
 
-    EventBus.emitEvent('ITEM_SELECTOR:SHOW', placement);
+    EventBus.emit('ITEM_SELECTOR:SHOW', placement);
 
-    EventBus.attachOnceListener('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    EventBus.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       if ((goalId as string) === placement.id) {
         const container = this.itemContainers.get(placement.id);
         if (container) {
