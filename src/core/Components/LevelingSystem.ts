@@ -1,6 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
 import { EventBus } from '../Controllers/EventController';
+import { ItemController } from '../Controllers/ItemController';
 import { playSoundEffect } from '../Utils/AudioManager';
 
 
@@ -135,13 +136,28 @@ export class LevelingSystem extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.attachListener('LEVEL:GOAL_COMPLETED', (goalId: string) => {
-      this.completeGoal(goalId);
+    EventBus.attachListener('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+      this.completeGoal(goalId as string);
     });
 
     EventBus.attachListener('LEVEL:RESET', () => {
       this.resetProgress();
     });
+
+    EventBus.attachListener('LEVEL:RETRY_CURRENT', () => {
+      this.retryCurrentLevel();
+    });
+  }
+
+  private retryCurrentLevel(): void {
+    const itemController = ItemController.getInstance();
+    itemController.restoreLevelStartBalance();
+
+    this.currentGoals.forEach(g => g.completed = false);
+    this.updateDisplay();
+
+    EventBus.emitEvent('GRID:CLEAR_LEVEL_ITEMS');
+    EventBus.emitEvent('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
   }
 
   private completeGoal(goalId: string): void {
@@ -158,23 +174,29 @@ export class LevelingSystem extends Container {
   }
 
   private levelUp(): void {
+    const itemController = ItemController.getInstance();
+    itemController.addLevelReward(this.currentLevel + 1);
+
     this.currentLevel++;
     playSoundEffect('sound_popup_chest', false);
 
-    this.showLevelUpAnimation();
-
     if (this.currentLevel < this.levels.length) {
+      this.showLevelUpAnimation();
+
       setTimeout(() => {
         this.currentGoals = [...this.levels[this.currentLevel].goals];
         this.updateDisplay();
 
+        itemController.saveLevelStartBalance();
+
+        EventBus.emitEvent('GRID:UPDATE_LEVEL', this.currentLevel + 1);
         EventBus.emitEvent('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
 
       }, 2000);
     } else {
-      setTimeout(() => {
+      gsap.delayedCall( 1, () => {
         this.showCongratulationsPopup();
-      }, 2000);
+      })
     }
   }
 

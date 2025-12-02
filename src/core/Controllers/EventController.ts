@@ -1,12 +1,12 @@
 import { Signal } from 'micro-signals';
 
 interface SignalMap {
-  [eventName: string]: Signal<any>;
+  [eventName: string]: Signal<unknown>;
 }
 
 interface EventRecord {
   eventName: string;
-  payload: any;
+  payload: unknown;
   timestamp: Date;
 }
 
@@ -26,7 +26,7 @@ export class EventController {
     return EventController.controllerInstance;
   }
 
-  private getOrCreateSignal(eventName: string): Signal<any> {
+  private getOrCreateSignal(eventName: string): Signal<unknown> {
     if (!this.signalMap[eventName]) {
       this.signalMap[eventName] = new Signal();
       this.listenerCountMap[eventName] = 0;
@@ -36,11 +36,11 @@ export class EventController {
 
   private attachCustomListener(
     eventName: string,
-    handlerFunction: (payload: any) => void,
+    handlerFunction: (payload: unknown) => void,
     triggerValue: string,
     shouldRemoveAfterTrigger: boolean
   ): void {
-    const wrappedHandler = (payload: any): void => {
+    const wrappedHandler = (payload: unknown): void => {
       if (String(payload) === triggerValue) {
         if (shouldRemoveAfterTrigger) {
           this.removeListener(eventName, wrappedHandler);
@@ -52,7 +52,7 @@ export class EventController {
     this.listenerCountMap[eventName]++;
   }
 
-  public attachOnceListener(eventName: string, handlerFunction: (payload: any) => void): void {
+  public attachOnceListener(eventName: string, handlerFunction: (payload: unknown) => void): void {
     const [signalName, customTrigger] = eventName.split('|');
 
     if (customTrigger) {
@@ -63,7 +63,7 @@ export class EventController {
     }
   }
 
-  public attachListener(eventName: string, handlerFunction: (payload: any) => void): void {
+  public attachListener(eventName: string, handlerFunction: (payload: unknown) => void): void {
     const [signalName, customTrigger] = eventName.split('|');
 
     if (customTrigger) {
@@ -73,12 +73,12 @@ export class EventController {
       this.listenerCountMap[signalName]++;
     }
   }
-  public removeListener(eventName: string, handlerFunction: (payload: any) => void): void {
+  public removeListener(eventName: string, handlerFunction: (payload: unknown) => void): void {
     this.getOrCreateSignal(eventName).remove(handlerFunction);
     this.listenerCountMap[eventName]--;
   }
 
-  public emitEvent(eventName: string, payload?: any): void {
+  public emitEvent(eventName: string, payload?: unknown): void {
     this.getOrCreateSignal(eventName).dispatch(payload);
 
     this.eventRecordList.push({

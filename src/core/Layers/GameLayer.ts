@@ -128,15 +128,13 @@ export class GameLayer {
         };
       }
 
-      const originalY = obj.userData._introOriginal.y as number;
       const originalScale = obj.userData._introOriginal.scale as THREE.Vector3;
 
       obj.visible = true;
-      obj.position.y = originalY - 10;
       obj.scale.set(
-          originalScale.x * 0.8,
-          originalScale.y * 0.8,
-          originalScale.z * 0.8
+          originalScale.x,
+          originalScale.y,
+          originalScale.z
       );
 
       const materials: THREE.Material[] = [];
@@ -156,30 +154,17 @@ export class GameLayer {
         m.needsUpdate = true;
       });
 
-      gsap.to(obj.position, {
-        y: originalY,
-        duration: 1,
-        ease: 'bounce.out',
-      });
-
-      gsap.to(obj.scale, {
-        x: originalScale.x,
-        y: originalScale.y,
-        z: originalScale.z,
-        duration: 0.8,
-        ease: 'back.out(1.7)',
-      });
-
       gsap.to(materials, {
         opacity: 1,
-        duration: 0.8,
-        ease: 'power2.out',
+        duration: 1.5,
+        ease: 'power2.inOut',
       });
     });
+
     this.cameraController.moveCameraToTarget(
         new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25),
-        1.2,
-        0
+        2,
+        0.3
     );
 
     gsap.delayedCall(1.5, () => {

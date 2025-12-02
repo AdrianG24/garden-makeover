@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import { Container, Sprite, Assets, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
 import { EventBus } from '../Controllers/EventController';
-import { ItemController } from '../Controllers/ItemController';
 import { playSoundEffect } from '../Utils/AudioManager';
 import { worldToScreen } from '../Utils/UtilityFunctions';
 
@@ -219,25 +218,19 @@ export class GridItemPlacement extends Container {
         background.circle(0, 0, 50);
         itemContainer.addChild(background);
 
-        const texture = Assets.get(placement.textureKey);
-        const icon = new Sprite(texture);
-        icon.anchor.set(0.5);
-        icon.width = icon.height = 60;
-        itemContainer.addChild(icon);
-
-        const label = new Text(
-          placement.label,
+        const questionMark = new Text(
+          '?',
           new TextStyle({
             fontFamily: 'Arial',
-            fontSize: 16,
+            fontSize: 60,
             fontWeight: 'bold',
             fill: '#FFFFFF',
-            stroke: { color: '#000000', width: 3, join: 'round' }
+            stroke: { color: '#000000', width: 4, join: 'round' }
           })
         );
-        label.anchor.set(0.5);
-        label.position.set(0, 70);
-        itemContainer.addChild(label);
+        questionMark.anchor.set(0.5);
+        questionMark.position.set(0, 0);
+        itemContainer.addChild(questionMark);
 
         itemContainer.eventMode = 'static';
         itemContainer.cursor = 'pointer';
@@ -285,10 +278,59 @@ export class GridItemPlacement extends Container {
       this.hideItems();
     });
 
-    EventBus.attachListener('GRID_ITEMS:CHANGE_LEVEL', (level: number) => {
-      this.currentLevel = level;
+    EventBus.attachListener('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
+      this.currentLevel = level as number;
       this.showItems();
     });
+
+    EventBus.attachListener('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
+      this.currentLevel = level as number;
+      this.showAllItemsForCurrentLevel();
+    });
+  }
+
+  private showAllItemsForCurrentLevel(): void {
+    this.itemContainers.forEach((container) => {
+      const containerLevel = this.containerLevels.get(container);
+
+      if (containerLevel === this.currentLevel) {
+        gsap.killTweensOf(container);
+        gsap.killTweensOf(container.scale);
+
+        container.visible = true;
+        container.alpha = 0;
+        container.scale.set(0, 0);
+
+        gsap.to(container, {
+          alpha: 1,
+          duration: 0.5,
+          delay: 0.2,
+          ease: 'power2.out'
+        });
+
+        gsap.to(container.scale, {
+          x: 1,
+          y: 1,
+          duration: 0.5,
+          delay: 0.2,
+          ease: 'back.out(1.7)'
+        });
+
+        gsap.to(container.scale, {
+          x: 1.05,
+          y: 1.05,
+          duration: 1,
+          delay: 0.8,
+          yoyo: true,
+          repeat: -1,
+          ease: 'sine.inOut'
+        });
+      }
+    });
+
+    if (this.camera && this.gridConfig) {
+      this.updatePositions();
+    }
   }
 
   private handleItemClick(placement: ItemPlacement): void {
@@ -296,39 +338,33 @@ export class GridItemPlacement extends Container {
 
     playSoundEffect('sound_click', false);
 
-    const itemController = ItemController.getInstance();
+    EventBus.emitEvent('ITEM_SELECTOR:SHOW', placement);
 
-    itemController.currentlySelectedItemId = placement.modelId;
+    EventBus.attachOnceListener('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+      if ((goalId as string) === placement.id) {
+        const container = this.itemContainers.get(placement.id);
+        if (container) {
+          gsap.killTweensOf(container);
+          gsap.killTweensOf(container.scale);
 
-    EventBus.emitEvent('GRID:PLACE_AT_POSITION', {
-      itemId: placement.modelId,
-      row: placement.gridPosition.row,
-      col: placement.gridPosition.col
-    });
+          gsap.to(container, {
+            alpha: 0,
+            duration: 0.3,
+            ease: 'power2.in'
+          });
 
-    EventBus.emitEvent('LEVEL:GOAL_COMPLETED', placement.id);
-
-    const container = this.itemContainers.get(placement.id);
-    if (container) {
-      gsap.killTweensOf(container);
-      gsap.killTweensOf(container.scale);
-
-      gsap.to(container, {
-        alpha: 0,
-        duration: 0.3,
-        ease: 'power2.in'
-      });
-
-      gsap.to(container.scale, {
-        x: 0.5,
-        y: 0.5,
-        duration: 0.3,
-        ease: 'back.in(1.7)',
-        onComplete: () => {
-          container.visible = false;
+          gsap.to(container.scale, {
+            x: 0.5,
+            y: 0.5,
+            duration: 0.3,
+            ease: 'back.in(1.7)',
+            onComplete: () => {
+              container.visible = false;
+            }
+          });
         }
-      });
-    }
+      }
+    });
   }
 
   private showItems(): void {

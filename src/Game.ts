@@ -9,7 +9,10 @@ import { NotificationDialog } from './core/Components/NotificationDialog';
 import { WelcomeScreen } from './core/Components/WelcomeScreen';
 import { LevelingSystem } from './core/Components/LevelingSystem';
 import { GridItemPlacement } from './core/Components/GridItemPlacement';
+import { BalanceDisplay } from './core/Components/BalanceDisplay';
+import { ItemSelector } from './core/Components/ItemSelector';
 import { EventBus } from './core/Controllers/EventController';
+import { ItemController } from './core/Controllers/ItemController';
 import { loadAllAudioAssets, playSoundEffect } from './core/Utils/AudioManager';
 import { manifest, DEBUG } from './config';
 
@@ -157,6 +160,10 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
 
   const levelingSystem = new LevelingSystem();
 
+  const balanceDisplay = new BalanceDisplay();
+
+  const itemSelector = new ItemSelector();
+
   const gridItemPlacement = new GridItemPlacement();
   gridItemPlacement.setCamera(gameLayer.camera);
   gridItemPlacement.setGridConfig({
@@ -179,20 +186,25 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
 
   successDialog.visible = false;
 
-  EventBus.attachListener('LEVEL:SHOW_ANIMATION', (animationContainer: Container) => {
-    uiLayer.addToLayer(animationContainer);
+  EventBus.attachListener('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
+    uiLayer.addToLayer(animationContainer as Container);
   });
 
   EventBus.attachListener('LEVEL:HIDE_ANIMATION', () => {
   });
 
   uiLayer.addToLayer(levelingSystem);
+  uiLayer.addToLayer(balanceDisplay);
   uiLayer.addToLayer(gridItemPlacement);
+  uiLayer.addToLayer(itemSelector);
   uiLayer.addToLayer(successDialog);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
   EventBus.emitEvent('HELPER:SHOW');
+
+  const itemController = ItemController.getInstance();
+  itemController.saveLevelStartBalance();
 
   EventBus.attachListener('GAME:UPDATE', () => {
     gridItemPlacement.updatePositions();

@@ -34,6 +34,7 @@ export class InteractiveGrid {
   private gridOffsetZ: number = 0;
   private blockedCellsMatrix: number[][] = [];
   private sceneControllerReference: SceneController;
+  private currentLevel: number = 1;
 
   public isTutorialMode: boolean = true;
 
@@ -65,19 +66,28 @@ export class InteractiveGrid {
   private registerEventHandlers(): void {
     EventBus.attachListener(
       'GRID:CLEAR_CELL',
-      (payload: { row: number; col: number }) => {
+      (payload: unknown) => {
+        const data = payload as { row: number; col: number };
         if (
-          payload &&
-          typeof payload.row === 'number' &&
-          typeof payload.col === 'number'
+          data &&
+          typeof data.row === 'number' &&
+          typeof data.col === 'number'
         ) {
-          this.clearCellAtPosition(payload.row, payload.col);
+          this.clearCellAtPosition(data.row, data.col);
         }
       }
     );
 
     EventBus.attachListener('GRID:CLEAR_ALL', () => {
       this.clearAllCells();
+    });
+
+    EventBus.attachListener('GRID:CLEAR_LEVEL_ITEMS', () => {
+      this.clearCurrentLevelItems();
+    });
+
+    EventBus.attachListener('GRID:UPDATE_LEVEL', (level: unknown) => {
+      this.currentLevel = level as number;
     });
 
     EventBus.attachOnceListener('GRID:ENABLE', () => {
@@ -88,18 +98,46 @@ export class InteractiveGrid {
       this.updateCellVisibilityForTutorial();
     });
 
-    EventBus.attachListener('GRID:TOGGLE', (isVisible: boolean) => {
-      this.setGridCellsVisibility(isVisible);
+    EventBus.attachListener('GRID:TOGGLE', (isVisible: unknown) => {
+      this.setGridCellsVisibility(isVisible as boolean);
     });
 
     EventBus.attachListener(
       'GRID:PLACE_AT_POSITION',
-      (payload: { itemId: string; row: number; col: number }) => {
-        if (payload && payload.itemId && typeof payload.row === 'number' && typeof payload.col === 'number') {
-          this.placeItemAtPosition(payload.itemId, payload.row, payload.col);
+      (payload: unknown) => {
+        const data = payload as { itemId: string; row: number; col: number };
+        if (data && data.itemId && typeof data.row === 'number' && typeof data.col === 'number') {
+          this.placeItemAtPosition(data.itemId, data.row, data.col);
         }
       }
     );
+  }
+
+  private clearCurrentLevelItems(): void {
+    for (let rowIndex = 0; rowIndex < this.gridConfiguration.rows; rowIndex++) {
+      for (let colIndex = 0; colIndex < this.gridConfiguration.columns; colIndex++) {
+        const cellMesh = this.gridCellMeshes[rowIndex]?.[colIndex];
+        if (cellMesh && cellMesh.userData.placedObject && !cellMesh.userData.isBaseObject) {
+          if (cellMesh.userData.placedLevel === this.currentLevel) {
+            this.gridGroupContainer.remove(cellMesh.userData.placedObject);
+            delete cellMesh.userData.placedObject;
+            delete cellMesh.userData.placedLevel;
+
+            this.gridStateMatrix[rowIndex][colIndex] = 0;
+            cellMesh.userData.selected = false;
+            (cellMesh.material as THREE.MeshBasicMaterial).color.set(
+              this.gridConfiguration.freeColor!
+            );
+
+            if (!this.blockedCellsMatrix[rowIndex]?.[colIndex]) {
+              this.interactionManagerReference.add(cellMesh);
+            }
+          }
+        }
+      }
+    }
+
+    this.refreshGridDisplay();
   }
 
   private updateCellVisibilityForTutorial(): void {
@@ -403,6 +441,7 @@ export class InteractiveGrid {
       });
 
       cellMesh.userData.placedObject = instantiatedGameObject;
+      cellMesh.userData.placedLevel = this.currentLevel;
     }
 
     this.refreshGridDisplay();
