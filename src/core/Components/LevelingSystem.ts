@@ -189,7 +189,7 @@ export class LevelingSystem extends Container {
     if (this.currentLevel < this.levels.length) {
       this.showLevelUpAnimation();
 
-      setTimeout(() => {
+      gsap.delayedCall(2, () => {
         this.currentGoals = [...this.levels[this.currentLevel].goals];
         this.updateDisplay();
 
@@ -197,12 +197,11 @@ export class LevelingSystem extends Container {
 
         EventBus.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
         EventBus.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
-
-      }, 2000);
+      });
     } else {
-      gsap.delayedCall( 1, () => {
+      gsap.delayedCall(1, () => {
         this.showCongratulationsPopup();
-      })
+      });
     }
   }
 

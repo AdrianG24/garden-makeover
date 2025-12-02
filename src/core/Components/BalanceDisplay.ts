@@ -14,9 +14,9 @@ export class BalanceDisplay extends Container {
 
   private createBalanceUI(): void {
     const isMobile = window.innerWidth < 968;
-    const width = isMobile ? 120 : 180;
+    const width = isMobile ? 150 : 210;
     const height = isMobile ? 45 : 60;
-    const fontSize = isMobile ? 20 : 28;
+    const fontSize = isMobile ? 16 : 22;
 
     this.background = new Graphics();
     this.background.fill(0x000000, 0.6);
@@ -25,14 +25,14 @@ export class BalanceDisplay extends Container {
     this.addChild(this.background);
 
     this.balanceText = new Text(
-      '$0',
-      new TextStyle({
-        fontFamily: 'Arial',
-        fontSize: fontSize,
-        fontWeight: 'bold',
-        fill: '#FFD700',
-        stroke: { color: '#000000', width: 3, join: 'round' }
-      })
+        'Balance: $90',
+        new TextStyle({
+          fontFamily: 'Arial',
+          fontSize: fontSize,
+          fontWeight: 'bold',
+          fill: '#FFD700',
+          stroke: { color: '#000000', width: 3, join: 'round' }
+        })
     );
     this.balanceText.anchor.set(0.5);
     this.balanceText.position.set(width / 2, height / 2);
@@ -49,18 +49,18 @@ export class BalanceDisplay extends Container {
   }
 
   private updateBalance(newBalance: number): void {
-    this.balanceText.text = `$${newBalance}`;
+    this.balanceText.text = `Balance: $${newBalance}`;
 
     gsap.fromTo(
-      this.balanceText.scale,
-      { x: 1.2, y: 1.2 },
-      { x: 1, y: 1, duration: 0.3, ease: 'back.out(1.7)' }
+        this.balanceText.scale,
+        { x: 1.2, y: 1.2 },
+        { x: 1, y: 1, duration: 0.3, ease: 'back.out(1.7)' }
     );
   }
 
   public resize(width: number): void {
     const isMobile = width < 968;
-    const balanceWidth = isMobile ? 120 : 180;
+    const balanceWidth = isMobile ? 150 : 210;
     const padding = isMobile ? 10 : 20;
     this.position.set(width - balanceWidth - padding, padding);
   }

@@ -15,6 +15,8 @@ import { EventBus } from './core/Controllers/EventController';
 import { ItemController } from './core/Controllers/ItemController';
 import { loadAllAudioAssets } from './core/Utils/AudioManager';
 import { manifest, DEBUG } from './config';
+import gsap from 'gsap';
+
 
 export async function createGameScene(): Promise<void> {
   const loaderOverlay = showLoadingOverlay();
@@ -252,28 +254,39 @@ function setupAnimationLoop(
 }
 
 function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): void {
-  let resizeTimeout: ReturnType<typeof setTimeout>;
+  let resizeDelay: gsap.core.Tween | null = null;
+  let orientationDelay: gsap.core.Tween | null = null;
+
   let lastOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
 
   const handleResize = (): void => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
+    if (resizeDelay) {
+      resizeDelay.kill();
+    }
+
+    resizeDelay = gsap.delayedCall(0.01, () => {
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
 
       EventBus.emit('UI:RESIZE');
 
-      const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+      const currentOrientation =
+          window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
       const orientationChanged = lastOrientation !== currentOrientation;
 
       if (orientationChanged && window.innerWidth < 768) {
         lastOrientation = currentOrientation;
-        setTimeout(() => {
+
+        if (orientationDelay) {
+          orientationDelay.kill();
+        }
+
+        orientationDelay = gsap.delayedCall(0.01, () => {
           gameLayer.adjustCameraForOrientation();
-        }, 100);
+        });
       }
-    }, 200);
+    });
   };
 
   window.addEventListener('resize', handleResize);
