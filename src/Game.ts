@@ -210,6 +210,14 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
   EventBus.attachListener('GAME:UPDATE', () => {
     gridItemPlacement.updatePositions();
   });
+
+  EventBus.attachListener('UI:RESIZE', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    levelingSystem.resize(width);
+    balanceDisplay.resize(width);
+    itemSelector.resize(width, height);
+  });
 }
 
 function setupAnimationLoop(
@@ -226,16 +234,28 @@ function setupAnimationLoop(
 
 function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): void {
   let resizeTimeout: ReturnType<typeof setTimeout>;
+  let lastOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
 
   const handleResize = (): void => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
+      const currentOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
+      const orientationChanged = lastOrientation !== currentOrientation;
+
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
-    }, 100);
+
+      EventBus.emitEvent('UI:RESIZE');
+
+      if (orientationChanged && window.innerWidth < 768) {
+        lastOrientation = currentOrientation;
+        gameLayer.adjustCameraForOrientation();
+      }
+    }, 150);
   };
 
   window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleResize);
   handleResize();
 }

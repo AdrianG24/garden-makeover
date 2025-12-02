@@ -13,7 +13,7 @@ export class BalanceDisplay extends Container {
   }
 
   private createBalanceUI(): void {
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
     const width = isMobile ? 120 : 180;
     const height = isMobile ? 45 : 60;
     const fontSize = isMobile ? 20 : 28;
@@ -59,7 +59,7 @@ export class BalanceDisplay extends Container {
   }
 
   public resize(width: number): void {
-    const isMobile = width < 768;
+    const isMobile = width < 968;
     const balanceWidth = isMobile ? 120 : 180;
     const padding = isMobile ? 10 : 20;
     this.position.set(width - balanceWidth - padding, padding);

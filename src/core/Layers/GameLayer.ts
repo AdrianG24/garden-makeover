@@ -165,9 +165,18 @@ export class GameLayer {
     });
 
     const isMobile = window.innerWidth < 768;
-    const cameraOffset = isMobile ?
-      new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 12, CAMERA.pos.z + 15) :
-      new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
+    const isPortrait = window.innerHeight > window.innerWidth;
+
+    let cameraOffset: THREE.Vector3;
+    if (isMobile) {
+      if (isPortrait) {
+        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 5, CAMERA.pos.y + 12, CAMERA.pos.z + 15);
+      } else {
+        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 5, CAMERA.pos.z + 5);
+      }
+    } else {
+      cameraOffset = new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
+    }
 
     this.cameraController.moveCameraToTarget(
         cameraOffset,
@@ -271,5 +280,21 @@ export class GameLayer {
 
     this.webglRenderer.setSize(width, height);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  }
+
+  public adjustCameraForOrientation(): void {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) return;
+
+    const isPortrait = window.innerHeight > window.innerWidth;
+
+    let cameraOffset: THREE.Vector3;
+    if (isPortrait) {
+      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 5, CAMERA.pos.y + 12, CAMERA.pos.z + 15);
+    } else {
+      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 5, CAMERA.pos.z + 5);
+    }
+
+    this.cameraController.moveCameraToTarget(cameraOffset, 1, 0);
   }
 }

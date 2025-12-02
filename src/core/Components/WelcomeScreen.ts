@@ -32,7 +32,7 @@ export class WelcomeScreen extends Container {
 
   private createWelcomePanel(): Container {
     const panel = new Container();
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
 
     const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 600;
     const panelHeight = isMobile ? Math.min(window.innerHeight - 80, 420) : 500;
@@ -93,7 +93,7 @@ export class WelcomeScreen extends Container {
     button.eventMode = 'static';
     button.cursor = 'pointer';
 
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
     const buttonWidth = isMobile ? 220 : 300;
     const buttonHeight = isMobile ? 55 : 80;
     const halfWidth = buttonWidth / 2;

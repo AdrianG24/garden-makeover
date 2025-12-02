@@ -209,19 +209,19 @@ export class GridItemPlacement extends Container {
     this.allLevelPlacements.forEach((placements, level) => {
       placements.forEach(placement => {
         const itemContainer = new Container();
-        const isMobile = window.innerWidth < 768;
-        const circleSize = isMobile ? 35 : 50;
+        const isMobile = window.innerWidth < 968;
+        const circleSize = isMobile ? 22 : 50;
 
         const background = new Graphics();
         background.fill(0x4CAF50, 0.8);
         background.circle(0, 0, circleSize);
         background.endFill();
 
-        background.lineStyle(isMobile ? 3 : 4, 0xFFFFFF, 1);
+        background.lineStyle(isMobile ? 2 : 4, 0xFFFFFF, 1);
         background.circle(0, 0, circleSize);
         itemContainer.addChild(background);
 
-        const fontSize = isMobile ? 22 : 60;
+        const fontSize = isMobile ? 20 : 60;
 
         const questionMark = new Text(
           '?',
@@ -230,7 +230,7 @@ export class GridItemPlacement extends Container {
             fontSize: fontSize,
             fontWeight: 'bold',
             fill: '#FFFFFF',
-            stroke: { color: '#000000', width: isMobile ? 2 : 4, join: 'round' }
+            stroke: { color: '#000000', width: isMobile ? 1.5 : 4, join: 'round' }
           })
         );
         questionMark.anchor.set(0.5);

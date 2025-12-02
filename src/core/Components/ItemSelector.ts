@@ -24,6 +24,7 @@ export class ItemSelector extends Container {
   private panel!: Container;
   private itemOptions: ItemOption[] = [];
   private currentPlacement: ItemPlacement | null = null;
+  private isCurrentlyVisible: boolean = false;
 
   constructor() {
     super();
@@ -39,6 +40,7 @@ export class ItemSelector extends Container {
 
   private showSelector(placement: ItemPlacement): void {
     this.currentPlacement = placement;
+    this.isCurrentlyVisible = true;
     this.removeChildren();
     this.createSelectorUI();
     this.visible = true;
@@ -48,7 +50,7 @@ export class ItemSelector extends Container {
   }
 
   private createSelectorUI(): void {
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
 
     this.overlay = new Graphics();
     this.overlay.fill(0x000000, 0.7);
@@ -138,7 +140,7 @@ export class ItemSelector extends Container {
   }
 
   private showNotEnoughMoneyPopup(): void {
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
 
     const popupOverlay = new Graphics();
     popupOverlay.fill(0x000000, 0.85);
@@ -376,6 +378,7 @@ export class ItemSelector extends Container {
   }
 
   private hideSelector(): void {
+    this.isCurrentlyVisible = false;
     gsap.to(this, {
       alpha: 0,
       duration: 0.3,
@@ -387,7 +390,10 @@ export class ItemSelector extends Container {
   }
 
   public resize(width: number, height: number): void {
-    if (this.overlay) {
+    if (this.isCurrentlyVisible && this.currentPlacement) {
+      this.removeChildren();
+      this.createSelectorUI();
+    } else if (this.overlay) {
       this.overlay.clear();
       this.overlay.fill(0x000000, 0.7);
       this.overlay.rect(0, 0, width, height);

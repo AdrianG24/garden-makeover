@@ -77,7 +77,7 @@ export class LevelingSystem extends Container {
   }
 
   private createLevelUI(): void {
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
     const panelWidth = isMobile ? 200 : 260;
     const panelHeight = isMobile ? 75 : 100;
     const padding = isMobile ? 12 : 20;
@@ -290,7 +290,7 @@ export class LevelingSystem extends Container {
 
   private showCongratulationsPopup(): void {
     const congratsContainer = new Container();
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
 
     const overlay = new Graphics();
     overlay.fill(0x000000, 0.7);
@@ -412,7 +412,7 @@ export class LevelingSystem extends Container {
   private updateDisplay(): void {
     this.levelText.text = `Level ${this.currentLevel + 1}`;
 
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 968;
     const padding = isMobile ? 12 : 20;
     const barWidth = isMobile ? 150 : 200;
     const barHeight = isMobile ? 15 : 20;
@@ -445,6 +445,16 @@ export class LevelingSystem extends Container {
     this.currentLevel = 0;
     this.currentGoals = [...this.levels[0].goals];
     this.currentGoals.forEach(g => g.completed = false);
+    this.updateDisplay();
+  }
+
+  public resize(width: number): void {
+    const isMobile = width < 968;
+    const positionPadding = isMobile ? 10 : 20;
+    this.position.set(positionPadding, positionPadding);
+
+    this.removeChildren();
+    this.createLevelUI();
     this.updateDisplay();
   }
 
