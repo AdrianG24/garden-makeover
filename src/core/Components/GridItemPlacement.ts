@@ -270,6 +270,8 @@ export class GridItemPlacement extends Container {
 
         this.addChild(itemContainer);
         this.itemContainers.set(placement.id, itemContainer);
+
+        EventBus.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
       });
     });
   }

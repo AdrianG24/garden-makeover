@@ -10,6 +10,7 @@ import { GridItemPlacement } from './core/Components/GridItemPlacement';
 import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
+import { TutorialGuide } from './core/Components/TutorialGuide';
 import { EventBus } from './core/Controllers/EventController';
 import { ItemController } from './core/Controllers/ItemController';
 import { loadAllAudioAssets } from './core/Utils/AudioManager';
@@ -160,6 +161,8 @@ async function startGame(stageContainer: Container, gameLayer: GameLayer): Promi
 function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
   const uiLayer = new UILayer();
 
+  const tutorialGuide = new TutorialGuide();
+
   const levelingSystem = new LevelingSystem();
 
   const balanceDisplay = new BalanceDisplay();
@@ -192,6 +195,7 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
   uiLayer.addToLayer(dayNightToggle);
   uiLayer.addToLayer(gridItemPlacement);
   uiLayer.addToLayer(itemSelector);
+  uiLayer.addToLayer(tutorialGuide);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
@@ -211,6 +215,7 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     balanceDisplay.resize(width);
     dayNightToggle.resize(width);
     itemSelector.resize(width, height);
+    tutorialGuide.resize();
   });
 }
 

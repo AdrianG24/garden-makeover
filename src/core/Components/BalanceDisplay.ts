@@ -10,6 +10,7 @@ export class BalanceDisplay extends Container {
     super();
     this.createBalanceUI();
     this.setupEventListeners();
+    EventBus.emit('TUTORIAL:SET_BALANCE', this);
   }
 
   private createBalanceUI(): void {
