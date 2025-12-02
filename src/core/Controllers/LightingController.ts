@@ -53,7 +53,7 @@ export class LightingController {
       ease: 'power2.inOut',
     });
 
-    const currentColor = new THREE.Color(this.directionalLight.color);
+    const currentColor = this.directionalLight.color.clone();
     const targetColor = new THREE.Color(preset.color);
     const colorProxy = { r: currentColor.r, g: currentColor.g, b: currentColor.b };
 
@@ -67,12 +67,6 @@ export class LightingController {
         this.directionalLight.color.setRGB(colorProxy.r, colorProxy.g, colorProxy.b);
       },
     });
-
-    Object.assign(this.directionalLight.shadow.camera, preset.shadow.camera);
-    this.directionalLight.shadow.bias = preset.shadow.bias;
-    this.directionalLight.shadow.normalBias = preset.shadow.normalBias;
-    this.directionalLight.shadow.camera.updateProjectionMatrix();
-    this.directionalLight.shadow.needsUpdate = true;
   }
 
   public toggleDayNight(): void {
