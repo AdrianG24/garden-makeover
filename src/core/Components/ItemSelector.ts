@@ -64,7 +64,7 @@ export class ItemSelector extends Container {
     this.panel.position.set(window.innerWidth / 2, window.innerHeight / 2);
 
     const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 360) : 560;
-    const panelHeight = isMobile ? Math.min(window.innerHeight - 40, 500) : 480;
+    const panelHeight = isMobile ? Math.min(window.innerHeight - 40, 300) : 480;
     const halfWidth = panelWidth / 2;
     const halfHeight = panelHeight / 2;
 
@@ -101,9 +101,9 @@ export class ItemSelector extends Container {
       { type: 'grape', textureKey: 'grape', modelId: 'grape_1', label: 'Grape' }
     ];
 
-    const itemsPerRow = isMobile ? 3 : 3;
-    const itemSpacing = isMobile ? 100 : 130;
-    const startY = isMobile ? -halfHeight + 80 : -80;
+    const itemsPerRow = isMobile ? 4 : 3;
+    const itemSpacing = isMobile ? 85 : 130;
+    const startY = isMobile ? -halfHeight + 85 : -80;
     const startX = isMobile ? -(itemSpacing * (itemsPerRow - 1)) / 2 : -125;
 
     this.itemOptions.forEach((option, index) => {

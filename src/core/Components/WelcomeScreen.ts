@@ -53,7 +53,7 @@ export class WelcomeScreen extends Container {
       '🌾 Welcome to Garden Makeover! 🌾',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: isMobile ? 20 : 32,
+        fontSize: isMobile ? 18 : 28,
         fill: '#f4e4c1',
         fontWeight: 'bold',
         align: 'center',
@@ -71,12 +71,12 @@ export class WelcomeScreen extends Container {
         fontSize: isMobile ? 16 : 24,
         fill: '#ffffff',
         align: 'center',
-        lineHeight: isMobile ? 24 : 35,
+        lineHeight: isMobile ? 12 : 20,
         stroke: { color: '#2c5f2d', width: 2 },
       })
     );
     descriptionText.anchor.set(0.5);
-    descriptionText.position.set(0, isMobile ? 0 : -20);
+    descriptionText.position.set(0, isMobile ? -10 : -20);
     panel.addChild(descriptionText);
 
     const buyButton = this.createBuyButton();
