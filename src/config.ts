@@ -143,7 +143,7 @@ export const GAME_GRID_CONFIG = {
 
 export const RENDERER = {
   antialias: false,
-  pixelRatio: window.devicePixelRatio,
+  pixelRatio: Math.min(window.devicePixelRatio, 2),
   screen: {
     width: 1920,
     height: 1080,
@@ -170,7 +170,10 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
       },
       bias: -0.0004,
       normalBias: 0.005,
-      mapSize: { x: 4096, y: 4096 },
+      mapSize: {
+        x: window.innerWidth < 768 ? 2048 : 4096,
+        y: window.innerWidth < 768 ? 2048 : 4096
+      },
     },
   },
   night: {
@@ -188,7 +191,10 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
       },
       bias: -0.0002,
       normalBias: 0.005,
-      mapSize: { x: 2048, y: 2048 },
+      mapSize: {
+        x: window.innerWidth < 768 ? 1024 : 2048,
+        y: window.innerWidth < 768 ? 1024 : 2048
+      },
     },
   },
 };
@@ -215,7 +221,7 @@ export type CameraAnimationConfiguration = {
 };
 
 export const DEFAULT_CAMERA_ANIMATION_CONFIG: CameraAnimationConfiguration = {
-  duration: 0.24,
+  duration: 0.8,
   delay: 0,
-  ease: 'power4.in',
+  ease: 'power2.inOut',
 };

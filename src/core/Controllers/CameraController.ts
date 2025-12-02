@@ -37,7 +37,7 @@ export class CameraController {
 
   moveCameraToTarget(
     targetPosition: THREE.Vector3,
-    animationDuration: number = 1,
+    animationDuration: number = 1.2,
     animationDelay: number = 0
   ): void {
     gsap.to(this.cameraReference.position, {
@@ -47,11 +47,12 @@ export class CameraController {
       duration: animationDuration,
       ease: DEFAULT_CAMERA_ANIMATION_CONFIG.ease,
       delay: animationDelay,
+      overwrite: 'auto',
     });
   }
 
   resetCameraToInitialPosition(
-    animationDuration: number = 1,
+    animationDuration: number = 1.2,
     animationDelay: number = 0
   ): void {
     gsap.to(this.cameraReference.position, {
@@ -61,6 +62,7 @@ export class CameraController {
       duration: animationDuration,
       ease: DEFAULT_CAMERA_ANIMATION_CONFIG.ease,
       delay: animationDelay,
+      overwrite: 'auto',
     });
   }
 

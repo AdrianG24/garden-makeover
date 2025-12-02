@@ -115,9 +115,10 @@ async function initializePixiRenderer(
     context: threeRenderer.domElement.getContext('webgl2'),
     width: window.innerWidth,
     height: window.innerHeight,
-    resolution: window.devicePixelRatio,
+    resolution: Math.min(window.devicePixelRatio, 2),
     clearBeforeRender: false,
     canvas: canvasElement,
+    antialias: false,
   });
 
   return pixiRenderer;
@@ -224,9 +225,15 @@ function setupAnimationLoop(
 }
 
 function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): void {
+  let resizeTimeout: ReturnType<typeof setTimeout>;
+
   const handleResize = (): void => {
-    gameLayer.handleResize();
-    pixiRenderer.resize(window.innerWidth, window.innerHeight);
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      gameLayer.handleResize();
+      pixiRenderer.resize(window.innerWidth, window.innerHeight);
+      pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
+    }, 100);
   };
 
   window.addEventListener('resize', handleResize);

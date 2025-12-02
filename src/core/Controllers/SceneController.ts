@@ -7,15 +7,6 @@ import { checkIfAnimationExists, getAnimationByIdentifier } from '../Utils/Utili
 import { Animations } from '../../config';
 import { playSoundEffect } from '../Utils/AudioManager';
 
-
-export type AnimationDataSet = {
-  id: string;
-  idle: string;
-  action: string;
-  sound: string;
-};
-
-
 export interface ModelConfiguration {
   url: string;
   name: string;

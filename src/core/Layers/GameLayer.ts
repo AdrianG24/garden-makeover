@@ -69,16 +69,19 @@ export class GameLayer {
   }
 
   private initializeRenderer(canvasElement: HTMLCanvasElement): void {
+    const isMobile = window.innerWidth < 768;
+
     this.webglRenderer = new THREE.WebGLRenderer({
       antialias: RENDERER.antialias,
       canvas: canvasElement,
+      powerPreference: isMobile ? 'default' : 'high-performance',
     });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
-    this.webglRenderer.setPixelRatio(RENDERER.pixelRatio);
+    this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.webglRenderer.shadowMap.enabled = RENDERER.shadow.enabled;
     this.webglRenderer.shadowMap.type = RENDERER.shadow.type;
-    this.webglRenderer.transmissionResolutionScale = window.devicePixelRatio;
+    this.webglRenderer.transmissionResolutionScale = Math.min(window.devicePixelRatio, 2);
   }
 
   async setupGameWorld(): Promise<void> {
@@ -163,20 +166,20 @@ export class GameLayer {
 
     const isMobile = window.innerWidth < 768;
     const cameraOffset = isMobile ?
-      new THREE.Vector3(CAMERA.pos.x + 10, CAMERA.pos.y + 15, CAMERA.pos.z + 20) :
+      new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 12, CAMERA.pos.z + 15) :
       new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
 
     this.cameraController.moveCameraToTarget(
         cameraOffset,
-        2,
-        0.3
+        2.5,
+        0.5
     );
 
     if (isMobile) {
       this.orbitControls.enabled = false;
     }
 
-    gsap.delayedCall(1.5, () => {
+    gsap.delayedCall(2, () => {
       EventBus.emitEvent('GRID_ITEMS:SHOW');
     });
   }
@@ -190,20 +193,32 @@ export class GameLayer {
     this.orbitControls.enabled = !isMobile;
 
     this.orbitControls.enableDamping = true;
-    this.orbitControls.dampingFactor = 0.05;
+    this.orbitControls.dampingFactor = 0.08;
     this.orbitControls.screenSpacePanning = false;
     this.orbitControls.minDistance = 10;
     this.orbitControls.maxDistance = 100;
+    this.orbitControls.maxPolarAngle = Math.PI / 2;
     this.orbitControls.target.set(-7, 0, 0);
     this.orbitControls.update();
   }
 
   private addSceneLighting(): void {
+    const isMobile = window.innerWidth < 768;
+
     const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
     rimLight.position.set(0, 30, 0);
+    rimLight.castShadow = !isMobile;
+
+    if (rimLight.castShadow) {
+      rimLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
+      rimLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
+      rimLight.shadow.camera.near = 0.5;
+      rimLight.shadow.camera.far = 100;
+    }
+
     this.threeScene.add(rimLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.5);
     ambientLight.position.set(0, 30, 0);
     this.threeScene.add(ambientLight);
   }
@@ -222,6 +237,10 @@ export class GameLayer {
 
     if (this.interactionManager) {
       this.interactionManager.update();
+    }
+
+    if (this.orbitControls && this.orbitControls.enabled) {
+      this.orbitControls.update();
     }
 
     EventBus.emitEvent('GAME:UPDATE');
@@ -251,6 +270,6 @@ export class GameLayer {
     this.camera.updateProjectionMatrix();
 
     this.webglRenderer.setSize(width, height);
-    this.webglRenderer.setPixelRatio(window.devicePixelRatio);
+    this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
 }
