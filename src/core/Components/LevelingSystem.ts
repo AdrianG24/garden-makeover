@@ -293,8 +293,13 @@ export class LevelingSystem extends Container {
 
     const overlay = new Graphics();
     overlay.fill(0x000000, 0.7);
-    overlay.rect(0, 0, window.innerWidth, window.innerHeight);
+    overlay.rect(0, 0, 3200, 3200);
     overlay.endFill();
+    overlay.eventMode = 'static';
+    overlay.cursor = 'default';
+    overlay.on('pointerdown', (event) => {
+      event.stopPropagation();
+    });
     congratsContainer.addChild(overlay);
 
     const popupContainer = new Container();

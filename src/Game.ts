@@ -10,7 +10,6 @@ import { GridItemPlacement } from './core/Components/GridItemPlacement';
 import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
-import { TutorialGuide } from './core/Components/TutorialGuide';
 import { EventBus } from './core/Controllers/EventController';
 import { ItemController } from './core/Controllers/ItemController';
 import { loadAllAudioAssets } from './core/Utils/AudioManager';
@@ -180,31 +179,6 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
     columns: 16
   });
 
-  const isMobile = window.innerWidth < 768;
-  const tutorialGuide = new TutorialGuide({
-    steps: [
-      {
-        position: {
-          x: window.innerWidth / 2,
-          y: window.innerHeight - (isMobile ? 120 : 150)
-        },
-        text: 'Select an item'
-      },
-      {
-        position: {
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2
-        },
-        text: 'Place it on the farm'
-      }
-    ],
-    handAnimationDuration: 0.8,
-    loopAnimation: {
-      scaleMin: 0.9,
-      scaleMax: 1.15,
-      duration: 0.8
-    }
-  });
 
   EventBus.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addToLayer(animationContainer as Container);
@@ -218,7 +192,6 @@ function createUILayers(stageContainer: Container, gameLayer: GameLayer): void {
   uiLayer.addToLayer(dayNightToggle);
   uiLayer.addToLayer(gridItemPlacement);
   uiLayer.addToLayer(itemSelector);
-  uiLayer.addToLayer(tutorialGuide.containerElement);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();

@@ -25,9 +25,9 @@ export const manifest = {
         { alias: 'cow', src: 'assets/images/cow.png' },
         { alias: 'grape', src: 'assets/images/grape.png' },
         { alias: 'sheep', src: 'assets/images/sheep.png' },
-        { alias: 'smoke', src: 'assets/images/smoke.png' },
         { alias: 'strawberry', src: 'assets/images/strawberry.png' },
         { alias: 'tomato', src: 'assets/images/tomato.png' },
+        { alias: 'finger', src: 'assets/images/finger.png' },
       ],
     },
   ],
@@ -185,20 +185,6 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
   },
 };
 
-export const POPUP_CONFIG = {
-  width: 400,
-  height: 200,
-  backgroundColor: 'rgba(255, 105, 180, 0.7)',
-  borderColor: 0xffffcc,
-  borderThickness: 4,
-  textStyle: {
-    fontFamily: 'Arial',
-    fontSize: 35,
-    fill: '#fff8dc',
-    aling: 'center',
-  },
-  spacing: 50,
-};
 
 export type CameraAnimationConfiguration = {
   duration: number;

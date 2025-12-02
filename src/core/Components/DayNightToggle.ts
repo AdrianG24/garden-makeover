@@ -36,7 +36,7 @@ export class DayNightToggle extends Container {
     this.addChild(this.iconText);
 
     const padding = 10
-    const topPosition = isMobile ? 90 : 110;
+    const topPosition = isMobile ? 90 : 140;
     this.position.set(padding, topPosition);
   }
 
@@ -83,7 +83,7 @@ export class DayNightToggle extends Container {
   public resize(width: number): void {
     const isMobile = width < 768;
     const padding = 10
-    const topPosition = isMobile ? 90 : 110;
+    const topPosition = isMobile ? 90 : 140;
     this.position.set(padding, topPosition);
   }
 }
