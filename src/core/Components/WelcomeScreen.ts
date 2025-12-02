@@ -35,7 +35,7 @@ export class WelcomeScreen extends Container {
     const isMobile = window.innerWidth < 968;
 
     const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 600;
-    const panelHeight = isMobile ? Math.min(window.innerHeight - 80, 420) : 500;
+    const panelHeight = isMobile ? Math.min(window.innerHeight - 80, 320) : 500;
     const halfWidth = panelWidth / 2;
     const halfHeight = panelHeight / 2;
 
@@ -68,10 +68,10 @@ export class WelcomeScreen extends Container {
       isMobile ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?' : 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
       new TextStyle({
         fontFamily: 'Arial',
-        fontSize: isMobile ? 16 : 24,
+        fontSize: isMobile ? 14 : 24,
         fill: '#ffffff',
         align: 'center',
-        lineHeight: isMobile ? 12 : 20,
+        lineHeight: isMobile ? 12 : 24,
         stroke: { color: '#2c5f2d', width: 2 },
       })
     );
