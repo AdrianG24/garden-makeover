@@ -29,6 +29,7 @@ export class GameLayer {
   private particleSystem: BatchedRenderer;
   private cameraInfoDisplay: HTMLDivElement | null = null;
   private ambientLight: THREE.AmbientLight | null = null;
+  private lastResponsiveOffset: THREE.Vector3 | null = null;
 
   constructor(canvasElement: HTMLCanvasElement, showDebug: boolean = false) {
     this.clock = new THREE.Clock();
@@ -165,27 +166,8 @@ export class GameLayer {
       });
     });
 
-    const isMobile = window.innerWidth < 768;
-    const isPortrait = window.innerHeight > window.innerWidth;
-
-    let cameraOffset: THREE.Vector3;
-    if (isMobile) {
-      if (isPortrait) {
-        const portraitDistance = 18;
-        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 15, CAMERA.pos.z + portraitDistance);
-      } else {
-        const landscapeDistance = 1;
-        cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 4, CAMERA.pos.z + landscapeDistance);
-      }
-    } else {
-      cameraOffset = new THREE.Vector3(CAMERA.pos.x - 10, CAMERA.pos.y - 10, CAMERA.pos.z - 25);
-    }
-
-    this.cameraController.moveCameraToTarget(
-        cameraOffset,
-        2.5,
-        0.5
-    );
+    // Set initial camera position based on viewport
+    this.setInitialCameraPosition(true);
 
       this.orbitControls.enabled = false;
 
@@ -291,6 +273,81 @@ export class GameLayer {
     this.cameraInfoDisplay.style.display = 'none';
   }
 
+  /**
+   * Calculate responsive camera offset based on viewport size and orientation
+   * Returns the offset that should be applied relative to the base camera position
+   */
+  private calculateResponsiveCameraOffset(): THREE.Vector3 {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const aspectRatio = width / height;
+    const isPortrait = height > width;
+    const isMobile = width < 768;
+    const isTablet = width >= 768 && width < 1024;
+    const isDesktop = width >= 1024;
+
+    let xOffset = 0;
+    let yOffset = 0;
+    let zOffset = 0;
+
+    if (isMobile) {
+      if (isPortrait) {
+        // Mobile portrait: move camera further back and up
+        xOffset = 10;
+        yOffset = 15;  // Higher
+        zOffset = 25;  // Further away
+      } else {
+        // Mobile landscape: closer to the scene
+        xOffset = 2;
+        yOffset = 4;
+        zOffset = 1;
+      }
+    } else if (isTablet) {
+      if (isPortrait) {
+        // Tablet portrait: higher and further
+        xOffset = 4;
+        yOffset = 8;
+        zOffset = 12;  // Further away
+      } else {
+        // Tablet landscape
+        xOffset = -4;
+        yOffset = 8;
+        zOffset = -5;
+      }
+    } else if (isDesktop) {
+      // Desktop - adjust based on aspect ratio
+      if (aspectRatio < 1.5) {
+        // Narrow desktop (more square)
+        xOffset = -5;
+        yOffset = -5;
+        zOffset = -15;
+      } else if (aspectRatio > 2) {
+        // Ultra-wide desktop
+        xOffset = -15;
+        yOffset = -12;
+        zOffset = -30;
+      } else {
+        // Standard desktop (16:9, 16:10)
+        xOffset = -10;
+        yOffset = -10;
+        zOffset = -25;
+      }
+    }
+
+    return new THREE.Vector3(xOffset, yOffset, zOffset);
+  }
+
+  /**
+   * Calculate absolute camera position from base position and offset
+   */
+  private calculateAbsoluteCameraPosition(offset: THREE.Vector3): THREE.Vector3 {
+    return new THREE.Vector3(
+      CAMERA.pos.x + offset.x,
+      CAMERA.pos.y + offset.y,
+      CAMERA.pos.z + offset.z
+    );
+  }
+
   public handleResize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -300,23 +357,71 @@ export class GameLayer {
 
     this.webglRenderer.setSize(width, height);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Adjust camera distance based on viewport size
+    this.adjustCameraForViewport();
   }
 
-  public adjustCameraForOrientation(): void {
-    const isMobile = window.innerWidth < 768;
-    if (!isMobile) return;
+  /**
+   * Adjust camera position for current viewport
+   * Applies delta from current position, not absolute position
+   * Called on resize and orientation change
+   */
+  public adjustCameraForViewport(animated: boolean = true): void {
+    const newOffset = this.calculateResponsiveCameraOffset();
 
-    const isPortrait = window.innerHeight > window.innerWidth;
+    let targetPosition: THREE.Vector3;
 
-    let cameraOffset: THREE.Vector3;
-    if (isPortrait) {
-      const portraitDistance = 18;
-      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 8, CAMERA.pos.y + 15, CAMERA.pos.z + portraitDistance);
+    if (this.lastResponsiveOffset) {
+      // Calculate delta between old and new offset
+      const delta = new THREE.Vector3(
+        newOffset.x - this.lastResponsiveOffset.x,
+        newOffset.y - this.lastResponsiveOffset.y,
+        newOffset.z - this.lastResponsiveOffset.z
+      );
+
+      // Apply delta to current camera position
+      targetPosition = new THREE.Vector3(
+        this.camera.position.x + delta.x,
+        this.camera.position.y + delta.y,
+        this.camera.position.z + delta.z
+      );
     } else {
-      const landscapeDistance = 1;
-      cameraOffset = new THREE.Vector3(CAMERA.pos.x + 2, CAMERA.pos.y + 4, CAMERA.pos.z + landscapeDistance);
+      // First time - use absolute position
+      targetPosition = this.calculateAbsoluteCameraPosition(newOffset);
     }
 
-    this.cameraController.moveCameraToTarget(cameraOffset, 1, 0);
+    // Store the new offset for next resize
+    this.lastResponsiveOffset = newOffset.clone();
+
+    if (animated) {
+      this.cameraController.moveCameraToTarget(targetPosition, 1, 0);
+    } else {
+      this.camera.position.copy(targetPosition);
+      this.camera.updateProjectionMatrix();
+    }
+  }
+
+  /**
+   * Reset camera to base responsive position (for initial setup)
+   */
+  public setInitialCameraPosition(animated: boolean = false): void {
+    const offset = this.calculateResponsiveCameraOffset();
+    const targetPosition = this.calculateAbsoluteCameraPosition(offset);
+    this.lastResponsiveOffset = offset.clone();
+
+    if (animated) {
+      this.cameraController.moveCameraToTarget(targetPosition, 2.5, 0.5);
+    } else {
+      this.camera.position.copy(targetPosition);
+      this.camera.updateProjectionMatrix();
+    }
+  }
+
+  /**
+   * @deprecated Use adjustCameraForViewport instead
+   */
+  public adjustCameraForOrientation(): void {
+    this.adjustCameraForViewport();
   }
 }

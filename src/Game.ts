@@ -233,9 +233,6 @@ function setupAnimationLoop(
 
 function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): void {
   let resizeDelay: gsap.core.Tween | null = null;
-  let orientationDelay: gsap.core.Tween | null = null;
-
-  let lastOrientation = window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
 
   const handleResize = (): void => {
     if (resizeDelay) {
@@ -243,28 +240,12 @@ function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): v
     }
 
     resizeDelay = gsap.delayedCall(0.01, () => {
+      // handleResize() now automatically adjusts camera for all devices
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
 
       EventBus.emit('UI:RESIZE');
-
-      const currentOrientation =
-          window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
-      const orientationChanged = lastOrientation !== currentOrientation;
-
-      if (orientationChanged && window.innerWidth < 768) {
-        lastOrientation = currentOrientation;
-
-        if (orientationDelay) {
-          orientationDelay.kill();
-        }
-
-        orientationDelay = gsap.delayedCall(0.01, () => {
-          gameLayer.adjustCameraForOrientation();
-
-        });
-      }
     });
   };
 

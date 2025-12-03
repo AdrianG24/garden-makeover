@@ -13,7 +13,7 @@ interface TutorialStep {
 export class TutorialGuide extends Container {
   private overlay!: Graphics;
   private fingerSprite!: Sprite;
-  private popupContainer!: Container;
+  private popupContainer: Container | null = null;
   private currentStep: number = 0;
   private isActive: boolean = false;
   private tutorialSteps: TutorialStep[] = [];
@@ -63,7 +63,7 @@ export class TutorialGuide extends Container {
 
     EventBus.on('HELPER:NEXT:STEP', () => {
       if (this.isActive) {
-        this.nextStep('HELPER:NEXT:STEP');
+        this.nextStep();
       }
     });
 
@@ -78,7 +78,7 @@ export class TutorialGuide extends Container {
     EventBus.on('ITEM_SELECTOR:SHOW', () => {
       if (this.isActive && this.currentStep === 1) {
         gsap.delayedCall(0.8, () => {
-          this.nextStep('ITEM_SELECTOR:SHOW');
+          this.nextStep();
         });
       }
     });
@@ -519,7 +519,7 @@ export class TutorialGuide extends Container {
 
     if (this.popupContainer) {
       const oldPopup = this.popupContainer;
-      this.popupContainer = null as any;
+      this.popupContainer = null;
 
       gsap.to(oldPopup, {
         alpha: 0,
@@ -545,7 +545,7 @@ export class TutorialGuide extends Container {
     this.drawOverlay();
   }
 
-  private nextStep(reason: string = 'unknown'): void {
+  private nextStep(): void {
     this.currentStep++;
     this.showStep(this.currentStep);
   }
