@@ -13,6 +13,7 @@ import { EventBusService } from '../Services/EventBusService';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
 import { SCENE, CAMERA, RENDERER, GRID, sceneManagerConfig } from '../../config';
+import { SCREEN_BREAKPOINTS, CAMERA_POSITIONS, ANIMATION_TIMINGS } from '../constants';
 
 export class GameLayer {
   threeScene!: THREE.Scene;
@@ -181,7 +182,7 @@ export class GameLayer {
 
       this.orbitControls.enabled = false;
 
-    gsap.delayedCall(2, () => {
+    gsap.delayedCall(ANIMATION_TIMINGS.LEVEL_UP_DELAY, () => {
       this.eventBus.emit('GRID_ITEMS:SHOW');
     });
   }
@@ -208,15 +209,15 @@ export class GameLayer {
   }
 
   private getCameraPositionForCurrentScreen(): THREE.Vector3 {
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.MOBILE;
     const isPortrait = window.innerHeight > window.innerWidth;
 
     if (isMobile) {
       if (isPortrait) {
         return new THREE.Vector3(
           CAMERA.pos.x,
-          CAMERA.pos.y + 5,
-          CAMERA.pos.z + 10
+          CAMERA.pos.y + CAMERA_POSITIONS.MOBILE_PORTRAIT_Y_OFFSET,
+          CAMERA.pos.z + CAMERA_POSITIONS.MOBILE_PORTRAIT_Z_OFFSET
         );
       } else {
         return new THREE.Vector3(
@@ -228,8 +229,8 @@ export class GameLayer {
     } else {
       return new THREE.Vector3(
         CAMERA.pos.x,
-        CAMERA.pos.y - 10,
-        CAMERA.pos.z - 20
+        CAMERA.pos.y + CAMERA_POSITIONS.DESKTOP_Y_OFFSET,
+        CAMERA.pos.z + CAMERA_POSITIONS.DESKTOP_Z_OFFSET
       );
     }
   }
@@ -242,7 +243,7 @@ export class GameLayer {
         x: targetPosition.x,
         y: targetPosition.y,
         z: targetPosition.z,
-        duration: 1.5,
+        duration: ANIMATION_TIMINGS.CAMERA_MOVE_DURATION,
         ease: 'power2.inOut',
       });
     } else {

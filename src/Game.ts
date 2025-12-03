@@ -15,6 +15,7 @@ import { EventBusService } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
 import { manifest, DEBUG } from './config';
+import { ANIMATION_TIMINGS } from './core/constants';
 import gsap from 'gsap';
 
 export async function createGameScene(): Promise<void> {
@@ -267,7 +268,7 @@ function setupWindowResize(
       resizeDelay.kill();
     }
 
-    resizeDelay = gsap.delayedCall(0.01, () => {
+    resizeDelay = gsap.delayedCall(ANIMATION_TIMINGS.RESIZE_DEBOUNCE, () => {
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
