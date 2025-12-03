@@ -23,6 +23,7 @@ export class TutorialGuide extends Container {
   private questionMarkElements: Container[] = [];
   private resizeDebounceTween: gsap.core.Tween | null = null;
 
+
   constructor(private eventBus: EventBusService) {
     super();
     this.visible = false;
@@ -188,6 +189,7 @@ export class TutorialGuide extends Container {
   private highlightItemOptions(step: TutorialStep): void {
     gsap.delayedCall(0.1, () => {
       const itemSelectorPanels = this.finder.findItemSelectorPanels(this.parent as Container);
+      this.eventBus.emit('TUTORIAL:LOCK_ITEMS');
 
       if (itemSelectorPanels.length === 0) {
         gsap.delayedCall(0.1, () => {
@@ -201,6 +203,7 @@ export class TutorialGuide extends Container {
 
       if (step.highlightSingleItem) {
         const singleItem = this.finder.findSingleItemInPanel(itemSelectorPanels[0]);
+
         if (singleItem) {
           targetBounds = singleItem.getBounds();
         } else {
@@ -263,6 +266,7 @@ export class TutorialGuide extends Container {
   }
 
   private endTutorial(): void {
+
     this.isActive = false;
 
     gsap.to(this, {
@@ -276,6 +280,7 @@ export class TutorialGuide extends Container {
     });
 
     this.eventBus.emit('TUTORIAL:COMPLETE');
+    this.eventBus.emit('TUTORIAL:UNLOCK_ITEMS');
   }
 
   private repositionCurrentStep(): void {
