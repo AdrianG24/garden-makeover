@@ -271,16 +271,16 @@ export class TutorialGuide extends Container {
 
     gsap.to(this, {
       alpha: 0,
-      duration: 2.5,
+      duration: 1.5,
       ease: 'power2.out',
       onComplete: () => {
         this.visible = false;
         this.destroy();
       }
     });
+    this.eventBus.emit('TUTORIAL:UNLOCK_ITEMS');
 
     this.eventBus.emit('TUTORIAL:COMPLETE');
-    this.eventBus.emit('TUTORIAL:UNLOCK_ITEMS');
   }
 
   private repositionCurrentStep(): void {
