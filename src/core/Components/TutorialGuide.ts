@@ -33,28 +33,29 @@ export class TutorialGuide extends Container {
     this.tutorialSteps = [
       {
         targetElement: 'balance',
-        message: 'Це ваш баланс',
+        message: 'This is your balance',
         waitForClick: false
       },
       {
         targetElement: 'questionMark',
-        message: 'Натисніть тут',
+        message: 'Tap here',
         waitForClick: true
       },
       {
         targetElement: 'itemOptions',
-        message: 'Тут можна вибирати\nщось для свого саду',
+        message: 'Here you can choose\nitems for your garden',
         waitForClick: false,
         highlightSingleItem: true
       },
       {
         targetElement: 'itemOptions',
-        message: 'Спробуйте вкластися\nв бюджет щоб пройти\nвсі рівні!',
+        message: 'Try to stay within\nyour budget to complete\nall levels!',
         waitForClick: false,
         highlightMultiple: true
       }
     ];
   }
+
 
   private setupEventListeners(): void {
     EventBus.on('HELPER:SHOW', () => {
@@ -116,16 +117,26 @@ export class TutorialGuide extends Container {
     this.overlay.clear();
 
     if (cutoutX !== undefined && cutoutY !== undefined && cutoutWidth !== undefined && cutoutHeight !== undefined) {
-      this.overlay.fill(0x000000, 0.85);
+      this.overlay.fill(0x000000, 0.65);
       this.overlay.rect(0, 0, window.innerWidth, cutoutY);
       this.overlay.rect(0, cutoutY, cutoutX, cutoutHeight);
       this.overlay.rect(cutoutX + cutoutWidth, cutoutY, window.innerWidth - (cutoutX + cutoutWidth), cutoutHeight);
       this.overlay.rect(0, cutoutY + cutoutHeight, window.innerWidth, window.innerHeight - (cutoutY + cutoutHeight));
       this.overlay.endFill();
+      this.overlay.eventMode = 'static';
+      this.overlay.cursor = 'default';
+      this.overlay.on('pointerdown', (event) => {
+        event.stopPropagation();
+      });
     } else {
-      this.overlay.fill(0x000000, 0.85);
+      this.overlay.fill(0x000000, 0.65);
       this.overlay.rect(0, 0, window.innerWidth, window.innerHeight);
       this.overlay.endFill();
+      this.overlay.eventMode = 'static';
+      this.overlay.cursor = 'default';
+      this.overlay.on('pointerdown', (event) => {
+        event.stopPropagation();
+      });
     }
   }
 
@@ -218,8 +229,8 @@ export class TutorialGuide extends Container {
     this.createSpotlight(bounds.x, bounds.y, bounds.width, bounds.height);
 
     const isMobile = window.innerWidth < 968;
-    const popupX = bounds.x + bounds.width / 2 + (isMobile ? 60 : 80);
-    const popupY = bounds.y + bounds.height / 2;
+    const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
+    const popupY = bounds.y + bounds.height / 2 ;
     this.showPopup(step.message, popupX, popupY);
 
     const fingerX = bounds.x + bounds.width / 2;
@@ -265,9 +276,9 @@ export class TutorialGuide extends Container {
       const popupY = targetBounds.y - (isMobile ? 60 : 80);
       this.showPopup(step.message, popupX, popupY);
 
-      const fingerX = targetBounds.x + targetBounds.width / 2;
-      const fingerY = targetBounds.y + targetBounds.height + (isMobile ? 12 : 16);
-      this.showFinger(fingerX, fingerY);
+      // const fingerX = targetBounds.x + targetBounds.width / 2;
+      // const fingerY = targetBounds.y + targetBounds.height + (isMobile ? 100 : 16);
+      // this.showFinger(fingerX, fingerY);
 
       gsap.delayedCall(2.5, () => {
         this.nextStep();
@@ -320,7 +331,7 @@ export class TutorialGuide extends Container {
         if (child instanceof Container && child.visible) {
           const bounds = child.getBounds();
           const isMobile = window.innerWidth < 968;
-          const expectedSize = isMobile ? 60 : 100;
+          const expectedSize = isMobile ? 70 : 110;
 
           if (
             bounds.width > expectedSize - 30 &&
