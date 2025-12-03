@@ -295,7 +295,7 @@ export class TutorialGuide extends Container {
         this.repositionBalance();
         break;
       case 'questionMark':
-        gsap.delayedCall(0.5, () => {
+        gsap.delayedCall(1, () => {
           this.repositionQuestionMark();
         });
         break;

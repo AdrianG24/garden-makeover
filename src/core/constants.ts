@@ -1,13 +1,6 @@
 export const SCREEN_BREAKPOINTS = {
-  MOBILE: 968,
+  MOBILE: 768,
   TABLET: 1068,
-} as const;
-
-export const CAMERA_POSITIONS = {
-  DESKTOP_Y_OFFSET: -5,
-  DESKTOP_Z_OFFSET: -20,
-  MOBILE_PORTRAIT_Y_OFFSET: 5,
-  MOBILE_PORTRAIT_Z_OFFSET: -10,
 } as const;
 
 export const ANIMATION_TIMINGS = {
