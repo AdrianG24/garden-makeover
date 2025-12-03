@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBus } from '../Controllers/EventController';
+import { IEventBus } from '../Interfaces/IEventBus';
 
 interface TutorialStep {
   targetElement: 'balance' | 'questionMark' | 'itemOptions' | 'prices';
@@ -25,9 +25,7 @@ export class TutorialGuide extends Container {
   private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_X: number = 0;
   private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_Y: number = 0;
 
-
-
-  constructor() {
+  constructor(private eventBus: IEventBus) {
     super();
     this.visible = false;
     this.initializeTutorialSteps();
@@ -63,25 +61,25 @@ export class TutorialGuide extends Container {
 
 
   private setupEventListeners(): void {
-    EventBus.on('HELPER:SHOW', () => {
+    this.eventBus.on('HELPER:SHOW', () => {
       this.startTutorial();
     });
 
-    EventBus.on('HELPER:NEXT:STEP', () => {
+    this.eventBus.on('HELPER:NEXT:STEP', () => {
       if (this.isActive) {
         this.nextStep();
       }
     });
 
-    EventBus.on('TUTORIAL:SET_BALANCE', (element: unknown) => {
+    this.eventBus.on('TUTORIAL:SET_BALANCE', (element: unknown) => {
       this.balanceElement = element as Container;
     });
 
-    EventBus.on('TUTORIAL:ADD_QUESTION_MARK', (element: unknown) => {
+    this.eventBus.on('TUTORIAL:ADD_QUESTION_MARK', (element: unknown) => {
       this.questionMarkElements.push(element as Container);
     });
 
-    EventBus.on('ITEM_SELECTOR:SHOW', () => {
+    this.eventBus.on('ITEM_SELECTOR:SHOW', () => {
       if (this.isActive && this.currentStep === 1) {
         gsap.delayedCall(0.3, () => {
           this.nextStep();
@@ -593,7 +591,7 @@ export class TutorialGuide extends Container {
       }
     });
 
-    EventBus.emit('TUTORIAL:COMPLETE');
+    this.eventBus.emit('TUTORIAL:COMPLETE');
   }
 
   private repositionCurrentStep(): void {

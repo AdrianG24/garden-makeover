@@ -1,12 +1,14 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-import { playSoundEffect } from '../Utils/AudioManager';
+import { IAudioService } from '../Interfaces/IAudioService';
 import gsap from 'gsap';
-
 
 export class WelcomeScreen extends Container {
   private onBuyCallback: () => void;
 
-  constructor(onBuy: () => void) {
+  constructor(
+    onBuy: () => void,
+    private audioService: IAudioService
+  ) {
     super();
     this.onBuyCallback = onBuy;
     this.createWelcomeInterface();
@@ -143,7 +145,7 @@ export class WelcomeScreen extends Container {
     });
 
     button.on('pointerdown', () => {
-      playSoundEffect('sound_click');
+      this.audioService.playSound('sound_click');
       this.handleBuyClick();
     });
 
@@ -160,7 +162,7 @@ export class WelcomeScreen extends Container {
   }
 
   private handleBuyClick(): void {
-    playSoundEffect('sound_popup_chest');
+    this.audioService.playSound('sound_popup_chest');
 
     gsap.to(this, {
       alpha: 0,

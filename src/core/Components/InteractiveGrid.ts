@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import { InteractionManager } from 'three.interactive';
 import gsap from 'gsap';
 import { SceneController } from '../Controllers/SceneController';
-import { ItemController } from '../Controllers/ItemController';
+import { IItemService } from '../Interfaces/IItemService';
+import { IEventBus } from '../Interfaces/IEventBus';
 import { animateScaleTo } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
-import { EventBus } from '../Controllers/EventController';
 
 
 export interface GridConfiguration {
@@ -41,7 +41,9 @@ export class InteractiveGrid {
   constructor(
     configuration: GridConfiguration,
     interactionManager: InteractionManager,
-    sceneController: SceneController
+    sceneController: SceneController,
+    private itemService: IItemService,
+    private eventBus: IEventBus
   ) {
     this.gridConfiguration = { ...configuration };
     this.interactionManagerReference = interactionManager;
@@ -64,7 +66,7 @@ export class InteractiveGrid {
   }
 
   private registerEventHandlers(): void {
-    EventBus.on(
+    this.eventBus.on(
       'GRID:CLEAR_CELL',
       (payload: unknown) => {
         const data = payload as { row: number; col: number };
@@ -78,19 +80,19 @@ export class InteractiveGrid {
       }
     );
 
-    EventBus.on('GRID:CLEAR_ALL', () => {
+    this.eventBus.on('GRID:CLEAR_ALL', () => {
       this.clearAllCells();
     });
 
-    EventBus.on('GRID:CLEAR_LEVEL_ITEMS', () => {
+    this.eventBus.on('GRID:CLEAR_LEVEL_ITEMS', () => {
       this.clearCurrentLevelItems();
     });
 
-    EventBus.on('GRID:UPDATE_LEVEL', (level: unknown) => {
+    this.eventBus.on('GRID:UPDATE_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
     });
 
-    EventBus.once('GRID:ENABLE', () => {
+    this.eventBus.once('GRID:ENABLE', () => {
       gsap.delayedCall(GAME_GRID_CONFIG.CLICK_DELAY, () => {
         this.isInteractionEnabled = false;
       });
@@ -98,11 +100,11 @@ export class InteractiveGrid {
       this.updateCellVisibilityForTutorial();
     });
 
-    EventBus.on('GRID:TOGGLE', (isVisible: unknown) => {
+    this.eventBus.on('GRID:TOGGLE', (isVisible: unknown) => {
       this.setGridCellsVisibility(isVisible as boolean);
     });
 
-    EventBus.on(
+    this.eventBus.on(
       'GRID:PLACE_AT_POSITION',
       (payload: unknown) => {
         const data = payload as { itemId: string; row: number; col: number };
@@ -235,14 +237,11 @@ export class InteractiveGrid {
 
     this.refreshGridDisplay();
 
-    const itemController = ItemController;
-    itemController.currentItemId = null;
+    this.itemService.setCurrentItemId(null);
   }
 
   private placeInitialObjects(): void {
     if (!this.gridConfiguration.baseObjects) return;
-
-    const itemController = ItemController;
 
     for (const objectData of this.gridConfiguration.baseObjects) {
       const { row, col, id } = objectData;
@@ -255,7 +254,7 @@ export class InteractiveGrid {
         this.gridConfiguration.filledColor!
       );
 
-      itemController.currentItemId = id;
+      this.itemService.setCurrentItemId(id);
       const instantiatedObject = this.sceneControllerReference.createInstanceFromClick(id);
 
       if (instantiatedObject) {
@@ -358,13 +357,13 @@ export class InteractiveGrid {
     });
 
     if (this.isTutorialMode) {
-      EventBus.emit('HELPER:HIDE');
+      this.eventBus.emit('HELPER:HIDE');
     }
 
     const cellColumn = Math.round((clickedCell.position.x - this.gridOffsetX) / (cellSize + gapSize));
     const cellRow = Math.round(-(clickedCell.position.z - this.gridOffsetZ) / (cellSize + gapSize));
 
-    EventBus.emit('GRID:CELL_CLICK', {
+    this.eventBus.emit('GRID:CELL_CLICK', {
       row: cellRow,
       col: cellColumn,
       selected: clickedCell.userData.selected,
@@ -377,10 +376,9 @@ export class InteractiveGrid {
         this.gridConfiguration.filledColor!
       );
 
-      const itemController = ItemController;
-      if (itemController.currentItemId) {
+      if (this.itemService.currentItemId) {
         const instantiatedGameObject = this.sceneControllerReference.createInstanceFromClick(
-          itemController.currentItemId
+          this.itemService.currentItemId
         );
 
         if (instantiatedGameObject) {

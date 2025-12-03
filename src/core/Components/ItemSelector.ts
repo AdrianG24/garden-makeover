@@ -1,8 +1,8 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBus } from '../Controllers/EventController';
-import { ItemController } from '../Controllers/ItemController';
-import { playSoundEffect } from '../Utils/AudioManager';
+import { IEventBus } from '../Interfaces/IEventBus';
+import { IItemService } from '../Interfaces/IItemService';
+import { IAudioService } from '../Interfaces/IAudioService';
 
 interface ItemOption {
   type: string;
@@ -26,14 +26,18 @@ export class ItemSelector extends Container {
   private currentPlacement: ItemPlacement | null = null;
   private isCurrentlyVisible: boolean = false;
 
-  constructor() {
+  constructor(
+    private eventBus: IEventBus,
+    private itemService: IItemService,
+    private audioService: IAudioService
+  ) {
     super();
     this.visible = false;
     this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
-    EventBus.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
+    this.eventBus.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
       this.showSelector(placement as ItemPlacement);
     });
   }
@@ -125,9 +129,8 @@ export class ItemSelector extends Container {
       duration: 0.4,
       ease: 'back.out(1.7)',
       onComplete: () => {
-        const itemController = ItemController;
         const hasAffordableItem = this.itemOptions.some(option =>
-          itemController.balance >= itemController.getCost(option.type)
+          this.itemService.balance >= this.itemService.getCost(option.type)
         );
 
         if (!hasAffordableItem) {
@@ -242,9 +245,9 @@ export class ItemSelector extends Container {
     });
 
     retryButton.on('pointerdown', () => {
-      playSoundEffect('sound_click', false);
+      this.audioService.playSound('sound_click', false);
       this.hideSelector();
-      EventBus.emit('LEVEL:RETRY_CURRENT');
+      this.eventBus.emit('LEVEL:RETRY_CURRENT');
     });
 
     popup.addChild(retryButton);
@@ -269,9 +272,8 @@ export class ItemSelector extends Container {
     const container = new Container();
     container.position.set(x, y);
 
-    const itemController = ItemController;
-    const cost = itemController.getCost(option.type);
-    const canAfford = itemController.balance >= cost;
+    const cost = this.itemService.getCost(option.type);
+    const canAfford = this.itemService.balance >= cost;
 
     const boxSize = isMobile ? 70 : 100;
     const halfBox = boxSize / 2;
@@ -346,7 +348,7 @@ export class ItemSelector extends Container {
   }
 
   private showNotEnoughMoneyFeedback(container: Container): void {
-    playSoundEffect('sound_click', false);
+    this.audioService.playSound('sound_click', false);
 
     gsap.to(container, {
       x: container.x - 10,
@@ -358,22 +360,20 @@ export class ItemSelector extends Container {
   }
 
   private selectItem(option: ItemOption, cost: number): void {
-    const itemController = ItemController;
+    if (this.currentPlacement && this.itemService.spend(cost)) {
+      this.audioService.playSound('sound_click', false);
 
-    if (this.currentPlacement && itemController.spend(cost)) {
-      playSoundEffect('sound_click', false);
+      this.itemService.setCurrentItemId(option.modelId);
 
-      itemController.currentItemId = option.modelId;
+      this.eventBus.emit('HELPER:NEXT:STEP');
 
-      EventBus.emit('HELPER:NEXT:STEP');
-
-      EventBus.emit('GRID:PLACE_AT_POSITION', {
+      this.eventBus.emit('GRID:PLACE_AT_POSITION', {
         itemId: option.modelId,
         row: this.currentPlacement.gridPosition.row,
         col: this.currentPlacement.gridPosition.col
       });
 
-      EventBus.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
+      this.eventBus.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
 
       this.hideSelector();
     }

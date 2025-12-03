@@ -5,7 +5,7 @@ import { InteractiveGroup } from 'three/addons/interactive/InteractiveGroup.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { checkIfAnimationExists, getAnimationByIdentifier } from '../Utils/UtilityFunctions';
 import { Animations } from '../../config';
-import { playSoundEffect } from '../Utils/AudioManager';
+import { IAudioService } from '../Interfaces/IAudioService';
 
 export interface ModelConfiguration {
   url: string;
@@ -24,7 +24,7 @@ export interface SceneControllerConfiguration {
 
 export class SceneController {
   private sceneReference: THREE.Scene;
-  
+
   private loadedModelsMap = new Map<string, THREE.Object3D>();
 
   public animationMixers: THREE.AnimationMixer[] = [];
@@ -35,7 +35,11 @@ export class SceneController {
   public activeSceneIdentifier: string | null = null;
   public rendererReference: THREE.WebGLRenderer;
 
-  constructor(threeScene: THREE.Scene, webglRenderer: THREE.WebGLRenderer) {
+  constructor(
+    threeScene: THREE.Scene,
+    webglRenderer: THREE.WebGLRenderer,
+    private audioService: IAudioService
+  ) {
     this.sceneReference = threeScene;
     this.rendererReference = webglRenderer;
   }
@@ -215,7 +219,7 @@ export class SceneController {
     if (!availableAnimations || availableAnimations.length === 0) return;
 
     if (!checkIfAnimationExists(objectIdentifier, Animations)) {
-      playSoundEffect('sound_throw_spear');
+      this.audioService.playSound('sound_throw_spear');
       return clonedObject;
     }
 
@@ -241,7 +245,7 @@ export class SceneController {
 
     if (selectedClip) {
       const animationAction = animationMixer.clipAction(selectedClip);
-      playSoundEffect(animationProperties.sound);
+      this.audioService.playSound(animationProperties.sound);
       animationAction.play();
     }
 

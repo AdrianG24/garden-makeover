@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { ILightingController } from '../Interfaces/ILightingController';
 import { DIRECTIONAL_LIGHT_PRESETS } from '../../config';
 
-export class LightingController {
+export class LightingController implements ILightingController {
   public directionalLight: THREE.DirectionalLight;
   public currentMode: 'day' | 'night' = 'day';
 

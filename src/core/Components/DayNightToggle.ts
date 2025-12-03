@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBus } from '../Controllers/EventController';
+import { IEventBus } from '../Interfaces/IEventBus';
 
 export class DayNightToggle extends Container {
   private background!: Graphics;
@@ -8,7 +8,7 @@ export class DayNightToggle extends Container {
   private currentMode: 'day' | 'night' = 'day';
   private buttonSize: number = 70;
 
-  constructor() {
+  constructor(private eventBus: IEventBus) {
     super();
     this.createToggleButton();
     this.setupInteraction();
@@ -77,7 +77,7 @@ export class DayNightToggle extends Container {
         { x: 1, y: 1, duration: 0.4, ease: 'back.out(1.7)' }
     );
 
-    EventBus.emit('LIGHTING:TOGGLE');
+    this.eventBus.emit('LIGHTING:TOGGLE');
   }
 
   public resize(width: number): void {

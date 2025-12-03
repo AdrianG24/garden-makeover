@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBus } from '../Controllers/EventController';
-import { playSoundEffect } from '../Utils/AudioManager';
+import { IEventBus } from '../Interfaces/IEventBus';
+import { IAudioService } from '../Interfaces/IAudioService';
 import { worldToScreen } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
-
 
 interface ItemPlacement {
   id: string;
@@ -14,7 +13,6 @@ interface ItemPlacement {
   gridPosition: { row: number; col: number };
   label: string;
 }
-
 
 export class GridItemPlacement extends Container {
   private allLevelPlacements: Map<number, ItemPlacement[]> = new Map();
@@ -33,7 +31,10 @@ export class GridItemPlacement extends Container {
     columns: number;
   } | null = null;
 
-  constructor() {
+  constructor(
+    private eventBus: IEventBus,
+    private audioService: IAudioService
+  ) {
     super();
     this.initializeAllLevelPlacements();
     this.createItemIcons();
@@ -271,26 +272,26 @@ export class GridItemPlacement extends Container {
         this.addChild(itemContainer);
         this.itemContainers.set(placement.id, itemContainer);
 
-        EventBus.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
+        this.eventBus.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
       });
     });
   }
 
   private setupEventListeners(): void {
-    EventBus.on('GRID_ITEMS:SHOW', () => {
+    this.eventBus.on('GRID_ITEMS:SHOW', () => {
       this.showItems();
     });
 
-    EventBus.on('GRID_ITEMS:HIDE', () => {
+    this.eventBus.on('GRID_ITEMS:HIDE', () => {
       this.hideItems();
     });
 
-    EventBus.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
+    this.eventBus.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.showItems();
     });
 
-    EventBus.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
+    this.eventBus.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.showAllItemsForCurrentLevel();
     });
@@ -343,11 +344,11 @@ export class GridItemPlacement extends Container {
   private handleItemClick(placement: ItemPlacement): void {
     if (!this.isEnabled) return;
 
-    playSoundEffect('sound_click', false);
+    this.audioService.playSound('sound_click', false);
 
-    EventBus.emit('ITEM_SELECTOR:SHOW', placement);
+    this.eventBus.emit('ITEM_SELECTOR:SHOW', placement);
 
-    EventBus.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    this.eventBus.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       if ((goalId as string) === placement.id) {
         const container = this.itemContainers.get(placement.id);
         if (container) {

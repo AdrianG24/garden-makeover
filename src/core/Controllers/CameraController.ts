@@ -1,14 +1,17 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { EventBus } from './EventController';
+import { IEventBus } from '../Interfaces/IEventBus';
+import { ICameraController } from '../Interfaces/ICameraController';
 import { DEFAULT_CAMERA_ANIMATION_CONFIG } from '../../config';
 
-
-export class CameraController {
+export class CameraController implements ICameraController {
   private cameraReference: THREE.PerspectiveCamera;
   private initialCameraPosition: THREE.Vector3;
 
-  constructor(perspectiveCamera: THREE.PerspectiveCamera) {
+  constructor(
+    perspectiveCamera: THREE.PerspectiveCamera,
+    private eventBus: IEventBus
+  ) {
     this.cameraReference = perspectiveCamera;
     this.initialCameraPosition = perspectiveCamera.position.clone();
 
@@ -16,8 +19,7 @@ export class CameraController {
   }
 
   private setupEventListeners(): void {
-
-    EventBus.on('CAMERA:ZOOM', () => {
+    this.eventBus.on('CAMERA:ZOOM', () => {
       this.moveCameraToTarget(
         new THREE.Vector3(
           this.initialCameraPosition.x,
@@ -27,7 +29,7 @@ export class CameraController {
       );
     });
 
-    EventBus.on('CAMERA:SHAKE', () => {
+    this.eventBus.on('CAMERA:SHAKE', () => {
       this.applyCameraShake();
     });
   }

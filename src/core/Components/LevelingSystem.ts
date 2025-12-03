@@ -1,9 +1,8 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBus } from '../Controllers/EventController';
-import { ItemController } from '../Controllers/ItemController';
-import { playSoundEffect } from '../Utils/AudioManager';
-
+import { IEventBus } from '../Interfaces/IEventBus';
+import { IItemService } from '../Interfaces/IItemService';
+import { IAudioService } from '../Interfaces/IAudioService';
 
 export interface LevelGoal {
   id: string;
@@ -27,7 +26,11 @@ export class LevelingSystem extends Container {
   private levels: LevelConfig[] = [];
   private currentGoals: LevelGoal[] = [];
 
-  constructor() {
+  constructor(
+    private eventBus: IEventBus,
+    private itemService: IItemService,
+    private audioService: IAudioService
+  ) {
     super();
     this.initializeLevels();
     this.createLevelUI();
@@ -142,28 +145,27 @@ export class LevelingSystem extends Container {
   }
 
   private setupEventListeners(): void {
-    EventBus.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    this.eventBus.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       this.completeGoal(goalId as string);
     });
 
-    EventBus.on('LEVEL:RESET', () => {
+    this.eventBus.on('LEVEL:RESET', () => {
       this.resetProgress();
     });
 
-    EventBus.on('LEVEL:RETRY_CURRENT', () => {
+    this.eventBus.on('LEVEL:RETRY_CURRENT', () => {
       this.retryCurrentLevel();
     });
   }
 
   private retryCurrentLevel(): void {
-    const itemController = ItemController;
-    itemController.restoreStartBalance();
+    this.itemService.restoreStartBalance();
 
     this.currentGoals.forEach(g => g.completed = false);
     this.updateDisplay();
 
-    EventBus.emit('GRID:CLEAR_LEVEL_ITEMS');
-    EventBus.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
+    this.eventBus.emit('GRID:CLEAR_LEVEL_ITEMS');
+    this.eventBus.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
   }
 
   private completeGoal(goalId: string): void {
@@ -180,11 +182,10 @@ export class LevelingSystem extends Container {
   }
 
   private levelUp(): void {
-    const itemController = ItemController;
-    itemController.addReward(this.currentLevel + 1);
+    this.itemService.addReward(this.currentLevel + 1);
 
     this.currentLevel++;
-    playSoundEffect('sound_popup_chest', false);
+    this.audioService.playSound('sound_popup_chest', false);
 
     if (this.currentLevel < this.levels.length) {
       this.showLevelUpAnimation();
@@ -193,10 +194,10 @@ export class LevelingSystem extends Container {
         this.currentGoals = [...this.levels[this.currentLevel].goals];
         this.updateDisplay();
 
-        itemController.saveStartBalance();
+        this.itemService.saveStartBalance();
 
-        EventBus.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
-        EventBus.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
+        this.eventBus.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
+        this.eventBus.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
       });
     } else {
       gsap.delayedCall(1, () => {
@@ -250,7 +251,7 @@ export class LevelingSystem extends Container {
     this.levelUpAnimation.alpha = 0;
     this.levelUpAnimation.scale.set(0.5);
 
-    EventBus.emit('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
+    this.eventBus.emit('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
 
     gsap.to(this.levelUpAnimation, {
       alpha: 1,
@@ -281,7 +282,7 @@ export class LevelingSystem extends Container {
       delay: 1.5,
       ease: 'power2.in',
       onComplete: () => {
-        EventBus.emit('LEVEL:HIDE_ANIMATION');
+        this.eventBus.emit('LEVEL:HIDE_ANIMATION');
         this.levelUpAnimation = null;
       }
     });
@@ -384,8 +385,8 @@ export class LevelingSystem extends Container {
 
     congratsContainer.addChild(popupContainer);
 
-    EventBus.emit('LEVEL:SHOW_ANIMATION', congratsContainer);
-    playSoundEffect('sound_popup_chest', false);
+    this.eventBus.emit('LEVEL:SHOW_ANIMATION', congratsContainer);
+    this.audioService.playSound('sound_popup_chest', false);
 
     congratsContainer.alpha = 0;
     popupContainer.scale.set(0.5);

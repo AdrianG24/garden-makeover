@@ -9,7 +9,7 @@ import { LightingController } from '../Controllers/LightingController';
 import { SceneController } from '../Controllers/SceneController';
 import { CameraController } from '../Controllers/CameraController';
 import { InteractiveGrid } from '../Components/InteractiveGrid';
-import { EventBus } from '../Controllers/EventController';
+import { ServiceContainer } from '../Services/ServiceContainer';
 import { SCENE, CAMERA, RENDERER, GRID, sceneManagerConfig } from '../../config';
 
 export class GameLayer {
@@ -31,7 +31,11 @@ export class GameLayer {
   private ambientLight: THREE.AmbientLight | null = null;
   private cameraLookAtTarget: THREE.Vector3 = new THREE.Vector3(-7, 0, 0);
 
-  constructor(canvasElement: HTMLCanvasElement, showDebug: boolean = false) {
+  constructor(
+    canvasElement: HTMLCanvasElement,
+    private serviceContainer: ServiceContainer,
+    showDebug: boolean = false
+  ) {
     this.clock = new THREE.Clock();
 
     this.initializeStats(showDebug);
@@ -67,7 +71,8 @@ export class GameLayer {
     this.camera.rotation.set(-0.5, 0, 0);
     this.camera.updateProjectionMatrix();
 
-    this.cameraController = new CameraController(this.camera);
+    const eventBus = this.serviceContainer.getEventBus();
+    this.cameraController = new CameraController(this.camera, eventBus);
   }
 
   private initializeRenderer(canvasElement: HTMLCanvasElement): void {
@@ -87,7 +92,11 @@ export class GameLayer {
   }
 
   async setupGameWorld(): Promise<void> {
-    this.sceneController = new SceneController(this.threeScene, this.webglRenderer);
+    const audioService = this.serviceContainer.getAudioService();
+    const eventBus = this.serviceContainer.getEventBus();
+    const itemService = this.serviceContainer.getItemService();
+
+    this.sceneController = new SceneController(this.threeScene, this.webglRenderer, audioService);
     await this.sceneController.loadSceneFromConfig(sceneManagerConfig.scenes[0]);
     await this.sceneController.displayScene('Base');
 
@@ -106,7 +115,13 @@ export class GameLayer {
         this.webglRenderer.domElement
     );
 
-    this.interactiveGrid = new InteractiveGrid(GRID, this.interactionManager, this.sceneController);
+    this.interactiveGrid = new InteractiveGrid(
+      GRID,
+      this.interactionManager,
+      this.sceneController,
+      itemService,
+      eventBus
+    );
     this.threeScene.add(this.interactiveGrid.gridGroupContainer);
 
     this.setupOrbitControls();
@@ -170,8 +185,9 @@ export class GameLayer {
 
       this.orbitControls.enabled = false;
 
+    const eventBus = this.serviceContainer.getEventBus();
     gsap.delayedCall(2, () => {
-      EventBus.emit('GRID_ITEMS:SHOW');
+      eventBus.emit('GRID_ITEMS:SHOW');
     });
   }
 
@@ -217,7 +233,8 @@ export class GameLayer {
   }
 
   private setupLightingEventListeners(): void {
-    EventBus.on('LIGHTING:TOGGLE', () => {
+    const eventBus = this.serviceContainer.getEventBus();
+    eventBus.on('LIGHTING:TOGGLE', () => {
       if (!this.lightingController) return;
 
       this.lightingController.toggleDayNight();
@@ -253,7 +270,8 @@ export class GameLayer {
       this.orbitControls.update();
     }
 
-    EventBus.emit('GAME:UPDATE');
+    const eventBus = this.serviceContainer.getEventBus();
+    eventBus.emit('GAME:UPDATE');
 
     this.webglRenderer.resetState();
     this.webglRenderer.render(this.threeScene, this.camera);
