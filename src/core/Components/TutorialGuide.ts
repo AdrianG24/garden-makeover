@@ -21,6 +21,11 @@ export class TutorialGuide extends Container {
 
   private balanceElement: Container | null = null;
   private questionMarkElements: Container[] = [];
+  private resizeDebounceTween: gsap.core.Tween | null = null;
+  private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_X: number = 0;
+  private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_Y: number = 0;
+
+
 
   constructor() {
     super();
@@ -78,7 +83,7 @@ export class TutorialGuide extends Container {
 
     EventBus.on('ITEM_SELECTOR:SHOW', () => {
       if (this.isActive && this.currentStep === 1) {
-        gsap.delayedCall(0.8, () => {
+        gsap.delayedCall(0.3, () => {
           this.nextStep();
         });
       }
@@ -213,31 +218,48 @@ export class TutorialGuide extends Container {
       this.nextStep();
     });
   }
+  private getActiveQuestionMark(): Container | null {
+    for (let i = this.questionMarkElements.length - 1; i >= 0; i--) {
+      const el = this.questionMarkElements[i];
+      if (!el || !el.parent || !el.visible) continue;
+
+      const bounds = el.getBounds();
+      if (bounds.width > 0 && bounds.height > 0) {
+        return el;
+      }
+    }
+    return null;
+  }
+
 
   private highlightQuestionMark(step: TutorialStep): void {
+    const questionMark = this.getActiveQuestionMark();
 
-    const firstQuestionMark = this.questionMarkElements[0];
-    if (!firstQuestionMark.visible) {
+    if (!questionMark) {
       gsap.delayedCall(0.5, () => {
-        this.highlightQuestionMark(step);
+        if (this.isActive && this.currentStep === 1) {
+          this.highlightQuestionMark(step);
+        }
       });
       return;
     }
 
-    const bounds = firstQuestionMark.getBounds();
+    const bounds = questionMark.getBounds();
 
-    this.createSpotlight(bounds.x, bounds.y, bounds.width, bounds.height);
+    const spotlightX = bounds.x;
+    const spotlightY = bounds.y;
+
+    this.createSpotlight(spotlightX, spotlightY, bounds.width, bounds.height);
 
     const isMobile = window.innerWidth < 968;
     const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
-    const popupY = bounds.y + bounds.height / 2 ;
+    const popupY = bounds.y + bounds.height / 2;
     this.showPopup(step.message, popupX, popupY);
 
     const fingerX = bounds.x + bounds.width / 2;
     const fingerY = bounds.y + bounds.height + 70;
     this.showFinger(fingerX, fingerY);
     this.animateFingerTap();
-
   }
 
   private highlightItemOptions(step: TutorialStep): void {
@@ -275,10 +297,6 @@ export class TutorialGuide extends Container {
       const popupX = targetBounds.x + targetBounds.width / 2;
       const popupY = targetBounds.y - (isMobile ? 60 : 80);
       this.showPopup(step.message, popupX, popupY);
-
-      // const fingerX = targetBounds.x + targetBounds.width / 2;
-      // const fingerY = targetBounds.y + targetBounds.height + (isMobile ? 100 : 16);
-      // this.showFinger(fingerX, fingerY);
 
       gsap.delayedCall(2.5, () => {
         this.nextStep();
@@ -355,7 +373,7 @@ export class TutorialGuide extends Container {
   private createSpotlight(x: number, y: number, width: number, height: number): void {
     this.spotlightContainer.removeChildren();
 
-    const padding = 10;
+    const padding = 5;
     this.drawOverlay(x - padding, y - padding, width + padding * 2, height + padding * 2);
 
     const spotlight = new Graphics();
@@ -578,18 +596,217 @@ export class TutorialGuide extends Container {
     EventBus.emit('TUTORIAL:COMPLETE');
   }
 
+  private repositionCurrentStep(): void {
+    const step = this.tutorialSteps[this.currentStep];
+    if (!step) return;
+
+    gsap.killTweensOf(this.fingerSprite);
+    gsap.killTweensOf(this.popupContainer);
+
+    switch (step.targetElement) {
+      case 'balance':
+        this.repositionBalance();
+        break;
+      case 'questionMark':
+        gsap.delayedCall(0.5, () => {
+          this.repositionQuestionMark();
+
+        })
+        break;
+      case 'itemOptions':
+        this.repositionItemOptions(step);
+        break;
+    }
+  }
+
+  private repositionBalance(): void {
+    if (!this.balanceElement) return;
+
+    const bounds = this.balanceElement.getBounds();
+    this.createSpotlight(bounds.x, bounds.y, bounds.width, bounds.height);
+
+    const isMobile = window.innerWidth < 968;
+
+    if (this.popupContainer) {
+      this.popupContainer.x = bounds.x - (isMobile ? 130 : 160);
+      this.popupContainer.y = bounds.y + bounds.height / 2;
+    }
+
+    if (this.fingerSprite.visible) {
+      this.fingerSprite.x = bounds.x + bounds.width / 2;
+      this.fingerSprite.y = bounds.y + bounds.height + 100;
+    }
+  }
+
+  private repositionQuestionMark(): void {
+    const questionMark = this.getActiveQuestionMark();
+    if (!questionMark) {
+      gsap.delayedCall(3, () => {
+        if (this.isActive && this.currentStep === 1) {
+          this.repositionQuestionMark();
+        }
+      });
+      return;
+    }
+
+    const bounds = questionMark.getBounds();
+    if (!bounds.width || !bounds.height) {
+      gsap.delayedCall(3, () => {
+        if (this.isActive && this.currentStep === 1) {
+          this.repositionQuestionMark();
+        }
+      });
+      return;
+    }
+
+    const spotlightX = bounds.x + this.QUESTION_MARK_SPOTLIGHT_OFFSET_X;
+    const spotlightY = bounds.y + this.QUESTION_MARK_SPOTLIGHT_OFFSET_Y;
+
+    this.createSpotlight(spotlightX, spotlightY, bounds.width, bounds.height);
+
+    const isMobile = window.innerWidth < 968;
+
+    if (this.popupContainer) {
+      const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
+      const popupY = bounds.y + bounds.height / 2;
+
+      this.popupContainer.position.set(popupX, popupY);
+
+      this.popupContainer.visible = true;
+
+      gsap.killTweensOf(this.popupContainer);
+      gsap.killTweensOf(this.popupContainer.scale);
+
+      this.popupContainer.alpha = 0;
+      this.popupContainer.scale.set(0.9);
+
+      gsap.to(this.popupContainer, {
+        alpha: 1,
+        duration: 0.2,
+        ease: 'power2.out'
+      });
+
+      gsap.to(this.popupContainer.scale, {
+        x: 1,
+        y: 1,
+        duration: 0.25,
+        ease: 'back.out(2)'
+      });
+    }
+
+    const fingerX = bounds.x + bounds.width / 2;
+    const fingerY = bounds.y + bounds.height + 70;
+
+    gsap.killTweensOf(this.fingerSprite);
+
+    this.fingerSprite.visible = true;
+    this.fingerSprite.alpha = 0;
+
+    this.fingerSprite.x = fingerX;
+    this.fingerSprite.y = fingerY + 10;
+
+    gsap.to(this.fingerSprite, {
+      alpha: 1,
+      y: fingerY,
+      duration: 0.5,
+      ease: 'power2.out',
+      onComplete: () => {
+        this.animateFingerTap();
+      }
+    });
+  }
+
+  private repositionItemOptions(step: TutorialStep): void {
+    const itemSelectorPanels = this.findItemSelectorPanels();
+
+    if (itemSelectorPanels.length === 0) {
+      gsap.delayedCall(0.3, () => {
+        if (this.isActive && this.currentStep >= 2) {
+          this.repositionItemOptions(step);
+        }
+      });
+      return;
+    }
+
+    const isMobile = window.innerWidth < 968;
+
+    if (step.highlightSingleItem) {
+      const targetBounds = itemSelectorPanels[0].getBounds();
+
+      this.createSpotlight(
+        targetBounds.x,
+        targetBounds.y,
+        targetBounds.width,
+        targetBounds.height
+      );
+
+      if (this.popupContainer) {
+        this.popupContainer.x = targetBounds.x + targetBounds.width / 2;
+        this.popupContainer.y = targetBounds.y - (isMobile ? 60 : 80);
+      }
+    } else if (step.highlightMultiple) {
+      this.spotlightContainer.removeChildren();
+
+      itemSelectorPanels.forEach((panel) => {
+        const panelBounds = panel.getBounds();
+        this.createSpotlight(
+          panelBounds.x,
+          panelBounds.y,
+          panelBounds.width,
+          panelBounds.height
+        );
+      });
+
+      if (this.popupContainer && itemSelectorPanels.length > 0) {
+        const firstPanelBounds = itemSelectorPanels[0].getBounds();
+        this.popupContainer.x = firstPanelBounds.x + firstPanelBounds.width / 2;
+        this.popupContainer.y = firstPanelBounds.y - (isMobile ? 60 : 80);
+      }
+    }
+  }
+  private scheduleRepositionAfterResize(delay: number = 0.7): void {
+    if (this.resizeDebounceTween) {
+      this.resizeDebounceTween.kill();
+      this.resizeDebounceTween = null;
+    }
+
+    const stepIndex = this.currentStep;
+
+    this.resizeDebounceTween = gsap.delayedCall(delay, () => {
+      if (!this.isActive || this.currentStep !== stepIndex) return;
+
+      this.repositionCurrentStep();
+    }) as unknown as gsap.core.Tween;
+  }
+
+
+
   public resize(): void {
+    if (!this.isActive) return;
+
+    const step = this.tutorialSteps[this.currentStep];
+    if (!step) return;
 
     if (this.overlay) {
       this.drawOverlay();
     }
 
-    if (this.isActive) {
-      this.clearHighlights();
-
-      gsap.delayedCall(0.3, () => {
-        this.showStep(this.currentStep);
-      });
+    if (this.spotlightContainer) {
+      this.spotlightContainer.removeChildren();
     }
+
+    if (this.popupContainer) {
+      this.popupContainer.visible = false;
+    }
+
+    if (this.fingerSprite) {
+      gsap.killTweensOf(this.fingerSprite);
+      this.fingerSprite.visible = false;
+    }
+
+    this.scheduleRepositionAfterResize(0.7);
   }
+
+
+
 }
