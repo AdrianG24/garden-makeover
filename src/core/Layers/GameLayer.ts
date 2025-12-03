@@ -13,7 +13,7 @@ import { EventBusService } from '../Services/EventBusService';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
 import { SCENE, CAMERA, RENDERER, GRID, sceneManagerConfig } from '../../config';
-import { SCREEN_BREAKPOINTS, CAMERA_POSITIONS, ANIMATION_TIMINGS } from '../constants';
+import { SCREEN_BREAKPOINTS, ANIMATION_TIMINGS } from '../constants';
 
 export class GameLayer {
   threeScene!: THREE.Scene;
@@ -31,7 +31,10 @@ export class GameLayer {
   private orbitControls!: OrbitControls;
   private particleSystem: BatchedRenderer;
   private ambientLight: THREE.AmbientLight | null = null;
+
   private cameraLookAtTarget: THREE.Vector3 = new THREE.Vector3(-7, 0, 0);
+  private baseCameraDistance!: number;
+  private baseCameraDirection!: THREE.Vector3;
 
   constructor(
     canvasElement: HTMLCanvasElement,
@@ -65,18 +68,28 @@ export class GameLayer {
 
   private initializeCamera(): void {
     this.camera = new THREE.PerspectiveCamera(
-      CAMERA.fov,
-      window.innerWidth / window.innerHeight,
-      CAMERA.near,
-      CAMERA.far
+        CAMERA.fov,
+        window.innerWidth / window.innerHeight,
+        CAMERA.near,
+        CAMERA.far
     );
 
     this.camera.position.set(CAMERA.pos.x, CAMERA.pos.y, CAMERA.pos.z);
-    this.camera.rotation.set(-0.5, 0, 0);
+    this.camera.lookAt(this.cameraLookAtTarget);
+
+    const dir = new THREE.Vector3().subVectors(
+        this.camera.position,
+        this.cameraLookAtTarget
+    );
+
+    this.baseCameraDistance = dir.length();
+    this.baseCameraDirection = dir.normalize();
+
     this.camera.updateProjectionMatrix();
 
     this.cameraController = new CameraController(this.camera, this.eventBus);
   }
+
 
   private initializeRenderer(canvasElement: HTMLCanvasElement): void {
     const isMobile = window.innerWidth < 768;
@@ -178,7 +191,7 @@ export class GameLayer {
       });
     }
 
-    this.setInitialCameraPosition(true);
+    this.setInitialCameraPosition();
 
       this.orbitControls.enabled = false;
 
@@ -209,47 +222,38 @@ export class GameLayer {
   }
 
   private getCameraPositionForCurrentScreen(): THREE.Vector3 {
+    const distance = this.getCameraDistanceForCurrentScreen();
+
+    return this.cameraLookAtTarget
+        .clone()
+        .add(this.baseCameraDirection.clone().multiplyScalar(distance));
+  }
+
+  private getCameraDistanceForCurrentScreen(): number {
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.MOBILE;
     const isPortrait = window.innerHeight > window.innerWidth;
 
-    if (isMobile) {
-      if (isPortrait) {
-        return new THREE.Vector3(
-          CAMERA.pos.x,
-          CAMERA.pos.y + CAMERA_POSITIONS.MOBILE_PORTRAIT_Y_OFFSET,
-          CAMERA.pos.z + CAMERA_POSITIONS.MOBILE_PORTRAIT_Z_OFFSET
-        );
-      } else {
-        return new THREE.Vector3(
-          CAMERA.pos.x,
-          CAMERA.pos.y,
-          CAMERA.pos.z
-        );
-      }
-    } else {
-      return new THREE.Vector3(
-        CAMERA.pos.x,
-        CAMERA.pos.y + CAMERA_POSITIONS.DESKTOP_Y_OFFSET,
-        CAMERA.pos.z + CAMERA_POSITIONS.DESKTOP_Z_OFFSET
-      );
+    let multiplier = 1;
+    if (isMobile && isPortrait) {
+      multiplier = 1.6;
+    } else if (isMobile && !isPortrait) {
+      multiplier = 0.8;
     }
+    return this.baseCameraDistance * multiplier;
   }
 
-  private setInitialCameraPosition(animate: boolean = false): void {
+  private setInitialCameraPosition(): void {
     const targetPosition = this.getCameraPositionForCurrentScreen();
 
-    if (animate) {
-      gsap.to(this.camera.position, {
-        x: targetPosition.x,
-        y: targetPosition.y,
-        z: targetPosition.z,
-        duration: ANIMATION_TIMINGS.CAMERA_MOVE_DURATION,
-        ease: 'power2.inOut',
-      });
-    } else {
-      this.camera.position.copy(targetPosition);
+    this.camera.position.copy(targetPosition);
+    this.camera.lookAt(this.cameraLookAtTarget);
+
+    if (this.orbitControls) {
+      this.orbitControls.target.copy(this.cameraLookAtTarget);
+      this.orbitControls.update();
     }
   }
+
 
   private addSceneLighting(): void {
     if (!this.lightingController) return;
@@ -314,9 +318,19 @@ export class GameLayer {
     this.camera.updateProjectionMatrix();
 
     const targetPosition = this.getCameraPositionForCurrentScreen();
-    this.camera.position.copy(targetPosition);
+    gsap.to(this.camera.position, {
+      x: targetPosition.x,
+      y: targetPosition.y,
+      z: targetPosition.z,
+      duration: ANIMATION_TIMINGS.CAMERA_MOVE_DURATION,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        this.camera.lookAt(this.cameraLookAtTarget);
+      },
+    });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
+
 }
