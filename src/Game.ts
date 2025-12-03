@@ -240,7 +240,6 @@ function setupWindowResize(gameLayer: GameLayer, pixiRenderer: WebGLRenderer): v
     }
 
     resizeDelay = gsap.delayedCall(0.01, () => {
-      // handleResize() now automatically adjusts camera for all devices
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);

@@ -16,9 +16,6 @@ export class CameraController {
   }
 
   private setupEventListeners(): void {
-    // EventBus.on('CAMERA:RESET', () => {
-    //   this.resetCameraToInitialPosition();
-    // });
 
     EventBus.on('CAMERA:ZOOM', () => {
       this.moveCameraToTarget(
