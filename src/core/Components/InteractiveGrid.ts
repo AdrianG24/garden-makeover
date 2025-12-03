@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { InteractionManager } from 'three.interactive';
 import gsap from 'gsap';
 import { SceneController } from '../Controllers/SceneController';
-import { IItemService } from '../Interfaces/IItemService';
-import { IEventBus } from '../Interfaces/IEventBus';
+import { ItemService } from '../Services/ItemService';
+import { EventBusService } from '../Services/EventBusService';
 import { animateScaleTo } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
 
@@ -42,8 +42,8 @@ export class InteractiveGrid {
     configuration: GridConfiguration,
     interactionManager: InteractionManager,
     sceneController: SceneController,
-    private itemService: IItemService,
-    private eventBus: IEventBus
+    private itemService: ItemService,
+    private eventBus: EventBusService
   ) {
     this.gridConfiguration = { ...configuration };
     this.interactionManagerReference = interactionManager;
@@ -237,7 +237,7 @@ export class InteractiveGrid {
 
     this.refreshGridDisplay();
 
-    this.itemService.setCurrentItemId(null);
+    this.itemService.currentItemId = null;
   }
 
   private placeInitialObjects(): void {
@@ -254,7 +254,7 @@ export class InteractiveGrid {
         this.gridConfiguration.filledColor!
       );
 
-      this.itemService.setCurrentItemId(id);
+      this.itemService.currentItemId = id;
       const instantiatedObject = this.sceneControllerReference.createInstanceFromClick(id);
 
       if (instantiatedObject) {

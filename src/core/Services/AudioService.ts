@@ -1,7 +1,6 @@
 import { sound } from '@pixi/sound';
-import { IAudioService } from '../Interfaces/IAudioService';
 
-export class AudioService implements IAudioService {
+export class AudioService {
   private readonly audioAssets = [
     { alias: 'sound_chicken', src: 'assets/sounds/chicken.mp3' },
     { alias: 'sound_click', src: 'assets/sounds/click_003.mp3' },

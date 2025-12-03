@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
-import { IAudioService } from '../Interfaces/IAudioService';
+import { EventBusService } from '../Services/EventBusService';
+import { AudioService } from '../Services/AudioService';
 import { worldToScreen } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
 
@@ -32,8 +32,8 @@ export class GridItemPlacement extends Container {
   } | null = null;
 
   constructor(
-    private eventBus: IEventBus,
-    private audioService: IAudioService
+    private eventBus: EventBusService,
+    private audioService: AudioService
   ) {
     super();
     this.initializeAllLevelPlacements();

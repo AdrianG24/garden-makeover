@@ -1,12 +1,12 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
+import { EventBusService } from '../Services/EventBusService';
 
 export class BalanceDisplay extends Container {
   private balanceText!: Text;
   private background!: Graphics;
 
-  constructor(private eventBus: IEventBus) {
+  constructor(private eventBus: EventBusService) {
     super();
     this.createBalanceUI();
     this.setupEventListeners();

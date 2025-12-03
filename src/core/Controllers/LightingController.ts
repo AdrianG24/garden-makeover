@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { ILightingController } from '../Interfaces/ILightingController';
 import { DIRECTIONAL_LIGHT_PRESETS } from '../../config';
 
-export class LightingController implements ILightingController {
-  public directionalLight: THREE.DirectionalLight;
-  public currentMode: 'day' | 'night' = 'day';
+export class LightingController {
+  directionalLight: THREE.DirectionalLight;
+  currentMode: 'day' | 'night' = 'day';
 
   constructor(private sceneReference: THREE.Scene) {
     const initialPreset = DIRECTIONAL_LIGHT_PRESETS.day;
@@ -34,7 +33,7 @@ export class LightingController implements ILightingController {
     this.sceneReference.add(this.directionalLight);
   }
 
-  public switchToMode(mode: 'day' | 'night'): void {
+  switchToMode(mode: 'day' | 'night'): void {
     if (this.currentMode === mode) return;
 
     this.currentMode = mode;
@@ -70,7 +69,7 @@ export class LightingController implements ILightingController {
     });
   }
 
-  public toggleDayNight(): void {
+  toggleDayNight(): void {
     const newMode = this.currentMode === 'day' ? 'night' : 'day';
     this.switchToMode(newMode);
   }

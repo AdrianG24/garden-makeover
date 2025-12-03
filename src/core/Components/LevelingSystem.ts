@@ -1,8 +1,8 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
-import { IItemService } from '../Interfaces/IItemService';
-import { IAudioService } from '../Interfaces/IAudioService';
+import { EventBusService } from '../Services/EventBusService';
+import { ItemService } from '../Services/ItemService';
+import { AudioService } from '../Services/AudioService';
 
 export interface LevelGoal {
   id: string;
@@ -27,9 +27,9 @@ export class LevelingSystem extends Container {
   private currentGoals: LevelGoal[] = [];
 
   constructor(
-    private eventBus: IEventBus,
-    private itemService: IItemService,
-    private audioService: IAudioService
+    private eventBus: EventBusService,
+    private itemService: ItemService,
+    private audioService: AudioService
   ) {
     super();
     this.initializeLevels();

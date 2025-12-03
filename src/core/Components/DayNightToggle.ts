@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
+import { EventBusService } from '../Services/EventBusService';
 
 export class DayNightToggle extends Container {
   private background!: Graphics;
@@ -8,7 +8,7 @@ export class DayNightToggle extends Container {
   private currentMode: 'day' | 'night' = 'day';
   private buttonSize: number = 70;
 
-  constructor(private eventBus: IEventBus) {
+  constructor(private eventBus: EventBusService) {
     super();
     this.createToggleButton();
     this.setupInteraction();

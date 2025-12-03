@@ -1,5 +1,5 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-import { IAudioService } from '../Interfaces/IAudioService';
+import { AudioService } from '../Services/AudioService';
 import gsap from 'gsap';
 
 export class WelcomeScreen extends Container {
@@ -7,7 +7,7 @@ export class WelcomeScreen extends Container {
 
   constructor(
     onBuy: () => void,
-    private audioService: IAudioService
+    private audioService: AudioService
   ) {
     super();
     this.onBuyCallback = onBuy;

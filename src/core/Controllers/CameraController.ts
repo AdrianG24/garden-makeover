@@ -1,16 +1,15 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
-import { ICameraController } from '../Interfaces/ICameraController';
+import { EventBusService } from '../Services/EventBusService';
 import { DEFAULT_CAMERA_ANIMATION_CONFIG } from '../../config';
 
-export class CameraController implements ICameraController {
+export class CameraController {
   private cameraReference: THREE.PerspectiveCamera;
   private initialCameraPosition: THREE.Vector3;
 
   constructor(
     perspectiveCamera: THREE.PerspectiveCamera,
-    private eventBus: IEventBus
+    private eventBus: EventBusService
   ) {
     this.cameraReference = perspectiveCamera;
     this.initialCameraPosition = perspectiveCamera.position.clone();

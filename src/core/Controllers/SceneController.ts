@@ -5,7 +5,7 @@ import { InteractiveGroup } from 'three/addons/interactive/InteractiveGroup.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { checkIfAnimationExists, getAnimationByIdentifier } from '../Utils/UtilityFunctions';
 import { Animations } from '../../config';
-import { IAudioService } from '../Interfaces/IAudioService';
+import { AudioService } from '../Services/AudioService';
 
 export interface ModelConfiguration {
   url: string;
@@ -24,21 +24,20 @@ export interface SceneControllerConfiguration {
 
 export class SceneController {
   private sceneReference: THREE.Scene;
-
   private loadedModelsMap = new Map<string, THREE.Object3D>();
 
-  public animationMixers: THREE.AnimationMixer[] = [];
-  public sceneGroupsMap = new Map<string, InteractiveGroup>();
-  public childObjectsMap = new Map<string, THREE.Object3D>();
-  public namedModelsMap = new Map<string, THREE.Object3D>();
-  public animationClipsMap = new Map<string, THREE.AnimationClip[]>();
-  public activeSceneIdentifier: string | null = null;
-  public rendererReference: THREE.WebGLRenderer;
+  animationMixers: THREE.AnimationMixer[] = [];
+  sceneGroupsMap = new Map<string, InteractiveGroup>();
+  childObjectsMap = new Map<string, THREE.Object3D>();
+  namedModelsMap = new Map<string, THREE.Object3D>();
+  animationClipsMap = new Map<string, THREE.AnimationClip[]>();
+  activeSceneIdentifier: string | null = null;
+  rendererReference: THREE.WebGLRenderer;
 
   constructor(
     threeScene: THREE.Scene,
     webglRenderer: THREE.WebGLRenderer,
-    private audioService: IAudioService
+    private audioService: AudioService
   ) {
     this.sceneReference = threeScene;
     this.rendererReference = webglRenderer;

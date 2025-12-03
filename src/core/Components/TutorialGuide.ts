@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
+import { EventBusService } from '../Services/EventBusService';
 
 interface TutorialStep {
   targetElement: 'balance' | 'questionMark' | 'itemOptions' | 'prices';
@@ -25,7 +25,7 @@ export class TutorialGuide extends Container {
   private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_X: number = 0;
   private readonly QUESTION_MARK_SPOTLIGHT_OFFSET_Y: number = 0;
 
-  constructor(private eventBus: IEventBus) {
+  constructor(private eventBus: EventBusService) {
     super();
     this.visible = false;
     this.initializeTutorialSteps();

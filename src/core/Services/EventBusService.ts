@@ -1,7 +1,6 @@
 import { Signal } from 'micro-signals';
-import { IEventBus } from '../Interfaces/IEventBus';
 
-export class EventBusService implements IEventBus {
+export class EventBusService {
   private signals: Map<string, Signal<unknown>> = new Map();
 
   private getSignal(eventName: string): Signal<unknown> {

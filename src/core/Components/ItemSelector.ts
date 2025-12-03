@@ -1,8 +1,8 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import gsap from 'gsap';
-import { IEventBus } from '../Interfaces/IEventBus';
-import { IItemService } from '../Interfaces/IItemService';
-import { IAudioService } from '../Interfaces/IAudioService';
+import { EventBusService } from '../Services/EventBusService';
+import { ItemService } from '../Services/ItemService';
+import { AudioService } from '../Services/AudioService';
 
 interface ItemOption {
   type: string;
@@ -27,9 +27,9 @@ export class ItemSelector extends Container {
   private isCurrentlyVisible: boolean = false;
 
   constructor(
-    private eventBus: IEventBus,
-    private itemService: IItemService,
-    private audioService: IAudioService
+    private eventBus: EventBusService,
+    private itemService: ItemService,
+    private audioService: AudioService
   ) {
     super();
     this.visible = false;
@@ -363,7 +363,7 @@ export class ItemSelector extends Container {
     if (this.currentPlacement && this.itemService.spend(cost)) {
       this.audioService.playSound('sound_click', false);
 
-      this.itemService.setCurrentItemId(option.modelId);
+      this.itemService.currentItemId = option.modelId;
 
       this.eventBus.emit('HELPER:NEXT:STEP');
 

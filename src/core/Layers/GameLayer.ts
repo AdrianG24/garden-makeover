@@ -9,31 +9,34 @@ import { LightingController } from '../Controllers/LightingController';
 import { SceneController } from '../Controllers/SceneController';
 import { CameraController } from '../Controllers/CameraController';
 import { InteractiveGrid } from '../Components/InteractiveGrid';
-import { ServiceContainer } from '../Services/ServiceContainer';
+import { EventBusService } from '../Services/EventBusService';
+import { ItemService } from '../Services/ItemService';
+import { AudioService } from '../Services/AudioService';
 import { SCENE, CAMERA, RENDERER, GRID, sceneManagerConfig } from '../../config';
 
 export class GameLayer {
-  public threeScene!: THREE.Scene;
-  public camera!: THREE.PerspectiveCamera;
-  public webglRenderer!: THREE.WebGLRenderer;
-  public clock: THREE.Clock;
-  public stats!: Stats;
+  threeScene!: THREE.Scene;
+  camera!: THREE.PerspectiveCamera;
+  webglRenderer!: THREE.WebGLRenderer;
+  clock: THREE.Clock;
+  stats!: Stats;
 
-  public lightingController: LightingController | null = null;
-  public sceneController: SceneController | null = null;
-  public cameraController!: CameraController;
-  public interactiveGrid: InteractiveGrid | null = null;
+  lightingController: LightingController | null = null;
+  sceneController: SceneController | null = null;
+  cameraController!: CameraController;
+  interactiveGrid: InteractiveGrid | null = null;
 
   private interactionManager: InteractionManager | null = null;
   private orbitControls!: OrbitControls;
   private particleSystem: BatchedRenderer;
-  private cameraInfoDisplay: HTMLDivElement | null = null;
   private ambientLight: THREE.AmbientLight | null = null;
   private cameraLookAtTarget: THREE.Vector3 = new THREE.Vector3(-7, 0, 0);
 
   constructor(
     canvasElement: HTMLCanvasElement,
-    private serviceContainer: ServiceContainer,
+    private eventBus: EventBusService,
+    private itemService: ItemService,
+    private audioService: AudioService,
     showDebug: boolean = false
   ) {
     this.clock = new THREE.Clock();
@@ -71,8 +74,7 @@ export class GameLayer {
     this.camera.rotation.set(-0.5, 0, 0);
     this.camera.updateProjectionMatrix();
 
-    const eventBus = this.serviceContainer.getEventBus();
-    this.cameraController = new CameraController(this.camera, eventBus);
+    this.cameraController = new CameraController(this.camera, this.eventBus);
   }
 
   private initializeRenderer(canvasElement: HTMLCanvasElement): void {
@@ -92,11 +94,7 @@ export class GameLayer {
   }
 
   async setupGameWorld(): Promise<void> {
-    const audioService = this.serviceContainer.getAudioService();
-    const eventBus = this.serviceContainer.getEventBus();
-    const itemService = this.serviceContainer.getItemService();
-
-    this.sceneController = new SceneController(this.threeScene, this.webglRenderer, audioService);
+    this.sceneController = new SceneController(this.threeScene, this.webglRenderer, this.audioService);
     await this.sceneController.loadSceneFromConfig(sceneManagerConfig.scenes[0]);
     await this.sceneController.displayScene('Base');
 
@@ -119,8 +117,8 @@ export class GameLayer {
       GRID,
       this.interactionManager,
       this.sceneController,
-      itemService,
-      eventBus
+      this.itemService,
+      this.eventBus
     );
     this.threeScene.add(this.interactiveGrid.gridGroupContainer);
 
@@ -128,66 +126,63 @@ export class GameLayer {
     this.threeScene.updateMatrix();
   }
 
-  public revealFarm(): void {
+  revealFarm(): void {
     if (!this.sceneController) return;
 
     const ground = this.sceneController.namedModelsMap.get('ground');
     const objects = this.sceneController.namedModelsMap.get('objects');
 
-    const targets: THREE.Object3D[] = [];
-    if (ground) targets.push(ground);
-    if (objects) targets.push(objects);
-
-    targets.forEach((obj) => {
-      if (!obj) return;
-
-      if (!obj.userData._introOriginal) {
-        obj.userData._introOriginal = {
-          y: obj.position.y,
-          scale: obj.scale.clone(),
-        };
-      }
-
-      const originalScale = obj.userData._introOriginal.scale as THREE.Vector3;
-
-      obj.visible = true;
-      obj.scale.set(
-          originalScale.x,
-          originalScale.y,
-          originalScale.z
-      );
-
-      const materials: THREE.Material[] = [];
-      obj.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          if (Array.isArray(child.material)) {
-            materials.push(...child.material);
-          } else {
-            materials.push(child.material);
-          }
+    if (ground) {
+      ground.visible = true;
+      ground.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material.transparent = true;
+          child.material.opacity = 0;
         }
       });
 
-      materials.forEach((m) => {
-        m.transparent = true;
-        m.opacity = 0;
-        m.needsUpdate = true;
+      gsap.to({}, {
+        duration: 1.5,
+        onUpdate: function (this: { progress: () => number }) {
+          const progress = this.progress();
+          ground.traverse(child => {
+            if (child instanceof THREE.Mesh && child.material.transparent) {
+              child.material.opacity = progress;
+            }
+          });
+        }
+      });
+    }
+
+    if (objects) {
+      objects.visible = true;
+      objects.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material.transparent = true;
+          child.material.opacity = 0;
+        }
       });
 
-      gsap.to(materials, {
-        opacity: 1,
+      gsap.to({}, {
         duration: 1.5,
-        ease: 'power2.inOut',
+        delay: 0.3,
+        onUpdate: function (this: { progress: () => number }) {
+          const progress = this.progress();
+          objects.traverse(child => {
+            if (child instanceof THREE.Mesh && child.material.transparent) {
+              child.material.opacity = progress;
+            }
+          });
+        }
       });
-    });
+    }
 
     this.setInitialCameraPosition(true);
 
       this.orbitControls.enabled = false;
 
-    const eventBus = this.serviceContainer.getEventBus();
     gsap.delayedCall(2, () => {
-      eventBus.emit('GRID_ITEMS:SHOW');
+      this.eventBus.emit('GRID_ITEMS:SHOW');
     });
   }
 
@@ -195,46 +190,77 @@ export class GameLayer {
 
   private setupOrbitControls(): void {
     this.orbitControls = new OrbitControls(this.camera, this.webglRenderer.domElement);
-
-    const isMobile = window.innerWidth < 768;
-    this.orbitControls.enabled = !isMobile;
-
     this.orbitControls.enableDamping = true;
-    this.orbitControls.dampingFactor = 0.08;
-    this.orbitControls.screenSpacePanning = false;
-    this.orbitControls.minDistance = 10;
-    this.orbitControls.maxDistance = 100;
-    this.orbitControls.maxPolarAngle = Math.PI / 2;
-    this.orbitControls.target.set(-7, 0, 0);
+    this.orbitControls.dampingFactor = 0.05;
+    this.orbitControls.enablePan = false;
+    this.orbitControls.enableZoom = false;
+    this.orbitControls.enableRotate = false;
+    this.orbitControls.target.set(
+      this.cameraLookAtTarget.x,
+      this.cameraLookAtTarget.y,
+      this.cameraLookAtTarget.z
+    );
+    this.orbitControls.minPolarAngle = Math.PI / 4;
+    this.orbitControls.maxPolarAngle = Math.PI / 2.5;
+    this.orbitControls.minAzimuthAngle = -Math.PI / 8;
+    this.orbitControls.maxAzimuthAngle = Math.PI / 8;
     this.orbitControls.update();
   }
 
-  private addSceneLighting(): void {
+  private getCameraPositionForCurrentScreen(): THREE.Vector3 {
     const isMobile = window.innerWidth < 768;
+    const isPortrait = window.innerHeight > window.innerWidth;
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    rimLight.position.set(0, 30, 0);
-    rimLight.castShadow = !isMobile;
-
-    if (rimLight.castShadow) {
-      rimLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
-      rimLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
-      rimLight.shadow.camera.near = 0.5;
-      rimLight.shadow.camera.far = 100;
+    if (isMobile) {
+      if (isPortrait) {
+        return new THREE.Vector3(
+          CAMERA.pos.x,
+          CAMERA.pos.y + 5,
+          CAMERA.pos.z + 10
+        );
+      } else {
+        return new THREE.Vector3(
+          CAMERA.pos.x,
+          CAMERA.pos.y,
+          CAMERA.pos.z
+        );
+      }
+    } else {
+      return new THREE.Vector3(
+        CAMERA.pos.x,
+        CAMERA.pos.y - 10,
+        CAMERA.pos.z - 20
+      );
     }
+  }
 
-    this.threeScene.add(rimLight);
+  private setInitialCameraPosition(animate: boolean = false): void {
+    const targetPosition = this.getCameraPositionForCurrentScreen();
 
-    this.ambientLight = new THREE.AmbientLight(0xffffff, isMobile ? 0.6 : 0.5);
-    this.ambientLight.position.set(0, 30, 0);
+    if (animate) {
+      gsap.to(this.camera.position, {
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
+        duration: 1.5,
+        ease: 'power2.inOut',
+      });
+    } else {
+      this.camera.position.copy(targetPosition);
+    }
+  }
+
+  private addSceneLighting(): void {
+    if (!this.lightingController) return;
+
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.threeScene.add(this.ambientLight);
 
     this.setupLightingEventListeners();
   }
 
   private setupLightingEventListeners(): void {
-    const eventBus = this.serviceContainer.getEventBus();
-    eventBus.on('LIGHTING:TOGGLE', () => {
+    this.eventBus.on('LIGHTING:TOGGLE', () => {
       if (!this.lightingController) return;
 
       this.lightingController.toggleDayNight();
@@ -250,16 +276,17 @@ export class GameLayer {
     });
   }
 
-  public update(pixiRenderer: WebGLRenderer, pixiStage: Container): void {
+  update(pixiRenderer: WebGLRenderer, pixiStage: Container): void {
     this.stats.begin();
 
-    const deltaTime = this.clock.getDelta();
-    this.particleSystem.update(deltaTime);
-
-    this.updateCameraInfo();
+    const delta = this.clock.getDelta();
 
     if (this.sceneController) {
-      this.sceneController.animationMixers.forEach((mixer) => mixer.update(deltaTime));
+      this.sceneController.animationMixers.forEach(mixer => mixer.update(delta));
+    }
+
+    if (this.particleSystem) {
+      this.particleSystem.update(delta);
     }
 
     if (this.interactionManager) {
@@ -270,8 +297,7 @@ export class GameLayer {
       this.orbitControls.update();
     }
 
-    const eventBus = this.serviceContainer.getEventBus();
-    eventBus.emit('GAME:UPDATE');
+    this.eventBus.emit('GAME:UPDATE');
 
     this.webglRenderer.resetState();
     this.webglRenderer.render(this.threeScene, this.camera);
@@ -282,105 +308,14 @@ export class GameLayer {
     this.stats.end();
   }
 
-  private updateCameraInfo(): void {
-    if (!this.cameraInfoDisplay) return;
-    this.cameraInfoDisplay.textContent = `Camera Position:\nx: ${this.camera.position.x.toFixed(
-      2
-    )}\ny: ${this.camera.position.y.toFixed(2)}\nz: ${this.camera.position.z.toFixed(2)}`;
-    this.cameraInfoDisplay.style.display = 'none';
-  }
-
-  /**
-   * Calculate responsive camera distance based on viewport size and orientation
-   * Returns the distance from the look-at target
-   */
-  private calculateResponsiveCameraDistance(): number {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const aspectRatio = width / height;
-    const isPortrait = height > width;
-    const isMobile = width < 768;
-    const isTablet = width >= 768 && width < 1024;
-    const isDesktop = width >= 1024;
-
-    let distance = 90;
-
-    if (isMobile) {
-      if (isPortrait) {
-        distance = 150;
-      } else {
-        distance = 85;
-      }
-    } else if (isTablet) {
-      if (isPortrait) {
-        distance = 100;
-      } else {
-        distance = 85;
-      }
-    } else if (isDesktop) {
-      if (aspectRatio < 1.5) {
-        distance = 85;
-      } else if (aspectRatio > 2) {
-        distance = 70;
-      } else {
-        distance = 75;
-      }
-    }
-
-    return distance;
-  }
-
-  private calculateCameraPositionAtDistance(distance: number, currentPosition?: THREE.Vector3): THREE.Vector3 {
-    const camPos = currentPosition || this.camera.position;
-
-    const direction = new THREE.Vector3()
-      .subVectors(camPos, this.cameraLookAtTarget)
-      .normalize();
-
-    return new THREE.Vector3()
-      .copy(this.cameraLookAtTarget)
-      .addScaledVector(direction, distance);
-  }
-
-  public handleResize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    this.camera.aspect = width / height;
+  handleResize(): void {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
 
-    this.webglRenderer.setSize(width, height);
+    const targetPosition = this.getCameraPositionForCurrentScreen();
+    this.camera.position.copy(targetPosition);
+
+    this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    this.adjustCameraForViewport();
   }
-
-  public adjustCameraForViewport(animated: boolean = true): void {
-    const newDistance = this.calculateResponsiveCameraDistance();
-    const targetPosition = this.calculateCameraPositionAtDistance(newDistance);
-
-    if (animated) {
-      this.cameraController.moveCameraToTarget(targetPosition, 1, 0);
-    } else {
-      this.camera.position.copy(targetPosition);
-      this.camera.lookAt(this.cameraLookAtTarget);
-      this.camera.updateProjectionMatrix();
-    }
-  }
-
-  public setInitialCameraPosition(animated: boolean = false): void {
-    const distance = this.calculateResponsiveCameraDistance();
-
-    const basePosition = new THREE.Vector3(CAMERA.pos.x, CAMERA.pos.y, CAMERA.pos.z);
-    const targetPosition = this.calculateCameraPositionAtDistance(distance, basePosition);
-
-    if (animated) {
-      this.cameraController.moveCameraToTarget(targetPosition, 2.5, 0.5);
-    } else {
-      this.camera.position.copy(targetPosition);
-      this.camera.lookAt(this.cameraLookAtTarget);
-      this.camera.updateProjectionMatrix();
-    }
-  }
-
 }

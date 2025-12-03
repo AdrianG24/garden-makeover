@@ -11,7 +11,6 @@ import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
 import { TutorialGuide } from './core/Components/TutorialGuide';
-import { ServiceContainer } from './core/Services/ServiceContainer';
 import { EventBusService } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
@@ -22,7 +21,9 @@ export async function createGameScene(): Promise<void> {
   const loaderOverlay = showLoadingOverlay();
 
   try {
-    const serviceContainer = initializeServices();
+    const eventBus = new EventBusService();
+    const itemService = new ItemService(eventBus);
+    const audioService = new AudioService();
 
     const canvasElement = document.createElement('canvas');
     canvasElement.style.display = 'block';
@@ -30,7 +31,7 @@ export async function createGameScene(): Promise<void> {
     canvasElement.style.inset = '0';
     document.body.appendChild(canvasElement);
 
-    const gameLayer = new GameLayer(canvasElement, serviceContainer, DEBUG);
+    const gameLayer = new GameLayer(canvasElement, eventBus, itemService, audioService, DEBUG);
 
     const pixiRenderer = await initializePixiRenderer(
         canvasElement,
@@ -40,27 +41,13 @@ export async function createGameScene(): Promise<void> {
 
     await gameLayer.setupGameWorld();
 
-    await loadGameAssets(pixiStage, gameLayer, serviceContainer);
+    await loadGameAssets(pixiStage, gameLayer, eventBus, itemService, audioService);
 
     setupAnimationLoop(gameLayer, pixiRenderer, pixiStage);
-    setupWindowResize(gameLayer, pixiRenderer, serviceContainer);
+    setupWindowResize(gameLayer, pixiRenderer, eventBus);
   } finally {
     hideLoadingOverlay(loaderOverlay);
   }
-}
-
-function initializeServices(): ServiceContainer {
-  const container = new ServiceContainer();
-
-  const eventBus = new EventBusService();
-  const itemService = new ItemService(eventBus);
-  const audioService = new AudioService();
-
-  container.register('EventBus', eventBus);
-  container.register('ItemService', itemService);
-  container.register('AudioService', audioService);
-
-  return container;
 }
 
 async function initializePixiStage(): Promise<Container> {
@@ -145,24 +132,26 @@ async function initializePixiRenderer(
 async function loadGameAssets(
   stageContainer: Container,
   gameLayer: GameLayer,
-  serviceContainer: ServiceContainer
+  eventBus: EventBusService,
+  itemService: ItemService,
+  audioService: AudioService
 ): Promise<void> {
-  const audioService = serviceContainer.getAudioService();
   await audioService.loadAllAssets();
 
   await Assets.loadBundle('game-assets');
 
-  showWelcomeScreen(stageContainer, gameLayer, serviceContainer);
+  showWelcomeScreen(stageContainer, gameLayer, eventBus, itemService, audioService);
 }
 
 function showWelcomeScreen(
   stageContainer: Container,
   gameLayer: GameLayer,
-  serviceContainer: ServiceContainer
+  eventBus: EventBusService,
+  itemService: ItemService,
+  audioService: AudioService
 ): void {
-  const audioService = serviceContainer.getAudioService();
   const welcomeScreen = new WelcomeScreen(async () => {
-    await startGame(stageContainer, gameLayer, serviceContainer);
+    await startGame(stageContainer, gameLayer, eventBus, itemService, audioService);
   }, audioService);
 
   stageContainer.addChild(welcomeScreen);
@@ -180,22 +169,22 @@ function showWelcomeScreen(
 async function startGame(
   stageContainer: Container,
   gameLayer: GameLayer,
-  serviceContainer: ServiceContainer
+  eventBus: EventBusService,
+  itemService: ItemService,
+  audioService: AudioService
 ): Promise<void> {
   gameLayer.revealFarm();
 
-  createUILayers(stageContainer, gameLayer, serviceContainer);
+  createUILayers(stageContainer, gameLayer, eventBus, itemService, audioService);
 }
 
 function createUILayers(
   stageContainer: Container,
   gameLayer: GameLayer,
-  serviceContainer: ServiceContainer
+  eventBus: EventBusService,
+  itemService: ItemService,
+  audioService: AudioService
 ): void {
-  const eventBus = serviceContainer.getEventBus();
-  const itemService = serviceContainer.getItemService();
-  const audioService = serviceContainer.getAudioService();
-
   const uiLayer = new UILayer();
 
   const tutorialGuide = new TutorialGuide(eventBus);
@@ -269,10 +258,9 @@ function setupAnimationLoop(
 function setupWindowResize(
   gameLayer: GameLayer,
   pixiRenderer: WebGLRenderer,
-  serviceContainer: ServiceContainer
+  eventBus: EventBusService
 ): void {
   let resizeDelay: gsap.core.Tween | null = null;
-  const eventBus = serviceContainer.getEventBus();
 
   const handleResize = (): void => {
     if (resizeDelay) {
