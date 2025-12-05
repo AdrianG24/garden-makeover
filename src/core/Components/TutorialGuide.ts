@@ -91,7 +91,6 @@ export class TutorialGuide extends Container {
     this.isActive = true;
     this.visible = true;
     this.currentStep = 0;
-    this.renderer.createOverlay(this);
     this.renderer.createFingerSprite(this);
     gsap.delayedCall(ANIMATION_TIMINGS.TUTORIAL_STEP_DELAY, () => {
       this.showStep(0);
@@ -153,7 +152,7 @@ export class TutorialGuide extends Container {
     const bounds = questionMark.getBounds();
 
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
-    const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
+    const popupX = bounds.x + bounds.width / 2 + (isMobile ? 120 : 150);
     const popupY = bounds.y + bounds.height / 2;
     this.renderer.showPopup(this, step.message, popupX, popupY);
 
@@ -245,7 +244,7 @@ export class TutorialGuide extends Container {
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
 
     if (this.renderer.popupContainer) {
-      const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
+      const popupX = bounds.x + bounds.width / 2 + (isMobile ? 120 : 150);
       const popupY = bounds.y + bounds.height / 2;
 
       this.renderer.popupContainer.position.set(popupX, popupY);

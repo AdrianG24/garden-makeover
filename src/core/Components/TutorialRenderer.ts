@@ -7,12 +7,6 @@ export class TutorialRenderer {
   fingerSprite!: Sprite;
   popupContainer: Container | null = null;
 
-  createOverlay(parent: Container): void {
-
-    this.spotlightContainer = new Container();
-    parent.addChild(this.spotlightContainer);
-  }
-
   createFingerSprite(parent: Container): void {
     const fingerTexture = Assets.get('finger');
     this.fingerSprite = new Sprite(fingerTexture);
@@ -167,7 +161,5 @@ export class TutorialRenderer {
         this.fingerSprite.visible = false;
       }
     });
-
-    this.spotlightContainer.removeChildren();
   }
 }
