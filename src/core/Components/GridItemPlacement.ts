@@ -151,26 +151,8 @@ export class GridItemPlacement extends Container {
       this.currentLevel = level as number;
       this.showBubbles();
     });
-    eventEmitter.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
-      this.currentLevel = level as number;
-      this.clearLevelObjects();
-      this.showBubbles();
-    });
   }
 
-  private clearLevelObjects(): void {
-    if (!this.scene) return;
-
-    this.items
-      .filter(item => item.level === this.currentLevel)
-      .forEach(item => {
-        const obj = this.placedObjects.get(item.id);
-        if (obj) {
-          this.scene!.remove(obj);
-          this.placedObjects.delete(item.id);
-        }
-      });
-  }
 
   private showBubbles(): void {
     this.isEnabled = true;
@@ -222,6 +204,7 @@ export class GridItemPlacement extends Container {
 
     eventEmitter.emit('ITEM_SELECTOR:SHOW', bubble.itemData);
 
+    eventEmitter.off('ITEM_SELECTOR:ITEM_SELECTED');
     eventEmitter.once('ITEM_SELECTOR:ITEM_SELECTED', (data: unknown) => {
       const { itemId, placementId } = data as { itemId: string; placementId: string };
       if (placementId === bubble.itemData.id) {
@@ -229,6 +212,7 @@ export class GridItemPlacement extends Container {
       }
     });
 
+    eventEmitter.off('LEVEL:GOAL_COMPLETED');
     eventEmitter.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       if (goalId === bubble.itemData.id) {
         this.hideBubble(bubble);

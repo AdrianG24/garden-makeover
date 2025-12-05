@@ -5,7 +5,7 @@ import { eventEmitter } from '../Services/EventBusService';
 export class BalanceDisplay extends Container {
   private balanceText!: Text;
   private background!: Graphics;
-  private currentBalance: number = 90;
+  private currentBalance: number = 0;
 
   constructor() {
     super();

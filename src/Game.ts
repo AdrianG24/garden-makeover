@@ -10,6 +10,7 @@ import { GridItemPlacement } from './core/Components/GridItemPlacement';
 import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
+import { ClickerButton } from './core/Components/ClickerButton';
 import { eventEmitter } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
@@ -190,6 +191,8 @@ function createUILayers(
 
   const dayNightToggle = new DayNightToggle();
 
+  const clickerButton = new ClickerButton(itemService, audioService);
+
   const gridItemPlacement = new GridItemPlacement(audioService);
   gridItemPlacement.setCamera(gameLayer.camera);
   gridItemPlacement.setScene(gameLayer.threeScene);
@@ -207,6 +210,7 @@ function createUILayers(
   uiLayer.addChild(levelingSystem);
   uiLayer.addChild(balanceDisplay);
   uiLayer.addChild(dayNightToggle);
+  uiLayer.addChild(clickerButton);
   uiLayer.addChild(gridItemPlacement);
   uiLayer.addChild(itemSelector);
 
@@ -233,6 +237,7 @@ function createUILayers(
     levelingSystem.resize(width);
     balanceDisplay.resize(width);
     dayNightToggle.resize(width);
+    clickerButton.resize(width, height);
     gridItemPlacement.resizeIcons();
     itemSelector.resize(width, height);
   });

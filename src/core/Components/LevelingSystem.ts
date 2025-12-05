@@ -159,15 +159,6 @@ export class LevelingSystem extends Container {
       this.completeGoal(goalId as string);
     });
     eventEmitter.on('LEVEL:RESET', () => this.resetProgress());
-    eventEmitter.on('LEVEL:RETRY_CURRENT', () => this.retryCurrentLevel());
-  }
-
-  private retryCurrentLevel(): void {
-    this.itemService.restoreStartBalance();
-    this.currentGoals.forEach(g => g.completed = false);
-    this.updateDisplay();
-    eventEmitter.emit('GRID:CLEAR_LEVEL_ITEMS');
-    eventEmitter.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
   }
 
   private completeGoal(goalId: string): void {

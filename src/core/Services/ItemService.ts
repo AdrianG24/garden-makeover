@@ -1,8 +1,8 @@
 import { eventEmitter } from './EventBusService';
 
 export class ItemService {
-  balance: number = 90;
-  levelStartBalance: number = 90;
+  balance: number = 0;
+  levelStartBalance: number = 0;
   currentItemId: string | null = null;
 
   private readonly costs: Record<string, number> = {
@@ -23,6 +23,11 @@ export class ItemService {
   };
 
   constructor() {}
+
+  addMoney(amount: number): void {
+    this.balance += amount;
+    eventEmitter.emit('BALANCE:UPDATED', this.balance);
+  }
 
   addReward(level: number): void {
     const reward = this.rewards[level] || 200;
