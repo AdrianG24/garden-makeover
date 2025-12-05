@@ -103,9 +103,35 @@ export class GridItemPlacement extends Container {
 
       bubble.eventMode = 'static';
       bubble.cursor = 'pointer';
-      bubble.on('pointerover', () => gsap.to(bubble.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
-      bubble.on('pointerout', () => gsap.to(bubble.scale, { x: 1, y: 1, duration: 0.2 }));
-      bubble.on('pointerdown', () => this.onBubbleClick(bubble));
+      const bubbleIdle = gsap.to(bubble.scale, {
+        x: 1.05,
+        y: 1.05,
+        duration: 1,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+        paused: true
+      });
+      bubble.on("pointerover", () => {
+        bubbleIdle.pause();
+        gsap.to(bubble.scale, {
+          x: 1.1,
+          y: 1.1,
+          duration: 0.2,
+          overwrite: "auto"
+        });
+      });
+      bubble.on("pointerout", () => {
+        gsap.to(bubble.scale, {
+          x: 1,
+          y: 1,
+          duration: 0.2,
+          overwrite: "auto",
+          onComplete: () => {
+            bubbleIdle.restart();
+          }
+        });
+      });      bubble.on('pointerdown', () => this.onBubbleClick(bubble));
 
       bubble.visible = false;
       bubble.alpha = 0;
