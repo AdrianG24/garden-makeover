@@ -10,7 +10,6 @@ import { GridItemPlacement } from './core/Components/GridItemPlacement';
 import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
-import { TutorialGuide } from './core/Components/TutorialGuide';
 import { eventEmitter } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
@@ -184,8 +183,6 @@ function createUILayers(
   uiLayer.visible = true;
   uiLayer.alpha = 0;
 
-  const tutorialGuide = new TutorialGuide();
-
   const levelingSystem = new LevelingSystem(itemService, audioService);
 
   const balanceDisplay = new BalanceDisplay();
@@ -221,7 +218,6 @@ function createUILayers(
   uiLayer.addChild(dayNightToggle);
   uiLayer.addChild(gridItemPlacement);
   uiLayer.addChild(itemSelector);
-  uiLayer.addChild(tutorialGuide);
 
   stageContainer.addChild(uiLayer);
 
@@ -248,7 +244,6 @@ function createUILayers(
     dayNightToggle.resize(width);
     gridItemPlacement.resizeIcons();
     itemSelector.resize(width, height);
-    tutorialGuide.resize();
   });
 }
 
