@@ -86,8 +86,8 @@ export class GridItemPlacement extends Container {
       const bg = new Graphics();
       bg.fill(0x4CAF50, 0.8);
       bg.circle(0, 0, size);
-      bg.endFill();
       bg.lineStyle(isMobile ? 2 : 4, 0xFFFFFF, 1);
+      bg.endFill();
       bg.circle(0, 0, size);
       bubble.addChild(bg);
 
