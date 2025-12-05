@@ -11,6 +11,8 @@ export class AudioService {
     { alias: 'sound_throw_spear', src: 'assets/sounds/throw_spear.mp3' },
   ];
 
+  private audioContextResumed: boolean = false;
+
   async loadAllAssets(): Promise<void> {
     const promises = this.audioAssets.map(({ alias, src }) => {
       return new Promise<void>((resolve) => {
@@ -25,7 +27,20 @@ export class AudioService {
     await Promise.all(promises);
   }
 
-  playSound(alias: string, loop: boolean = false): void {
+  private async ensureAudioContext(): Promise<void> {
+    if (this.audioContextResumed) return;
+
+    try {
+      await sound.resumeAll();
+      this.audioContextResumed = true;
+    } catch (error) {
+      console.warn('Failed to resume audio context:', error);
+    }
+  }
+
+  async playSound(alias: string, loop: boolean = false): Promise<void> {
+    await this.ensureAudioContext();
+
     if (sound.exists(alias)) {
       sound.play(alias, { loop });
     }

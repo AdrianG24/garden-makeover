@@ -1,4 +1,4 @@
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics, Text } from 'pixi.js';
 import { AudioService } from '../Services/AudioService';
 import gsap from 'gsap';
 
@@ -26,9 +26,8 @@ export class WelcomeScreen extends Container {
 
   private createBackgroundOverlay(): Graphics {
     const overlay = new Graphics();
-    overlay.fill(0x2c5f2d, 0.95);
     overlay.rect(0, 0, window.innerWidth, window.innerHeight);
-    overlay.endFill();
+    overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
     return overlay;
   }
 
@@ -42,41 +41,38 @@ export class WelcomeScreen extends Container {
     const halfHeight = panelHeight / 2;
 
     const panelBackground = new Graphics();
-    panelBackground.fill(0x4a7c59, 1);
     panelBackground.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, isMobile ? 15 : 20);
-    panelBackground.endFill();
-
-    panelBackground.lineStyle(isMobile ? 5 : 8, 0xf4e4c1, 1);
-    panelBackground.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, isMobile ? 15 : 20);
+    panelBackground.fill({ color: 0x4a7c59 });
+    panelBackground.stroke({ width: isMobile ? 5 : 8, color: 0xf4e4c1 });
 
     panel.addChild(panelBackground);
 
-    const titleText = new Text(
-      '🌾 Welcome to Garden Makeover! 🌾',
-      new TextStyle({
+    const titleText = new Text({
+      text: '🌾 Welcome to Garden Makeover! 🌾',
+      style: {
         fontFamily: 'Arial',
         fontSize: isMobile ? 18 : 28,
         fill: '#f4e4c1',
         fontWeight: 'bold',
         align: 'center',
         stroke: { color: '#2c5f2d', width: isMobile ? 3 : 4 },
-      })
-    );
+      }
+    });
     titleText.anchor.set(0.5);
     titleText.position.set(0, isMobile ? -halfHeight + 40 : -150);
     panel.addChild(titleText);
 
-    const descriptionText = new Text(
-      isMobile ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?' : 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
-      new TextStyle({
+    const descriptionText = new Text({
+      text: isMobile ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?' : 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
+      style: {
         fontFamily: 'Arial',
         fontSize: isMobile ? 14 : 24,
         fill: '#ffffff',
         align: 'center',
         lineHeight: isMobile ? 12 : 24,
         stroke: { color: '#2c5f2d', width: 2 },
-      })
-    );
+      }
+    });
     descriptionText.anchor.set(0.5);
     descriptionText.position.set(0, isMobile ? -10 : -20);
     panel.addChild(descriptionText);
@@ -102,46 +98,39 @@ export class WelcomeScreen extends Container {
     const halfHeight = buttonHeight / 2;
 
     const buttonBackground = new Graphics();
-    buttonBackground.fill(0x86c232, 1);
     buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-    buttonBackground.endFill();
-
-    buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
-    buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
+    buttonBackground.fill({ color: 0x86c232 });
+    buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
 
     button.addChild(buttonBackground);
 
-    const buttonText = new Text(
-      '🏡 BUY YOUR FARM 🏡',
-      new TextStyle({
+    const buttonText = new Text({
+      text: '🏡 BUY YOUR FARM 🏡',
+      style: {
         fontFamily: 'Arial',
         fontSize: isMobile ? 20 : 32,
         fill: '#ffffff',
         fontWeight: 'bold',
         stroke: { color: '#2c5f2d', width: isMobile ? 2 : 3 },
-      })
-    );
+      }
+    });
     buttonText.anchor.set(0.5);
     button.addChild(buttonText);
 
     button.on('pointerover', () => {
       gsap.to(button.scale, { x: 1.1, y: 1.1, duration: 0.2 });
       buttonBackground.clear();
-      buttonBackground.fill(0x9ed63a, 1);
       buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-      buttonBackground.endFill();
-      buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
-      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
+      buttonBackground.fill({ color: 0x9ed63a });
+      buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
     });
 
     button.on('pointerout', () => {
       gsap.to(button.scale, { x: 1, y: 1, duration: 0.2 });
       buttonBackground.clear();
-      buttonBackground.fill(0x86c232, 1);
       buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-      buttonBackground.endFill();
-      buttonBackground.lineStyle(isMobile ? 3 : 4, 0xf4e4c1, 1);
-      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
+      buttonBackground.fill({ color: 0x86c232 });
+      buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
     });
 
     button.on('pointerdown', () => {
@@ -156,7 +145,7 @@ export class WelcomeScreen extends Container {
     this.alpha = 0;
     gsap.to(this, {
       alpha: 1,
-      duration: 0.8,
+      duration: 0,
       ease: 'power2.out',
     });
   }
@@ -178,9 +167,8 @@ export class WelcomeScreen extends Container {
   public resize(width: number, height: number): void {
     const overlay = this.children[0] as Graphics;
     overlay.clear();
-    overlay.fill(0x2c5f2d, 0.95);
     overlay.rect(0, 0, width, height);
-    overlay.endFill();
+    overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
 
     const panel = this.children[1] as Container;
     panel.position.set(width / 2, height / 2);

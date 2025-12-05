@@ -235,22 +235,12 @@ export class SceneController {
 
     clonedObject.traverse((childObject: THREE.Object3D): void => {
       if (childObject instanceof THREE.Mesh && childObject.material) {
-        this.configureMeshDefaults(childObject);
+        childObject.castShadow = true;
+        childObject.receiveShadow = false;
       }
     });
 
     return clonedObject;
   }
-
-  private configureMeshDefaults(meshObject: THREE.Mesh): void {
-    meshObject.castShadow = true;
-    meshObject.receiveShadow = true;
-
-    if (!(meshObject.material instanceof THREE.Material)) return;
-
-    meshObject.material.transparent = true;
-    meshObject.material.opacity = 1;
-    meshObject.material.depthWrite = true;
-    meshObject.material.needsUpdate = true;
-  }
 }
+

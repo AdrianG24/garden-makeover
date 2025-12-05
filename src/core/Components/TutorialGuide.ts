@@ -227,7 +227,7 @@ export class TutorialGuide extends Container {
   private repositionQuestionMark(): void {
     const questionMark = this.getActiveQuestionMark(this.questionMarkElements);
     if (!questionMark) {
-      gsap.delayedCall(3, () => {
+      gsap.delayedCall(2, () => {
         if (this.isActive && this.currentStep === 1) {
           this.repositionQuestionMark();
         }
@@ -237,7 +237,7 @@ export class TutorialGuide extends Container {
 
     const bounds = questionMark.getBounds();
     if (!bounds.width || !bounds.height) {
-      gsap.delayedCall(3, () => {
+      gsap.delayedCall(2, () => {
         if (this.isActive && this.currentStep === 1) {
           this.repositionQuestionMark();
         }

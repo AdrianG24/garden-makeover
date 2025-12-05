@@ -202,11 +202,27 @@ export class GridItemPlacement extends Container {
   }
 
   public updatePositions(): void {
-    if (!this.camera) return;
+    if (!this.camera || !this.gridConfig) return;
+
+    const { rows, columns } = this.gridConfig;
+
+    const topLeft3D = this.gridPositionTo3D(0, 0);
+    const topRight3D = this.gridPositionTo3D(0, columns - 1);
+    const bottomLeft3D = this.gridPositionTo3D(rows - 1, 0);
+    const bottomRight3D = this.gridPositionTo3D(rows - 1, columns - 1);
+
+    const topLeftScreen = worldToScreen(topLeft3D, this.camera);
+    const topRightScreen = worldToScreen(topRight3D, this.camera);
+    const bottomLeftScreen = worldToScreen(bottomLeft3D, this.camera);
+    const bottomRightScreen = worldToScreen(bottomRight3D, this.camera);
+
+    const minX = Math.min(topLeftScreen.x, topRightScreen.x, bottomLeftScreen.x, bottomRightScreen.x);
+    const maxX = Math.max(topLeftScreen.x, topRightScreen.x, bottomLeftScreen.x, bottomRightScreen.x);
+    const minY = Math.min(topLeftScreen.y, topRightScreen.y, bottomLeftScreen.y, bottomRightScreen.y);
+    const maxY = Math.max(topLeftScreen.y, topRightScreen.y, bottomLeftScreen.y, bottomRightScreen.y);
 
     const isMobile = window.innerWidth < 968;
-    const marginX = isMobile ? 60 : 100;
-    const marginY = isMobile ? 60 : 100;
+    const padding = isMobile ? 30 : 50;
 
     this.containerPlacements.forEach((placement, container) => {
       if (!container.visible) return;
@@ -217,8 +233,8 @@ export class GridItemPlacement extends Container {
       );
       const screenPos = worldToScreen(world3D, this.camera!);
 
-      const clampedX = Math.max(marginX, Math.min(window.innerWidth - marginX, screenPos.x));
-      const clampedY = Math.max(marginY, Math.min(window.innerHeight - marginY, screenPos.y));
+      const clampedX = Math.max(minX + padding, Math.min(maxX - padding, screenPos.x));
+      const clampedY = Math.max(minY + padding, Math.min(maxY - padding, screenPos.y));
 
       container.position.set(clampedX, clampedY);
     });

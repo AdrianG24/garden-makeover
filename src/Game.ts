@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { Assets } from 'pixi.js';
 import { Container, WebGLRenderer } from 'pixi.js';
+import gsap from "gsap";
 
 import { GameLayer } from './core/Layers/GameLayer';
-import { UILayer } from './core/Layers/UILayer';
 import { WelcomeScreen } from './core/Components/WelcomeScreen';
 import { LevelingSystem } from './core/Components/LevelingSystem';
 import { GridItemPlacement } from './core/Components/GridItemPlacement';
@@ -114,14 +114,15 @@ async function initializePixiRenderer(
 ): Promise<WebGLRenderer> {
   const pixiRenderer = new WebGLRenderer();
 
+  const context = threeRenderer.getContext();
+
   await pixiRenderer.init({
-    view: canvasElement,
-    context: threeRenderer.domElement.getContext('webgl2'),
+    canvas: canvasElement,
+    context: context as WebGL2RenderingContext,
     width: window.innerWidth,
     height: window.innerHeight,
     resolution: Math.min(window.devicePixelRatio, 2),
     clearBeforeRender: false,
-    canvas: canvasElement,
     antialias: false,
   });
 
@@ -184,7 +185,9 @@ function createUILayers(
   itemService: ItemService,
   audioService: AudioService
 ): void {
-  const uiLayer = new UILayer();
+  const uiLayer = new Container();
+  uiLayer.visible = true;
+  uiLayer.alpha = 0;
 
   const tutorialGuide = new TutorialGuide(eventBus);
 
@@ -226,7 +229,14 @@ function createUILayers(
   uiLayer.addChild(tutorialGuide);
 
   stageContainer.addChild(uiLayer);
-  uiLayer.showLayer();
+
+  gsap.to(uiLayer, {
+    alpha: 1,
+    duration: 0.4,
+    delay: 1,
+    ease: 'power2.out',
+  });
+
   eventBus.emit('HELPER:SHOW');
 
   itemService.saveStartBalance();
