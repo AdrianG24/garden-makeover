@@ -3,46 +3,14 @@ import gsap from 'gsap';
 import { SCREEN_BREAKPOINTS, TUTORIAL, COLORS } from '../constants';
 
 export class TutorialRenderer {
-  overlay!: Graphics;
   spotlightContainer!: Container;
   fingerSprite!: Sprite;
   popupContainer: Container | null = null;
 
   createOverlay(parent: Container): void {
-    this.overlay = new Graphics();
-    parent.addChild(this.overlay);
 
     this.spotlightContainer = new Container();
     parent.addChild(this.spotlightContainer);
-
-    this.drawOverlay();
-  }
-
-  drawOverlay(cutoutX?: number, cutoutY?: number, cutoutWidth?: number, cutoutHeight?: number): void {
-    this.overlay.clear();
-
-    if (cutoutX !== undefined && cutoutY !== undefined && cutoutWidth !== undefined && cutoutHeight !== undefined) {
-      this.overlay.fill(COLORS.BLACK, TUTORIAL.OVERLAY_ALPHA);
-      this.overlay.rect(0, 0, window.innerWidth, cutoutY);
-      this.overlay.rect(0, cutoutY, cutoutX, cutoutHeight);
-      this.overlay.rect(cutoutX + cutoutWidth, cutoutY, window.innerWidth - (cutoutX + cutoutWidth), cutoutHeight);
-      this.overlay.rect(0, cutoutY + cutoutHeight, window.innerWidth, window.innerHeight - (cutoutY + cutoutHeight));
-      this.overlay.endFill();
-      this.overlay.eventMode = 'static';
-      this.overlay.cursor = 'default';
-      this.overlay.on('pointerdown', (event) => {
-        event.stopPropagation();
-      });
-    } else {
-      this.overlay.fill(COLORS.BLACK, TUTORIAL.OVERLAY_ALPHA);
-      this.overlay.rect(0, 0, window.innerWidth, window.innerHeight);
-      this.overlay.endFill();
-      this.overlay.eventMode = 'static';
-      this.overlay.cursor = 'default';
-      this.overlay.on('pointerdown', (event) => {
-        event.stopPropagation();
-      });
-    }
   }
 
   createFingerSprite(parent: Container): void {
@@ -61,32 +29,8 @@ export class TutorialRenderer {
     parent.addChild(this.fingerSprite);
   }
 
-  createSpotlight(x: number, y: number, width: number, height: number): void {
+  createSpotlight(): void {
     this.spotlightContainer.removeChildren();
-
-    const padding = TUTORIAL.SPOTLIGHT_PADDING;
-    this.drawOverlay(x - padding, y - padding, width + padding * 2, height + padding * 2);
-
-    const spotlight = new Graphics();
-    spotlight.stroke({ width: TUTORIAL.SPOTLIGHT_BORDER_WIDTH, color: COLORS.GOLD, alpha: 0.8 });
-    spotlight.roundRect(x - padding, y - padding, width + padding * 2, height + padding * 2, TUTORIAL.SPOTLIGHT_BORDER_RADIUS);
-
-    this.spotlightContainer.addChild(spotlight);
-
-    spotlight.alpha = 0;
-    gsap.to(spotlight, {
-      alpha: 1,
-      duration: 0.5,
-      ease: 'power2.out'
-    });
-
-    gsap.to(spotlight, {
-      alpha: 0.6,
-      duration: 1.2,
-      repeat: -1,
-      yoyo: true,
-      ease: 'sine.inOut'
-    });
   }
 
   showFinger(x: number, y: number): void {
@@ -228,6 +172,5 @@ export class TutorialRenderer {
     });
 
     this.spotlightContainer.removeChildren();
-    this.drawOverlay();
   }
 }

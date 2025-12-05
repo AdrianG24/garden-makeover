@@ -1,28 +1,21 @@
-import { Signal } from 'micro-signals';
+import EventEmitter from 'eventemitter3';
 
 export class EventBusService {
-  private signals: Map<string, Signal<unknown>> = new Map();
-
-  private getSignal(eventName: string): Signal<unknown> {
-    if (!this.signals.has(eventName)) {
-      this.signals.set(eventName, new Signal());
-    }
-    return this.signals.get(eventName)!;
-  }
+  private emitter = new EventEmitter();
 
   on<T = unknown>(eventName: string, handler: (payload: T) => void): void {
-    this.getSignal(eventName).add(handler as (payload: unknown) => void);
+    this.emitter.on(eventName, handler);
   }
 
   once<T = unknown>(eventName: string, handler: (payload: T) => void): void {
-    this.getSignal(eventName).addOnce(handler as (payload: unknown) => void);
+    this.emitter.once(eventName, handler);
   }
 
   off<T = unknown>(eventName: string, handler: (payload: T) => void): void {
-    this.getSignal(eventName).remove(handler as (payload: unknown) => void);
+    this.emitter.off(eventName, handler);
   }
 
   emit<T = unknown>(eventName: string, payload?: T): void {
-    this.getSignal(eventName).dispatch(payload);
+    this.emitter.emit(eventName, payload);
   }
 }

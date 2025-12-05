@@ -5,6 +5,7 @@ import { EventBusService } from '../Services/EventBusService';
 export class BalanceDisplay extends Container {
   private balanceText!: Text;
   private background!: Graphics;
+  private currentBalance: number = 90;
 
   constructor(private eventBus: EventBusService) {
     super();
@@ -26,7 +27,7 @@ export class BalanceDisplay extends Container {
     this.addChild(this.background);
 
     this.balanceText = new Text(
-        'Balance: $90',
+        `Balance: $${this.currentBalance}`,
         new TextStyle({
           fontFamily: 'Arial',
           fontSize: fontSize,
@@ -50,6 +51,7 @@ export class BalanceDisplay extends Container {
   }
 
   private updateBalance(newBalance: number): void {
+    this.currentBalance = newBalance;
     this.balanceText.text = `Balance: $${newBalance}`;
 
     gsap.fromTo(
@@ -59,10 +61,21 @@ export class BalanceDisplay extends Container {
     );
   }
 
-  public resize(width: number): void {
-    const isMobile = width < 968;
-    const balanceWidth = isMobile ? 150 : 210;
+  public resize(screenWidth: number): void {
+    const isMobile = screenWidth < 968;
+    const width = isMobile ? 150 : 210;
+    const height = isMobile ? 45 : 60;
+    const fontSize = isMobile ? 16 : 22;
     const padding = isMobile ? 10 : 20;
-    this.position.set(width - balanceWidth - padding, padding);
+
+    this.background.clear();
+    this.background.fill(0x000000, 0.6);
+    this.background.roundRect(0, 0, width, height, 10);
+    this.background.endFill();
+
+    this.balanceText.style.fontSize = fontSize;
+    this.balanceText.position.set(width / 2, height / 2);
+
+    this.position.set(screenWidth - width - padding, padding);
   }
 }

@@ -22,9 +22,4 @@ export class UILayer extends Container {
     });
   }
 
-  public addToLayer<T extends Container>(displayObject: T): T {
-    this.addChild(displayObject);
-    return displayObject;
-  }
-
 }

@@ -25,7 +25,6 @@ export class ItemSelector extends Container {
   private itemOptions: ItemOption[] = [];
   private currentPlacement: ItemPlacement | null = null;
   private isCurrentlyVisible: boolean = false;
-  private tutorialLocked: boolean = false;
 
   constructor(
     private eventBus: EventBusService,
@@ -35,22 +34,11 @@ export class ItemSelector extends Container {
     super();
     this.visible = false;
     this.setupEventListeners();
-    this.setupTutorialLocks();
-
   }
 
   private setupEventListeners(): void {
     this.eventBus.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
       this.showSelector(placement as ItemPlacement);
-    });
-  }
-  private setupTutorialLocks(): void {
-    this.eventBus.on('TUTORIAL:LOCK_ITEMS', () => {
-      this.tutorialLocked = true;
-    });
-
-    this.eventBus.on('TUTORIAL:UNLOCK_ITEMS', () => {
-      this.tutorialLocked = false;
     });
   }
 
@@ -337,19 +325,14 @@ export class ItemSelector extends Container {
       container.cursor = 'pointer';
 
       container.on('pointerover', () => {
-        if (this.tutorialLocked) return;
         gsap.to(container.scale, { x: 1.1, y: 1.1, duration: 0.2 });
       });
 
       container.on('pointerout', () => {
-        if (this.tutorialLocked) return;
         gsap.to(container.scale, { x: 1, y: 1, duration: 0.2 });
       });
 
       container.on('pointerdown', () => {
-        if (this.tutorialLocked) {
-          return;
-        }
         this.selectItem(option, cost);
       });
     } else {
@@ -357,7 +340,6 @@ export class ItemSelector extends Container {
       container.cursor = 'not-allowed';
 
       container.on('pointerdown', () => {
-        if (this.tutorialLocked) return;
         this.showNotEnoughMoneyFeedback(container);
       });
     }
@@ -386,10 +368,9 @@ export class ItemSelector extends Container {
 
       this.eventBus.emit('HELPER:NEXT:STEP');
 
-      this.eventBus.emit('GRID:PLACE_AT_POSITION', {
+      this.eventBus.emit('ITEM_SELECTOR:ITEM_SELECTED', {
         itemId: option.modelId,
-        row: this.currentPlacement.gridPosition.row,
-        col: this.currentPlacement.gridPosition.col
+        placementId: this.currentPlacement.id
       });
 
       this.eventBus.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);

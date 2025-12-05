@@ -2,10 +2,10 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 import { createGameScene } from './Game';
 
 (async (): Promise<void> => {
-  if (WebGL.isWebGL2Available()) {
+  if (WebGL.isWebGL2Available() || WebGL.isWebGLAvailable()) {
     await createGameScene();
   } else {
-    const warningMessage = WebGL.getWebGL2ErrorMessage();
+    const warningMessage = WebGL.getWebGLErrorMessage();
     const containerElement = document.getElementById('container');
 
     if (containerElement) {

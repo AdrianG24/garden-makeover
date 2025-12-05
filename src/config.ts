@@ -119,7 +119,7 @@ export const GAME_GRID_CONFIG = {
   GEOMETRY_HEIGHT: 0.1,
   CUBE_Y: 4.4,
   GAME_OBJECT_Y: 4.2,
-  CLICK_DELAY: 0.3,
+  CLICK_DELAY: 0.15,
   CUBE_OPACITY: 0.01,
   BLOCKED_COLOR: 0x888888,
   EDGE_LINE_COLOR: 0x000000,
@@ -157,8 +157,8 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
       bias: -0.0004,
       normalBias: 0.005,
       mapSize: {
-        x: window.innerWidth < 768 ? 2048 : 4096,
-        y: window.innerWidth < 768 ? 2048 : 4096
+        x: window.innerWidth < 768 ? 1024 : 2048,
+        y: window.innerWidth < 768 ? 1024 : 2048
       },
     },
   },
@@ -178,8 +178,8 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
       bias: -0.0002,
       normalBias: 0.005,
       mapSize: {
-        x: window.innerWidth < 768 ? 1024 : 2048,
-        y: window.innerWidth < 768 ? 1024 : 2048
+        x: window.innerWidth < 768 ? 512 : 1024,
+        y: window.innerWidth < 768 ? 512 : 1024
       },
     },
   },

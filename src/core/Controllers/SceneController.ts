@@ -149,28 +149,17 @@ export class SceneController {
         gradientMap: gradientTexture,
         map: originalMaterial.map ?? null,
         alphaMap: originalMaterial.alphaMap ?? null,
-        transparent: originalMaterial.transparent,
+        transparent: true,
         opacity: originalMaterial.opacity,
         side: originalMaterial.side,
       });
     }
 
-    if (Array.isArray(meshObject.material)) {
-      meshObject.material.forEach(
-        (materialItem: THREE.Material & { attenuationColor?: THREE.Color }): void => {
-          materialItem.transparent = true;
-          if (!materialItem.attenuationColor) {
-            materialItem.attenuationColor = new THREE.Color(0xffffff);
-          }
-          materialItem.depthWrite = true;
-          materialItem.needsUpdate = true;
-        }
-      );
-    } else {
-      meshObject.material.transparent = true;
-      meshObject.material.depthWrite = true;
-      meshObject.material.needsUpdate = true;
-    }
+    if (!(meshObject.material instanceof THREE.Material)) return;
+
+    meshObject.material.transparent = true;
+    meshObject.material.depthWrite = true;
+    meshObject.material.needsUpdate = true;
   }
 
   private animateSceneOpacity(
@@ -182,12 +171,8 @@ export class SceneController {
       const materialsToAnimate: THREE.Material[] = [];
 
       sceneGroup.traverse((childObject: THREE.Object3D): void => {
-        if (childObject instanceof THREE.Mesh && childObject.material) {
-          if (Array.isArray(childObject.material)) {
-            materialsToAnimate.push(...childObject.material);
-          } else {
-            materialsToAnimate.push(childObject.material);
-          }
+        if (childObject instanceof THREE.Mesh && childObject.material instanceof THREE.Material) {
+          materialsToAnimate.push(childObject.material);
         }
       });
 
@@ -261,22 +246,11 @@ export class SceneController {
     meshObject.castShadow = true;
     meshObject.receiveShadow = true;
 
-    if (Array.isArray(meshObject.material)) {
-      meshObject.material.forEach(
-        (
-          materialItem: THREE.Material & {
-            transparent?: boolean;
-            opacity?: number;
-            depthWrite?: boolean;
-            needsUpdate?: boolean;
-          }
-        ) => {
-          materialItem.transparent = true;
-          materialItem.opacity = 1;
-          materialItem.depthWrite = true;
-          materialItem.needsUpdate = true;
-        }
-      );
-    }
+    if (!(meshObject.material instanceof THREE.Material)) return;
+
+    meshObject.material.transparent = true;
+    meshObject.material.opacity = 1;
+    meshObject.material.depthWrite = true;
+    meshObject.material.needsUpdate = true;
   }
 }

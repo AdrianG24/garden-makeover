@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { InteractionManager } from 'three.interactive';
 import Stats from 'stats.js';
 import { BatchedRenderer } from 'three.quarks';
 import { Container, WebGLRenderer } from 'pixi.js';
@@ -8,11 +7,9 @@ import gsap from 'gsap';
 import { LightingController } from '../Controllers/LightingController';
 import { SceneController } from '../Controllers/SceneController';
 import { CameraController } from '../Controllers/CameraController';
-import { InteractiveGrid } from '../Components/InteractiveGrid';
 import { EventBusService } from '../Services/EventBusService';
-import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
-import { SCENE, CAMERA, RENDERER, GRID, sceneManagerConfig } from '../../config';
+import { SCENE, CAMERA, RENDERER, sceneManagerConfig } from '../../config';
 import { SCREEN_BREAKPOINTS, ANIMATION_TIMINGS } from '../constants';
 
 export class GameLayer {
@@ -25,9 +22,7 @@ export class GameLayer {
   lightingController: LightingController | null = null;
   sceneController: SceneController | null = null;
   cameraController!: CameraController;
-  interactiveGrid: InteractiveGrid | null = null;
 
-  private interactionManager: InteractionManager | null = null;
   private orbitControls!: OrbitControls;
   private particleSystem: BatchedRenderer;
   private ambientLight: THREE.AmbientLight | null = null;
@@ -39,7 +34,6 @@ export class GameLayer {
   constructor(
     canvasElement: HTMLCanvasElement,
     private eventBus: EventBusService,
-    private itemService: ItemService,
     private audioService: AudioService,
     showDebug: boolean = false
   ) {
@@ -55,10 +49,11 @@ export class GameLayer {
   }
 
   private initializeStats(showDebug: boolean): void {
-    this.stats = new Stats();
-    this.stats.showPanel(0);
-    document.body.appendChild(this.stats.dom);
-    this.stats.dom.style.display = showDebug ? 'block' : 'none';
+    if (showDebug) {
+      this.stats = new Stats();
+      this.stats.showPanel(0);
+      document.body.appendChild(this.stats.dom);
+    }
   }
 
   private initializeScene(): void {
@@ -104,7 +99,6 @@ export class GameLayer {
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.webglRenderer.shadowMap.enabled = RENDERER.shadow.enabled;
     this.webglRenderer.shadowMap.type = RENDERER.shadow.type;
-    this.webglRenderer.transmissionResolutionScale = Math.min(window.devicePixelRatio, 2);
   }
 
   async setupGameWorld(): Promise<void> {
@@ -120,21 +114,6 @@ export class GameLayer {
 
     this.lightingController = new LightingController(this.threeScene);
     this.addSceneLighting();
-
-    this.interactionManager = new InteractionManager(
-        this.webglRenderer,
-        this.camera,
-        this.webglRenderer.domElement
-    );
-
-    this.interactiveGrid = new InteractiveGrid(
-      GRID,
-      this.interactionManager,
-      this.sceneController,
-      this.itemService,
-      this.eventBus
-    );
-    this.threeScene.add(this.interactiveGrid.gridGroupContainer);
 
     this.setupOrbitControls();
     this.threeScene.updateMatrix();
@@ -282,24 +261,16 @@ export class GameLayer {
   }
 
   update(pixiRenderer: WebGLRenderer, pixiStage: Container): void {
-    this.stats.begin();
+    if (this.stats) this.stats.begin();
 
     const delta = this.clock.getDelta();
 
-    if (this.sceneController) {
+    if (this.sceneController && this.sceneController.animationMixers.length > 0) {
       this.sceneController.animationMixers.forEach(mixer => mixer.update(delta));
     }
 
     if (this.particleSystem) {
       this.particleSystem.update(delta);
-    }
-
-    if (this.interactionManager) {
-      this.interactionManager.update();
-    }
-
-    if (this.orbitControls && this.orbitControls.enabled) {
-      this.orbitControls.update();
     }
 
     this.eventBus.emit('GAME:UPDATE');
@@ -310,7 +281,7 @@ export class GameLayer {
     pixiRenderer.resetState();
     pixiRenderer.render({ container: pixiStage });
 
-    this.stats.end();
+    if (this.stats) this.stats.end();
   }
 
   handleResize(): void {

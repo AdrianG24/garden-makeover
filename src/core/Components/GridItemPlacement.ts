@@ -3,7 +3,8 @@ import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
 import { EventBusService } from '../Services/EventBusService';
 import { AudioService } from '../Services/AudioService';
-import { worldToScreen } from '../Utils/UtilityFunctions';
+import { SceneController } from '../Controllers/SceneController';
+import { worldToScreen, animateScaleTo } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
 
 interface ItemPlacement {
@@ -17,11 +18,16 @@ interface ItemPlacement {
 export class GridItemPlacement extends Container {
   private allLevelPlacements: Map<number, ItemPlacement[]> = new Map();
   private itemContainers: Map<string, Container> = new Map();
+  private itemBackgrounds: Map<string, Graphics> = new Map();
+  private itemTexts: Map<string, Text> = new Map();
   private containerLevels: Map<Container, number> = new Map();
   private containerPlacements: Map<Container, ItemPlacement> = new Map();
+  private placedObjects: Map<string, THREE.Object3D> = new Map();
   private isEnabled: boolean = false;
   private currentLevel: number = 1;
   private camera: THREE.Camera | null = null;
+  private scene: THREE.Scene | null = null;
+  private sceneController: SceneController | null = null;
   private gridConfig: {
     cubeSize: number;
     gap: number;
@@ -39,6 +45,14 @@ export class GridItemPlacement extends Container {
     this.initializeAllLevelPlacements();
     this.createItemIcons();
     this.setupEventListeners();
+  }
+
+  public setScene(scene: THREE.Scene): void {
+    this.scene = scene;
+  }
+
+  public setSceneController(controller: SceneController): void {
+    this.sceneController = controller;
   }
 
   public setCamera(camera: THREE.Camera): void {
@@ -190,6 +204,10 @@ export class GridItemPlacement extends Container {
   public updatePositions(): void {
     if (!this.camera) return;
 
+    const isMobile = window.innerWidth < 968;
+    const marginX = isMobile ? 60 : 100;
+    const marginY = isMobile ? 60 : 100;
+
     this.containerPlacements.forEach((placement, container) => {
       if (!container.visible) return;
 
@@ -199,8 +217,8 @@ export class GridItemPlacement extends Container {
       );
       const screenPos = worldToScreen(world3D, this.camera!);
 
-      const clampedX = Math.max(100, Math.min(window.innerWidth - 100, screenPos.x));
-      const clampedY = Math.max(100, Math.min(window.innerHeight - 100, screenPos.y));
+      const clampedX = Math.max(marginX, Math.min(window.innerWidth - marginX, screenPos.x));
+      const clampedY = Math.max(marginY, Math.min(window.innerHeight - marginY, screenPos.y));
 
       container.position.set(clampedX, clampedY);
     });
@@ -271,9 +289,33 @@ export class GridItemPlacement extends Container {
 
         this.addChild(itemContainer);
         this.itemContainers.set(placement.id, itemContainer);
+        this.itemBackgrounds.set(placement.id, background);
+        this.itemTexts.set(placement.id, questionMark);
 
         this.eventBus.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
       });
+    });
+  }
+
+  public resizeIcons(): void {
+    const isMobile = window.innerWidth < 968;
+    const circleSize = isMobile ? 22 : 50;
+    const fontSize = isMobile ? 20 : 60;
+    const strokeWidth = isMobile ? 1.5 : 4;
+    const lineWidth = isMobile ? 2 : 4;
+
+    this.itemBackgrounds.forEach((background) => {
+      background.clear();
+      background.fill(0x4CAF50, 0.8);
+      background.circle(0, 0, circleSize);
+      background.endFill();
+      background.lineStyle(lineWidth, 0xFFFFFF, 1);
+      background.circle(0, 0, circleSize);
+    });
+
+    this.itemTexts.forEach((text) => {
+      text.style.fontSize = fontSize;
+      text.style.stroke = { color: '#000000', width: strokeWidth, join: 'round' };
     });
   }
 
@@ -293,7 +335,20 @@ export class GridItemPlacement extends Container {
 
     this.eventBus.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
+      this.clearCurrentLevelObjects();
       this.showAllItemsForCurrentLevel();
+    });
+  }
+
+  private clearCurrentLevelObjects(): void {
+    if (!this.scene) return;
+
+    this.allLevelPlacements.get(this.currentLevel)?.forEach(placement => {
+      const obj = this.placedObjects.get(placement.id);
+      if (obj) {
+        this.scene!.remove(obj);
+        this.placedObjects.delete(placement.id);
+      }
     });
   }
 
@@ -343,10 +398,19 @@ export class GridItemPlacement extends Container {
 
   private handleItemClick(placement: ItemPlacement): void {
     if (!this.isEnabled) return;
+    if (this.placedObjects.has(placement.id)) return;
 
     this.audioService.playSound('sound_click', false);
 
     this.eventBus.emit('ITEM_SELECTOR:SHOW', placement);
+
+    this.eventBus.once('ITEM_SELECTOR:ITEM_SELECTED', (data: unknown) => {
+      const selectedData = data as { itemId: string; placementId: string };
+
+      if (selectedData.placementId === placement.id) {
+        this.placeObjectAtPosition(selectedData.itemId, placement);
+      }
+    });
 
     this.eventBus.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       if ((goalId as string) === placement.id) {
@@ -373,6 +437,57 @@ export class GridItemPlacement extends Container {
         }
       }
     });
+  }
+
+  private placeObjectAtPosition(itemId: string, placement: ItemPlacement): void {
+    if (!this.scene || !this.sceneController) return;
+
+    const world3D = this.gridPositionTo3D(
+      placement.gridPosition.row,
+      placement.gridPosition.col
+    );
+
+    const instantiatedObject = this.sceneController.createInstanceFromClick(itemId);
+
+    if (instantiatedObject) {
+      animateScaleTo(instantiatedObject, 0.3, 1);
+      instantiatedObject.position.set(
+        world3D.x,
+        GAME_GRID_CONFIG.GAME_OBJECT_Y + 20,
+        world3D.z
+      );
+      this.scene.add(instantiatedObject);
+
+      gsap.to(instantiatedObject.position, {
+        y: GAME_GRID_CONFIG.GAME_OBJECT_Y,
+        duration: 0.6,
+        ease: 'bounce.out',
+      });
+
+      this.placedObjects.set(placement.id, instantiatedObject);
+
+      const container = this.itemContainers.get(placement.id);
+      if (container) {
+        gsap.killTweensOf(container);
+        gsap.killTweensOf(container.scale);
+
+        gsap.to(container, {
+          alpha: 0,
+          duration: 0.3,
+          ease: 'power2.in'
+        });
+
+        gsap.to(container.scale, {
+          x: 0.5,
+          y: 0.5,
+          duration: 0.3,
+          ease: 'back.in(1.7)',
+          onComplete: () => {
+            container.visible = false;
+          }
+        });
+      }
+    }
   }
 
   private showItems(): void {

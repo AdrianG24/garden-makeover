@@ -15,8 +15,6 @@ import { EventBusService } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
 import { manifest, DEBUG } from './config';
-import { ANIMATION_TIMINGS } from './core/constants';
-import gsap from 'gsap';
 
 export async function createGameScene(): Promise<void> {
   const loaderOverlay = showLoadingOverlay();
@@ -32,7 +30,7 @@ export async function createGameScene(): Promise<void> {
     canvasElement.style.inset = '0';
     document.body.appendChild(canvasElement);
 
-    const gameLayer = new GameLayer(canvasElement, eventBus, itemService, audioService, DEBUG);
+    const gameLayer = new GameLayer(canvasElement, eventBus, audioService, DEBUG);
 
     const pixiRenderer = await initializePixiRenderer(
         canvasElement,
@@ -200,6 +198,10 @@ function createUILayers(
 
   const gridItemPlacement = new GridItemPlacement(eventBus, audioService);
   gridItemPlacement.setCamera(gameLayer.camera);
+  gridItemPlacement.setScene(gameLayer.threeScene);
+  if (gameLayer.sceneController) {
+    gridItemPlacement.setSceneController(gameLayer.sceneController);
+  }
   gridItemPlacement.setGridConfig({
     cubeSize: 2,
     gap: 0.1,
@@ -210,18 +212,18 @@ function createUILayers(
   });
 
   eventBus.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
-    uiLayer.addToLayer(animationContainer as Container);
+    uiLayer.addChild(animationContainer as Container);
   });
 
   eventBus.on('LEVEL:HIDE_ANIMATION', () => {
   });
 
-  uiLayer.addToLayer(levelingSystem);
-  uiLayer.addToLayer(balanceDisplay);
-  uiLayer.addToLayer(dayNightToggle);
-  uiLayer.addToLayer(gridItemPlacement);
-  uiLayer.addToLayer(itemSelector);
-  uiLayer.addToLayer(tutorialGuide);
+  uiLayer.addChild(levelingSystem);
+  uiLayer.addChild(balanceDisplay);
+  uiLayer.addChild(dayNightToggle);
+  uiLayer.addChild(gridItemPlacement);
+  uiLayer.addChild(itemSelector);
+  uiLayer.addChild(tutorialGuide);
 
   stageContainer.addChild(uiLayer);
   uiLayer.showLayer();
@@ -239,6 +241,7 @@ function createUILayers(
     levelingSystem.resize(width);
     balanceDisplay.resize(width);
     dayNightToggle.resize(width);
+    gridItemPlacement.resizeIcons();
     itemSelector.resize(width, height);
     tutorialGuide.resize();
   });
@@ -261,20 +264,14 @@ function setupWindowResize(
   pixiRenderer: WebGLRenderer,
   eventBus: EventBusService
 ): void {
-  let resizeDelay: gsap.core.Tween | null = null;
-
   const handleResize = (): void => {
-    if (resizeDelay) {
-      resizeDelay.kill();
-    }
 
-    resizeDelay = gsap.delayedCall(ANIMATION_TIMINGS.RESIZE_DEBOUNCE, () => {
+
       gameLayer.handleResize();
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
 
       eventBus.emit('UI:RESIZE');
-    });
   };
 
   window.addEventListener('resize', handleResize);
