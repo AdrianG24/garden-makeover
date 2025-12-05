@@ -196,14 +196,6 @@ function createUILayers(
   if (gameLayer.sceneController) {
     gridItemPlacement.setSceneController(gameLayer.sceneController);
   }
-  gridItemPlacement.setGridConfig({
-    cubeSize: 2,
-    gap: 0.1,
-    startX: -1,
-    startZ: 3,
-    rows: 19,
-    columns: 16
-  });
 
   eventEmitter.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addChild(animationContainer as Container);

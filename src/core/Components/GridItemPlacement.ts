@@ -10,47 +10,41 @@ import { GAME_GRID_CONFIG } from '../../config';
 interface ItemData {
   id: string;
   modelId: string;
-  gridPosition: { row: number; col: number };
+  position: { x: number; y: number; z: number };
   level: number;
 }
 
 export class GridItemPlacement extends Container {
   private items: ItemData[] = [
-    { id: 'cow_1', modelId: 'cow_1', gridPosition: { row: 3, col: 9 }, level: 1 },
-    { id: 'chicken_1', modelId: 'chicken_1', gridPosition: { row: 9, col: 2 }, level: 1 },
+    { id: 'cow_1', modelId: 'cow_1', position: { x: -13, y: 4.2, z: 0 }, level: 1 },
+    { id: 'chicken_1', modelId: 'chicken_1', position: { x: 10, y: 4.2, z: 13 }, level: 1 },
 
-    { id: 'sheep_1', modelId: 'sheep_1', gridPosition: { row: 6, col: 2 }, level: 2 },
-    { id: 'corn_1', modelId: 'corn_1', gridPosition: { row: 12, col: 4 }, level: 2 },
-    { id: 'tomato_1', modelId: 'tomato_1', gridPosition: { row: 4, col: 4 }, level: 2 },
+    { id: 'sheep_1', modelId: 'sheep_1', position: { x: -10.5, y: 4.2, z: 4.2 }, level: 2 },
+    { id: 'corn_1', modelId: 'corn_1', position: { x: -5.5,  y: 4.2, z: 10.8 }, level: 2 },
+    { id: 'tomato_1', modelId: 'tomato_1', position: { x:  3.5, y: 4.2, z:  6.3 }, level: 2 },
 
-    { id: 'strawberry_1', modelId: 'strawberry_1', gridPosition: { row: 13, col: 2 }, level: 3 },
-    { id: 'grape_1', modelId: 'grape_1', gridPosition: { row: 5, col: 11 }, level: 3 },
-    { id: 'chicken_2', modelId: 'chicken_1', gridPosition: { row: 9, col: 5 }, level: 3 },
-    { id: 'sheep_2', modelId: 'sheep_1', gridPosition: { row: 3, col: 12 }, level: 3 },
 
-    { id: 'cow_2', modelId: 'cow_1', gridPosition: { row: 2, col: 3 }, level: 4 },
-    { id: 'tomato_2', modelId: 'tomato_1', gridPosition: { row: 11, col: 2 }, level: 4 },
-    { id: 'corn_2', modelId: 'corn_1', gridPosition: { row: 6, col: 9 }, level: 4 },
-    { id: 'strawberry_2', modelId: 'strawberry_1', gridPosition: { row: 6, col: 12 }, level: 4 },
-    { id: 'grape_2', modelId: 'grape_1', gridPosition: { row: 5, col: 6 }, level: 4 }
+    { id: 'strawberry_1', modelId: 'strawberry_1', position: { x: -12.2, y: 4.2, z: 12.5 }, level: 3 },
+    { id: 'grape_1', modelId: 'grape_1', position: { x:   4.8, y: 4.2, z:  9.1 }, level: 3 },
+    { id: 'chicken_2', modelId: 'chicken_1', position: { x:  -6.4, y: 4.2, z:  3.6 }, level: 3 },
+    { id: 'sheep_2', modelId: 'sheep_1', position: { x:   7.5, y: 4.2, z:  17.4 }, level: 3 },
+
+
+    { id: 'cow_2', modelId: 'cow_1', position: { x: -11.8, y: 4.2, z:  7.3 }, level: 4 },
+    { id: 'tomato_2', modelId: 'tomato_1', position: { x: -3.2,  y: 4.2, z: 12.1 }, level: 4 },
+    { id: 'corn_2', modelId: 'corn_1', position: { x:  4.1,  y: 4.2, z:  10.2 }, level: 4 },
+    { id: 'strawberry_2', modelId: 'strawberry_1', position: { x:  2.3,  y: 4.2, z: 0.5 }, level: 4 },
+    { id: 'grape_2', modelId: 'grape_1', position: { x: -7.6,  y: 4.2, z:  9.8 }, level: 4 },
+
   ];
 
   private bubbles = new Map<string, Container & { itemData: ItemData }>();
   private placedObjects = new Map<string, THREE.Object3D>();
-
   private isEnabled = false;
   private currentLevel = 1;
   private camera: THREE.Camera | null = null;
   private scene: THREE.Scene | null = null;
   private sceneController: SceneController | null = null;
-  private gridConfig: {
-    cubeSize: number;
-    gap: number;
-    startX: number;
-    startZ: number;
-    rows: number;
-    columns: number;
-  } | null = null;
 
   constructor(private audioService: AudioService) {
     super();
@@ -68,10 +62,6 @@ export class GridItemPlacement extends Container {
 
   public setCamera(camera: THREE.Camera): void {
     this.camera = camera;
-  }
-
-  public setGridConfig(config: typeof this.gridConfig): void {
-    this.gridConfig = config;
   }
 
   private createBubbles(): void {
@@ -103,35 +93,9 @@ export class GridItemPlacement extends Container {
 
       bubble.eventMode = 'static';
       bubble.cursor = 'pointer';
-      const bubbleIdle = gsap.to(bubble.scale, {
-        x: 1.05,
-        y: 1.05,
-        duration: 1,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-        paused: true
-      });
-      bubble.on("pointerover", () => {
-        bubbleIdle.pause();
-        gsap.to(bubble.scale, {
-          x: 1.1,
-          y: 1.1,
-          duration: 0.2,
-          overwrite: "auto"
-        });
-      });
-      bubble.on("pointerout", () => {
-        gsap.to(bubble.scale, {
-          x: 1,
-          y: 1,
-          duration: 0.2,
-          overwrite: "auto",
-          onComplete: () => {
-            bubbleIdle.restart();
-          }
-        });
-      });      bubble.on('pointerdown', () => this.onBubbleClick(bubble));
+      bubble.on('pointerover', () => gsap.to(bubble.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
+      bubble.on('pointerout', () => gsap.to(bubble.scale, { x: 1, y: 1, duration: 0.2 }));
+      bubble.on('pointerdown', () => this.onBubbleClick(bubble));
 
       bubble.visible = false;
       bubble.alpha = 0;
@@ -163,52 +127,20 @@ export class GridItemPlacement extends Container {
     });
   }
 
-  private gridToWorld(row: number, col: number): THREE.Vector3 {
-    if (!this.gridConfig) return new THREE.Vector3(0, 0, 0);
-
-    const { cubeSize, gap, startX, startZ, rows, columns } = this.gridConfig;
-    const totalWidth = columns * cubeSize + (columns - 1) * gap;
-    const totalDepth = rows * cubeSize + (rows - 1) * gap;
-    const offsetX = startX - totalWidth / 2 + cubeSize / 2;
-    const offsetZ = startZ + totalDepth / 2 - cubeSize / 2;
-
-    return new THREE.Vector3(
-      col * (cubeSize + gap) + offsetX,
-      GAME_GRID_CONFIG.GAME_OBJECT_Y,
-      -row * (cubeSize + gap) + offsetZ
-    );
-  }
-
   public updatePositions(): void {
-    if (!this.camera || !this.gridConfig) return;
-
-    const { rows, columns } = this.gridConfig;
-    const isMobile = window.innerWidth < 968;
-    const padding = isMobile ? 30 : 50;
-
-    const corners = [
-      this.gridToWorld(0, 0),
-      this.gridToWorld(0, columns - 1),
-      this.gridToWorld(rows - 1, 0),
-      this.gridToWorld(rows - 1, columns - 1)
-    ].map(pos => worldToScreen(pos, this.camera!));
-
-    const minX = Math.min(...corners.map(p => p.x)) + padding;
-    const maxX = Math.max(...corners.map(p => p.x)) - padding;
-    const minY = Math.min(...corners.map(p => p.y)) + padding;
-    const maxY = Math.max(...corners.map(p => p.y)) - padding;
+    if (!this.camera) return;
 
     this.bubbles.forEach(bubble => {
       if (!bubble.visible) return;
 
-      const { row, col } = bubble.itemData.gridPosition;
-      const world = this.gridToWorld(row, col);
-      const screen = worldToScreen(world, this.camera!);
-
-      bubble.position.set(
-        Math.max(minX, Math.min(maxX, screen.x)),
-        Math.max(minY, Math.min(maxY, screen.y))
+      const worldPos = new THREE.Vector3(
+        bubble.itemData.position.x,
+        GAME_GRID_CONFIG.GAME_OBJECT_Y,
+        bubble.itemData.position.z
       );
+      const screenPos = worldToScreen(worldPos, this.camera!);
+
+      bubble.position.set(screenPos.x, screenPos.y);
     });
   }
 
@@ -307,13 +239,15 @@ export class GridItemPlacement extends Container {
   private placeObject(itemId: string, bubble: Container & { itemData: ItemData }): void {
     if (!this.scene || !this.sceneController) return;
 
-    const { row, col } = bubble.itemData.gridPosition;
-    const world = this.gridToWorld(row, col);
     const obj = this.sceneController.createInstanceFromClick(itemId);
 
     if (obj) {
       animateScaleTo(obj, 0.3, 1);
-      obj.position.set(world.x, GAME_GRID_CONFIG.GAME_OBJECT_Y + 20, world.z);
+      obj.position.set(
+        bubble.itemData.position.x,
+          GAME_GRID_CONFIG.GAME_OBJECT_Y,
+        bubble.itemData.position.z
+      );
       this.scene.add(obj);
 
       gsap.to(obj.position, {
