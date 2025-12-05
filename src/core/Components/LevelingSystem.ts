@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
 
@@ -35,7 +35,6 @@ export class LevelingSystem extends Container {
 
 
   constructor(
-    private eventBus: EventBusService,
     private itemService: ItemService,
     private audioService: AudioService
   ) {
@@ -164,15 +163,15 @@ export class LevelingSystem extends Container {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    eventEmitter.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       this.completeGoal(goalId as string);
     });
 
-    this.eventBus.on('LEVEL:RESET', () => {
+    eventEmitter.on('LEVEL:RESET', () => {
       this.resetProgress();
     });
 
-    this.eventBus.on('LEVEL:RETRY_CURRENT', () => {
+    eventEmitter.on('LEVEL:RETRY_CURRENT', () => {
       this.retryCurrentLevel();
     });
   }
@@ -183,8 +182,8 @@ export class LevelingSystem extends Container {
     this.currentGoals.forEach(g => g.completed = false);
     this.updateDisplay();
 
-    this.eventBus.emit('GRID:CLEAR_LEVEL_ITEMS');
-    this.eventBus.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
+    eventEmitter.emit('GRID:CLEAR_LEVEL_ITEMS');
+    eventEmitter.emit('GRID_ITEMS:RETRY_LEVEL', this.currentLevel + 1);
   }
 
   private completeGoal(goalId: string): void {
@@ -215,8 +214,8 @@ export class LevelingSystem extends Container {
 
         this.itemService.saveStartBalance();
 
-        this.eventBus.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
-        this.eventBus.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
+        eventEmitter.emit('GRID:UPDATE_LEVEL', this.currentLevel + 1);
+        eventEmitter.emit('GRID_ITEMS:CHANGE_LEVEL', this.currentLevel + 1);
       });
     } else {
       gsap.delayedCall(1, () => {
@@ -270,7 +269,7 @@ export class LevelingSystem extends Container {
     this.levelUpAnimation.alpha = 0;
     this.levelUpAnimation.scale.set(0.5);
 
-    this.eventBus.emit('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
+    eventEmitter.emit('LEVEL:SHOW_ANIMATION', this.levelUpAnimation);
 
     gsap.to(this.levelUpAnimation, {
       alpha: 1,
@@ -301,7 +300,7 @@ export class LevelingSystem extends Container {
       delay: 1.5,
       ease: 'power2.in',
       onComplete: () => {
-        this.eventBus.emit('LEVEL:HIDE_ANIMATION');
+        eventEmitter.emit('LEVEL:HIDE_ANIMATION');
         this.levelUpAnimation = null;
       }
     });
@@ -391,7 +390,7 @@ export class LevelingSystem extends Container {
 
     if (!this.congratsContainer || !this.popupContainer) return;
 
-    this.eventBus.emit('LEVEL:SHOW_ANIMATION', this.congratsContainer);
+    eventEmitter.emit('LEVEL:SHOW_ANIMATION', this.congratsContainer);
     this.audioService.playSound('sound_popup_chest', false);
 
     this.congratsContainer.alpha = 0;

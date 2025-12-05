@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 import { AudioService } from '../Services/AudioService';
 import { SceneController } from '../Controllers/SceneController';
 import { worldToScreen, animateScaleTo } from '../Utils/UtilityFunctions';
@@ -38,7 +38,6 @@ export class GridItemPlacement extends Container {
   } | null = null;
 
   constructor(
-    private eventBus: EventBusService,
     private audioService: AudioService
   ) {
     super();
@@ -308,7 +307,7 @@ export class GridItemPlacement extends Container {
         this.itemBackgrounds.set(placement.id, background);
         this.itemTexts.set(placement.id, questionMark);
 
-        this.eventBus.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
+        eventEmitter.emit('TUTORIAL:ADD_QUESTION_MARK', itemContainer);
       });
     });
   }
@@ -336,20 +335,20 @@ export class GridItemPlacement extends Container {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('GRID_ITEMS:SHOW', () => {
+    eventEmitter.on('GRID_ITEMS:SHOW', () => {
       this.showItems();
     });
 
-    this.eventBus.on('GRID_ITEMS:HIDE', () => {
+    eventEmitter.on('GRID_ITEMS:HIDE', () => {
       this.hideItems();
     });
 
-    this.eventBus.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
+    eventEmitter.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.showItems();
     });
 
-    this.eventBus.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
+    eventEmitter.on('GRID_ITEMS:RETRY_LEVEL', (level: unknown) => {
       this.currentLevel = level as number;
       this.clearCurrentLevelObjects();
       this.showAllItemsForCurrentLevel();
@@ -418,9 +417,9 @@ export class GridItemPlacement extends Container {
 
     this.audioService.playSound('sound_click', false);
 
-    this.eventBus.emit('ITEM_SELECTOR:SHOW', placement);
+    eventEmitter.emit('ITEM_SELECTOR:SHOW', placement);
 
-    this.eventBus.once('ITEM_SELECTOR:ITEM_SELECTED', (data: unknown) => {
+    eventEmitter.once('ITEM_SELECTOR:ITEM_SELECTED', (data: unknown) => {
       const selectedData = data as { itemId: string; placementId: string };
 
       if (selectedData.placementId === placement.id) {
@@ -428,7 +427,7 @@ export class GridItemPlacement extends Container {
       }
     });
 
-    this.eventBus.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
+    eventEmitter.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       if ((goalId as string) === placement.id) {
         const container = this.itemContainers.get(placement.id);
         if (container) {

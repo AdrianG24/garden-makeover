@@ -11,7 +11,7 @@ import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
 import { TutorialGuide } from './core/Components/TutorialGuide';
-import { EventBusService } from './core/Services/EventBusService';
+import { eventEmitter } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
 import { manifest, DEBUG } from './config';
@@ -20,8 +20,7 @@ export async function createGameScene(): Promise<void> {
   const loaderOverlay = showLoadingOverlay();
 
   try {
-    const eventBus = new EventBusService();
-    const itemService = new ItemService(eventBus);
+    const itemService = new ItemService();
     const audioService = new AudioService();
 
     const canvasElement = document.createElement('canvas');
@@ -30,7 +29,7 @@ export async function createGameScene(): Promise<void> {
     canvasElement.style.inset = '0';
     document.body.appendChild(canvasElement);
 
-    const gameLayer = new GameLayer(canvasElement, eventBus, audioService, DEBUG);
+    const gameLayer = new GameLayer(canvasElement, audioService, DEBUG);
 
     const pixiRenderer = await initializePixiRenderer(
         canvasElement,
@@ -40,10 +39,10 @@ export async function createGameScene(): Promise<void> {
 
     await gameLayer.setupGameWorld();
 
-    await loadGameAssets(pixiStage, gameLayer, eventBus, itemService, audioService);
+    await loadGameAssets(pixiStage, gameLayer, itemService, audioService);
 
     setupAnimationLoop(gameLayer, pixiRenderer, pixiStage);
-    setupWindowResize(gameLayer, pixiRenderer, eventBus);
+    setupWindowResize(gameLayer, pixiRenderer);
   } finally {
     hideLoadingOverlay(loaderOverlay);
   }
@@ -132,7 +131,6 @@ async function initializePixiRenderer(
 async function loadGameAssets(
   stageContainer: Container,
   gameLayer: GameLayer,
-  eventBus: EventBusService,
   itemService: ItemService,
   audioService: AudioService
 ): Promise<void> {
@@ -140,18 +138,17 @@ async function loadGameAssets(
 
   await Assets.loadBundle('game-assets');
 
-  showWelcomeScreen(stageContainer, gameLayer, eventBus, itemService, audioService);
+  showWelcomeScreen(stageContainer, gameLayer, itemService, audioService);
 }
 
 function showWelcomeScreen(
   stageContainer: Container,
   gameLayer: GameLayer,
-  eventBus: EventBusService,
   itemService: ItemService,
   audioService: AudioService
 ): void {
   const welcomeScreen = new WelcomeScreen(async () => {
-    await startGame(stageContainer, gameLayer, eventBus, itemService, audioService);
+    await startGame(stageContainer, gameLayer, itemService, audioService);
   }, audioService);
 
   stageContainer.addChild(welcomeScreen);
@@ -169,19 +166,17 @@ function showWelcomeScreen(
 async function startGame(
   stageContainer: Container,
   gameLayer: GameLayer,
-  eventBus: EventBusService,
   itemService: ItemService,
   audioService: AudioService
 ): Promise<void> {
   gameLayer.revealFarm();
 
-  createUILayers(stageContainer, gameLayer, eventBus, itemService, audioService);
+  createUILayers(stageContainer, gameLayer, itemService, audioService);
 }
 
 function createUILayers(
   stageContainer: Container,
   gameLayer: GameLayer,
-  eventBus: EventBusService,
   itemService: ItemService,
   audioService: AudioService
 ): void {
@@ -189,17 +184,17 @@ function createUILayers(
   uiLayer.visible = true;
   uiLayer.alpha = 0;
 
-  const tutorialGuide = new TutorialGuide(eventBus);
+  const tutorialGuide = new TutorialGuide();
 
-  const levelingSystem = new LevelingSystem(eventBus, itemService, audioService);
+  const levelingSystem = new LevelingSystem(itemService, audioService);
 
-  const balanceDisplay = new BalanceDisplay(eventBus);
+  const balanceDisplay = new BalanceDisplay();
 
-  const itemSelector = new ItemSelector(eventBus, itemService, audioService);
+  const itemSelector = new ItemSelector(itemService, audioService);
 
-  const dayNightToggle = new DayNightToggle(eventBus);
+  const dayNightToggle = new DayNightToggle();
 
-  const gridItemPlacement = new GridItemPlacement(eventBus, audioService);
+  const gridItemPlacement = new GridItemPlacement(audioService);
   gridItemPlacement.setCamera(gameLayer.camera);
   gridItemPlacement.setScene(gameLayer.threeScene);
   if (gameLayer.sceneController) {
@@ -214,11 +209,11 @@ function createUILayers(
     columns: 16
   });
 
-  eventBus.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
+  eventEmitter.on('LEVEL:SHOW_ANIMATION', (animationContainer: unknown) => {
     uiLayer.addChild(animationContainer as Container);
   });
 
-  eventBus.on('LEVEL:HIDE_ANIMATION', () => {
+  eventEmitter.on('LEVEL:HIDE_ANIMATION', () => {
   });
 
   uiLayer.addChild(levelingSystem);
@@ -237,15 +232,15 @@ function createUILayers(
     ease: 'power2.out',
   });
 
-  eventBus.emit('HELPER:SHOW');
+  eventEmitter.emit('HELPER:SHOW');
 
   itemService.saveStartBalance();
 
-  eventBus.on('GAME:UPDATE', () => {
+  eventEmitter.on('GAME:UPDATE', () => {
     gridItemPlacement.updatePositions();
   });
 
-  eventBus.on('UI:RESIZE', () => {
+  eventEmitter.on('UI:RESIZE', () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
     levelingSystem.resize(width);
@@ -271,8 +266,7 @@ function setupAnimationLoop(
 
 function setupWindowResize(
   gameLayer: GameLayer,
-  pixiRenderer: WebGLRenderer,
-  eventBus: EventBusService
+  pixiRenderer: WebGLRenderer
 ): void {
   const handleResize = (): void => {
 
@@ -281,7 +275,7 @@ function setupWindowResize(
       pixiRenderer.resize(window.innerWidth, window.innerHeight);
       pixiRenderer.resolution = Math.min(window.devicePixelRatio, 2);
 
-      eventBus.emit('UI:RESIZE');
+      eventEmitter.emit('UI:RESIZE');
   };
 
   window.addEventListener('resize', handleResize);

@@ -29,9 +29,6 @@ export class TutorialRenderer {
     parent.addChild(this.fingerSprite);
   }
 
-  createSpotlight(): void {
-    this.spotlightContainer.removeChildren();
-  }
 
   showFinger(x: number, y: number): void {
     this.fingerSprite.position.set(x, y);

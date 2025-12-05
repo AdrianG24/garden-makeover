@@ -1,6 +1,6 @@
 import { Container } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 import { TutorialRenderer } from './TutorialRenderer';
 import { SCREEN_BREAKPOINTS, ANIMATION_TIMINGS, TUTORIAL } from '../constants';
 
@@ -20,7 +20,7 @@ export class TutorialGuide extends Container {
   private resizeDebounceTween: gsap.core.Tween | null = null;
 
 
-  constructor(private eventBus: EventBusService) {
+  constructor() {
     super();
     this.visible = false;
     this.renderer = new TutorialRenderer();
@@ -57,23 +57,23 @@ export class TutorialGuide extends Container {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('HELPER:SHOW', () => {
+    eventEmitter.on('HELPER:SHOW', () => {
       this.startTutorial();
     });
 
-    this.eventBus.on('HELPER:HIDE', () => {
+    eventEmitter.on('HELPER:HIDE', () => {
       this.endTutorial();
     });
 
-    this.eventBus.on('TUTORIAL:SET_BALANCE', (element: unknown) => {
+    eventEmitter.on('TUTORIAL:SET_BALANCE', (element: unknown) => {
       this.balanceElement = element as Container;
     });
 
-    this.eventBus.on('TUTORIAL:ADD_QUESTION_MARK', (element: unknown) => {
+    eventEmitter.on('TUTORIAL:ADD_QUESTION_MARK', (element: unknown) => {
       this.questionMarkElements.push(element as Container);
     });
 
-    this.eventBus.on('ITEM_SELECTOR:SHOW', () => {
+    eventEmitter.on('ITEM_SELECTOR:SHOW', () => {
       if (this.currentStep === 1 && this.isActive) {
         this.renderer.clearHighlights();
       }
@@ -122,7 +122,6 @@ export class TutorialGuide extends Container {
     if (!this.balanceElement) return;
 
     const bounds = this.balanceElement.getBounds();
-    this.renderer.createSpotlight();
 
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
 
@@ -152,7 +151,6 @@ export class TutorialGuide extends Container {
     }
 
     const bounds = questionMark.getBounds();
-    this.renderer.createSpotlight();
 
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
     const popupX = bounds.x + bounds.width / 2 + (isMobile ? 90 : 110);
@@ -183,7 +181,7 @@ export class TutorialGuide extends Container {
       }
     });
 
-    this.eventBus.emit('TUTORIAL:COMPLETE');
+    eventEmitter.emit('TUTORIAL:COMPLETE');
   }
 
   private repositionCurrentStep(): void {
@@ -209,7 +207,6 @@ export class TutorialGuide extends Container {
     if (!this.balanceElement) return;
 
     const bounds = this.balanceElement.getBounds();
-    this.renderer.createSpotlight();
 
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
 
@@ -244,8 +241,6 @@ export class TutorialGuide extends Container {
       });
       return;
     }
-
-    this.renderer.createSpotlight();
 
     const isMobile = window.innerWidth < SCREEN_BREAKPOINTS.TABLET;
 

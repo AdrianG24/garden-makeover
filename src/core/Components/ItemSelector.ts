@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle, Sprite, Assets } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
 
@@ -27,7 +27,6 @@ export class ItemSelector extends Container {
   private isCurrentlyVisible: boolean = false;
 
   constructor(
-    private eventBus: EventBusService,
     private itemService: ItemService,
     private audioService: AudioService
   ) {
@@ -37,7 +36,7 @@ export class ItemSelector extends Container {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
+    eventEmitter.on('ITEM_SELECTOR:SHOW', (placement: unknown) => {
       this.showSelector(placement as ItemPlacement);
     });
   }
@@ -247,7 +246,7 @@ export class ItemSelector extends Container {
     retryButton.on('pointerdown', () => {
       this.audioService.playSound('sound_click', false);
       this.hideSelector();
-      this.eventBus.emit('LEVEL:RETRY_CURRENT');
+      eventEmitter.emit('LEVEL:RETRY_CURRENT');
     });
 
     popup.addChild(retryButton);
@@ -366,14 +365,14 @@ export class ItemSelector extends Container {
 
       this.itemService.currentItemId = option.modelId;
 
-      this.eventBus.emit('HELPER:NEXT:STEP');
+      eventEmitter.emit('HELPER:NEXT:STEP');
 
-      this.eventBus.emit('ITEM_SELECTOR:ITEM_SELECTED', {
+      eventEmitter.emit('ITEM_SELECTOR:ITEM_SELECTED', {
         itemId: option.modelId,
         placementId: this.currentPlacement.id
       });
 
-      this.eventBus.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
+      eventEmitter.emit('LEVEL:GOAL_COMPLETED', this.currentPlacement.id);
 
       this.hideSelector();
     }

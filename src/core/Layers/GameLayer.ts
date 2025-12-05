@@ -7,7 +7,7 @@ import gsap from 'gsap';
 import { LightingController } from '../Controllers/LightingController';
 import { SceneController } from '../Controllers/SceneController';
 import { CameraController } from '../Controllers/CameraController';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 import { AudioService } from '../Services/AudioService';
 import { SCENE, CAMERA, RENDERER, sceneManagerConfig } from '../../config';
 import { SCREEN_BREAKPOINTS, ANIMATION_TIMINGS } from '../constants';
@@ -33,7 +33,6 @@ export class GameLayer {
 
   constructor(
     canvasElement: HTMLCanvasElement,
-    private eventBus: EventBusService,
     private audioService: AudioService,
     showDebug: boolean = false
   ) {
@@ -82,7 +81,7 @@ export class GameLayer {
 
     this.camera.updateProjectionMatrix();
 
-    this.cameraController = new CameraController(this.camera, this.eventBus);
+    this.cameraController = new CameraController(this.camera);
   }
 
 
@@ -176,7 +175,7 @@ export class GameLayer {
       this.orbitControls.enabled = false;
 
     gsap.delayedCall(ANIMATION_TIMINGS.LEVEL_UP_DELAY, () => {
-      this.eventBus.emit('GRID_ITEMS:SHOW');
+      eventEmitter.emit('GRID_ITEMS:SHOW');
     });
   }
 
@@ -245,7 +244,7 @@ export class GameLayer {
   }
 
   private setupLightingEventListeners(): void {
-    this.eventBus.on('LIGHTING:TOGGLE', () => {
+    eventEmitter.on('LIGHTING:TOGGLE', () => {
       if (!this.lightingController) return;
 
       this.lightingController.toggleDayNight();
@@ -274,7 +273,7 @@ export class GameLayer {
       this.particleSystem.update(delta);
     }
 
-    this.eventBus.emit('GAME:UPDATE');
+    eventEmitter.emit('GAME:UPDATE');
 
     this.webglRenderer.resetState();
     this.webglRenderer.render(this.threeScene, this.camera);

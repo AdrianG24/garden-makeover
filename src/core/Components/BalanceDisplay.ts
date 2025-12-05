@@ -1,17 +1,17 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
-import { EventBusService } from '../Services/EventBusService';
+import { eventEmitter } from '../Services/EventBusService';
 
 export class BalanceDisplay extends Container {
   private balanceText!: Text;
   private background!: Graphics;
   private currentBalance: number = 90;
 
-  constructor(private eventBus: EventBusService) {
+  constructor() {
     super();
     this.createBalanceUI();
     this.setupEventListeners();
-    this.eventBus.emit('TUTORIAL:SET_BALANCE', this);
+    eventEmitter.emit('TUTORIAL:SET_BALANCE', this);
   }
 
   private createBalanceUI(): void {
@@ -45,7 +45,7 @@ export class BalanceDisplay extends Container {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('BALANCE:UPDATED', (balance: unknown) => {
+    eventEmitter.on('BALANCE:UPDATED', (balance: unknown) => {
       this.updateBalance(balance as number);
     });
   }

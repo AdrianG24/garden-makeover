@@ -1,4 +1,4 @@
-import { EventBusService } from './EventBusService';
+import { eventEmitter } from './EventBusService';
 
 export class ItemService {
   balance: number = 90;
@@ -22,12 +22,12 @@ export class ItemService {
     4: 350,
   };
 
-  constructor(private eventBus: EventBusService) {}
+  constructor() {}
 
   addReward(level: number): void {
     const reward = this.rewards[level] || 200;
     this.balance += reward;
-    this.eventBus.emit('BALANCE:UPDATED', this.balance);
+    eventEmitter.emit('BALANCE:UPDATED', this.balance);
   }
 
   saveStartBalance(): void {
@@ -36,13 +36,13 @@ export class ItemService {
 
   restoreStartBalance(): void {
     this.balance = this.levelStartBalance;
-    this.eventBus.emit('BALANCE:UPDATED', this.balance);
+    eventEmitter.emit('BALANCE:UPDATED', this.balance);
   }
 
   spend(amount: number): boolean {
     if (this.balance >= amount) {
       this.balance -= amount;
-      this.eventBus.emit('BALANCE:UPDATED', this.balance);
+      eventEmitter.emit('BALANCE:UPDATED', this.balance);
       return true;
     }
     return false;
