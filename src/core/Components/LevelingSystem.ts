@@ -453,6 +453,24 @@ export class LevelingSystem extends Container {
     this.currentGoals.forEach(g => g.completed = false);
     this.updateDisplay();
   }
+  private updateTextStyles(): void {
+    this.levelText.style = new TextStyle({
+      fontFamily: 'Arial',
+      fontSize: this.isMobile ? 18 : 24,
+      fontWeight: 'bold',
+      fill: '#FFD700',
+      stroke: { color: '#000000', width: 3, join: 'round' }
+    });
+
+    this.progressText.style = new TextStyle({
+      fontFamily: 'Arial',
+      fontSize: this.isMobile ? 12 : 14,
+      fontWeight: 'bold',
+      fill: '#FFFFFF',
+      stroke: { color: '#000000', width: 2, join: 'round' }
+    });
+  }
+
   private updateCongratulationsPopupPosition(): void {
     if (!this.popupContainer) return;
 
@@ -497,11 +515,12 @@ export class LevelingSystem extends Container {
 
   public resize(width: number): void {
     this.updateLayoutValues(width);
+    this.updateTextStyles();
     this.redrawStaticUI();
     this.updateDisplay();
-
     this.updateCongratulationsPopupPosition();
   }
+
 
 
 
