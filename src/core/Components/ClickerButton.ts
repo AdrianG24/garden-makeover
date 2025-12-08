@@ -2,12 +2,15 @@ import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import gsap from 'gsap';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
+import { eventEmitter } from '../Services/EventBusService';
 
 export class ClickerButton extends Container {
   private button: Graphics;
   private buttonText: Text;
   private coinText: Text;
   private isMobile = window.innerWidth < 968;
+  private currentLevel = 1;
+  private clickValue = 5;
 
   constructor(
       private itemService: ItemService,
@@ -42,8 +45,22 @@ export class ClickerButton extends Container {
     this.button.on('pointerover', () => this.onHover());
     this.button.on('pointerout', () => this.onHoverOut());
 
+    this.setupEvents();
+    this.updateClickValue();
     this.updateVisuals();
     this.updatePosition(window.innerWidth, window.innerHeight);
+  }
+
+  private setupEvents(): void {
+    eventEmitter.on('GRID_ITEMS:CHANGE_LEVEL', (level: unknown) => {
+      this.currentLevel = level as number;
+      this.updateClickValue();
+    });
+  }
+
+  private updateClickValue(): void {
+    this.clickValue = 5 * Math.pow(2, this.currentLevel - 1);
+    this.coinText.text = `+${this.clickValue}$`;
   }
 
   private updateVisuals(): void {
@@ -72,7 +89,7 @@ export class ClickerButton extends Container {
   }
 
   private onClick(): void {
-    this.itemService.addMoney(5);
+    this.itemService.addMoney(this.clickValue);
     this.audioService.playSound('sound_click', false);
 
     gsap.killTweensOf(this.scale);
@@ -84,8 +101,7 @@ export class ClickerButton extends Container {
       repeat: 1
     });
 
-
-    const float = new Text('+5$', {
+    const float = new Text(`+${this.clickValue}$`, {
       fontFamily: 'Arial',
       fontSize: this.isMobile ? 20 : 28,
       fontWeight: 'bold',

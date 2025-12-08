@@ -140,11 +140,13 @@ export class LevelingSystem extends Container {
     this.levelText.style.fontSize = this.isMobile ? 14 : 18;
     this.levelText.position.set(this.padding, this.padding);
 
+    const barY = this.padding + (this.isMobile ? 28 : 35);
+
     this.progressBackground.clear();
     this.progressBackground.fill(0x333333, 0.8);
     this.progressBackground.roundRect(
         this.padding,
-        this.padding + (this.isMobile ? 18 : 24),
+        barY,
         this.barWidth,
         this.barHeight,
         this.barHeight / 2
@@ -154,7 +156,7 @@ export class LevelingSystem extends Container {
     this.progressText.style.fontSize = this.isMobile ? 10 : 12;
     this.progressText.position.set(
         this.padding + this.barWidth / 2,
-        this.padding + (this.isMobile ? 18 : 24) + this.barHeight / 2
+        barY + this.barHeight / 2
     );
   }
 
@@ -163,7 +165,6 @@ export class LevelingSystem extends Container {
     eventEmitter.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       this.completeGoal(goalId as string);
     });
-    eventEmitter.on('LEVEL:RESET', () => this.resetProgress());
   }
 
   private completeGoal(goalId: string): void {
@@ -179,7 +180,6 @@ export class LevelingSystem extends Container {
   }
 
   private levelUp(): void {
-    this.itemService.addReward(this.currentLevel + 1);
     this.currentLevel++;
     this.audioService.playSound('sound_popup_chest', false);
 
@@ -247,13 +247,6 @@ export class LevelingSystem extends Container {
       { alpha: 0.5 },
       { alpha: 1, duration: 0.3, ease: 'power2.out' }
     );
-  }
-
-  private resetProgress(): void {
-    this.currentLevel = 0;
-    this.currentGoals = [...this.levels[0].goals];
-    this.currentGoals.forEach(g => g.completed = false);
-    this.updateDisplay();
   }
 
   private updateTextStyles(): void {

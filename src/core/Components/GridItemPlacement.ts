@@ -211,13 +211,6 @@ export class GridItemPlacement extends Container {
         this.placeObject(itemId, bubble);
       }
     });
-
-    eventEmitter.off('LEVEL:GOAL_COMPLETED');
-    eventEmitter.once('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
-      if (goalId === bubble.itemData.id) {
-        this.hideBubble(bubble);
-      }
-    });
   }
 
   private placeObject(itemId: string, bubble: Container & { itemData: ItemData }): void {

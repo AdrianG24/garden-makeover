@@ -15,23 +15,10 @@ export class ItemService {
     grape: 35,
   };
 
-  private readonly rewards: Record<number, number> = {
-    1: 200,
-    2: 250,
-    3: 300,
-    4: 350,
-  };
-
   constructor() {}
 
   addMoney(amount: number): void {
     this.balance += amount;
-    eventEmitter.emit('BALANCE:UPDATED', this.balance);
-  }
-
-  addReward(level: number): void {
-    const reward = this.rewards[level] || 200;
-    this.balance += reward;
     eventEmitter.emit('BALANCE:UPDATED', this.balance);
   }
 

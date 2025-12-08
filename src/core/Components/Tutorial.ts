@@ -7,6 +7,11 @@ interface TutorialStep {
   description: string;
 }
 
+interface ButtonContainer extends Container {
+  bg: Graphics;
+  txt: Text;
+}
+
 export class Tutorial extends Container {
   private overlay!: Graphics;
   private panel!: Container;
@@ -16,16 +21,16 @@ export class Tutorial extends Container {
   private descriptionText!: Text;
   private stepIndicator!: Text;
 
-  private nextButton!: Container;
+  private nextButton!: ButtonContainer;
   private nextButtonText!: Text;
-  private skipButton!: Container;
+  private skipButton!: ButtonContainer;
 
   private currentStep = 0;
   private steps: TutorialStep[] = [
     { title: '🌟 Welcome!', description: 'Build your dream garden farm!\nLet\'s learn the basics.' },
-    { title: '💰 Earn Money', description: 'Click the golden coin button\nto earn $5 per click!' },
+    { title: '💰 Earn Money', description: 'Click the golden coin button\nto earn $ per click!' },
     { title: '🎯 Place Items', description: 'Tap glowing spots to add\nanimals and plants to your farm.' },
-    { title: '📊 Level Up', description: 'Complete placements to gain XP\nand unlock rewards!' },
+    { title: '📊 Level Up', description: 'Complete placements to level up!\nHigher levels = more $ per click!' },
     { title: '🌙 Day & Night', description: 'Use the sun/moon button\nto toggle lighting.' },
     { title: '✨ Have Fun!', description: 'You\'re ready to play!\nEnjoy building your garden!' }
   ];
@@ -94,8 +99,8 @@ export class Tutorial extends Container {
     this.layout();
   }
 
-  private createButton(label: string): Container {
-    const container = new Container();
+  private createButton(label: string): ButtonContainer {
+    const container = new Container() as ButtonContainer;
     container.eventMode = 'static';
     container.cursor = 'pointer';
 
@@ -120,8 +125,8 @@ export class Tutorial extends Container {
         gsap.to(container.scale, { x: 1, y: 1, duration: 0.2 })
     );
 
-    (container as any).bg = bg;
-    (container as any).txt = txt;
+    container.bg = bg;
+    container.txt = txt;
 
     return container;
   }
@@ -175,9 +180,9 @@ export class Tutorial extends Container {
 
     const buttonsOffset = this.isMobile ? 70 : 100;
 
-    const layoutButton = (btn: Container, x: number) => {
-      const bg = (btn as any).bg as Graphics;
-      const txt = (btn as any).txt as Text;
+    const layoutButton = (btn: ButtonContainer, x: number) => {
+      const bg = btn.bg;
+      const txt = btn.txt;
 
       bg.clear();
       bg.fill(txt.text === 'Next' || txt.text === 'Start!' ? 0x4CAF50 : 0x666666);
