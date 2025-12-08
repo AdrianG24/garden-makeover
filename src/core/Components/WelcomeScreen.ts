@@ -70,14 +70,18 @@ export class WelcomeScreen extends Container {
   private layout(): void {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const isMobile = w < 968;
+
+    const smallest = Math.min(w, h);
+
+    const isMobile = smallest < 650;
 
     this.overlay.clear();
     this.overlay.rect(0, 0, w, h);
     this.overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
 
-    const panelWidth = isMobile ? Math.min(w - 40, 340) : 600;
-    const panelHeight = isMobile ? Math.min(h - 80, 330) : 520;
+    const panelWidth = isMobile ? smallest * 0.9 : 600;
+    const panelHeight = isMobile ? smallest * 0.8 : 520;
+
     const halfW = panelWidth / 2;
     const halfH = panelHeight / 2;
 
@@ -89,13 +93,13 @@ export class WelcomeScreen extends Container {
     this.title.text = 'Welcome to Garden Makeover!';
     this.title.style = {
       fontFamily: 'Arial',
-      fontSize: isMobile ? 16 : 30,
+      fontSize: isMobile ? 18 : 30,
       fill: '#f4e4c1',
       fontWeight: 'bold',
       align: 'center',
       stroke: { color: '#2c5f2d', width: isMobile ? 3 : 5 }
     };
-    this.title.position.set(0, isMobile ? -halfH + 45 : -halfH + 70);
+    this.title.position.set(0, -halfH + (isMobile ? 35 : 70));
 
     this.description.text = isMobile
         ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?'
@@ -106,12 +110,12 @@ export class WelcomeScreen extends Container {
       fontSize: isMobile ? 14 : 22,
       fill: '#ffffff',
       align: 'center',
-      lineHeight: isMobile ? 12 : 26,
+      lineHeight: isMobile ? 14 : 26,
       stroke: { color: '#2c5f2d', width: 2 }
     };
-    this.description.position.set(0, isMobile ? -10 : 0);
+    this.description.position.set(0, isMobile ? -5 : 0);
 
-    const btnW = isMobile ? 210 : 300;
+    const btnW = isMobile ? smallest * 0.7 : 300;
     const btnH = isMobile ? 55 : 80;
     const btnHW = btnW / 2;
     const btnHH = btnH / 2;
@@ -130,9 +134,16 @@ export class WelcomeScreen extends Container {
       stroke: { color: '#2c5f2d', width: isMobile ? 2 : 4 }
     };
 
-    this.buyButton.position.set(0, halfH - (isMobile ? 50 : 70));
+    this.buyButton.position.set(0, halfH - (isMobile ? 45 : 70));
 
     this.panel.position.set(w / 2, h / 2);
+
+    const bounds = this.panel.getLocalBounds();
+    const scaleX = (w * 0.9) / bounds.width;
+    const scaleY = (h * 0.9) / bounds.height;
+    const finalScale = Math.min(scaleX, scaleY, 1);
+
+    this.panel.scale.set(finalScale);
   }
 
   private handleBuy(): void {
