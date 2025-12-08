@@ -133,9 +133,8 @@ export class LevelingSystem extends Container {
     const panelHeight = this.isMobile ? 55 : 75;
 
     this.panel.clear();
-    this.panel.fill(0x2c5f2d, 0.85);
     this.panel.roundRect(0, 0, panelWidth, panelHeight, 8);
-    this.panel.endFill();
+    this.panel.fill(0x2c5f2d, 0.85);
 
     this.levelText.style.fontSize = this.isMobile ? 14 : 18;
     this.levelText.position.set(this.padding, this.padding);
@@ -143,7 +142,6 @@ export class LevelingSystem extends Container {
     const barY = this.padding + (this.isMobile ? 28 : 35);
 
     this.progressBackground.clear();
-    this.progressBackground.fill(0x1a3a1b, 0.9);
     this.progressBackground.roundRect(
         this.padding,
         barY,
@@ -151,7 +149,7 @@ export class LevelingSystem extends Container {
         this.barHeight,
         this.barHeight / 2
     );
-    this.progressBackground.endFill();
+    this.progressBackground.fill(0x1a3a1b, 0.9);
 
     this.progressText.style.fontSize = this.isMobile ? 10 : 12;
     this.progressText.position.set(
@@ -231,7 +229,6 @@ export class LevelingSystem extends Container {
     const progress = totalGoals > 0 ? completedGoals / totalGoals : 0;
 
     this.progressBar.clear();
-    this.progressBar.fill(0x4CAF50, 1);
     this.progressBar.roundRect(
       this.padding,
       this.padding + (this.isMobile ? 28 : 35),
@@ -239,7 +236,7 @@ export class LevelingSystem extends Container {
       this.barHeight,
       this.barHeight / 2
     );
-    this.progressBar.endFill();
+    this.progressBar.fill(0x4CAF50, 1);
 
     this.progressText.text = `${completedGoals}/${totalGoals}`;
 

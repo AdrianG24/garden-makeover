@@ -68,11 +68,9 @@ export class GridItemPlacement extends Container {
       bubble.itemData = item;
 
       const bg = new Graphics();
+      bg.circle(0, 0, size);
       bg.fill(0x5ec96d, 0.95);
-      bg.circle(0, 0, size);
-      bg.lineStyle(isMobile ? 2 : 4, 0xFFFFFF, 1);
-      bg.endFill();
-      bg.circle(0, 0, size);
+      bg.stroke({ width: isMobile ? 2 : 4, color: 0xFFFFFF });
       bubble.addChild(bg);
 
       const text = new Text('?', new TextStyle({
@@ -109,11 +107,9 @@ export class GridItemPlacement extends Container {
     this.bubbles.forEach(bubble => {
       const bg = bubble.children[0] as Graphics;
       bg.clear();
+      bg.circle(0, 0, size);
       bg.fill(0x5ec96d, 0.95);
-      bg.circle(0, 0, size);
-      bg.endFill();
-      bg.lineStyle(isMobile ? 2 : 4, 0xFFFFFF, 1);
-      bg.circle(0, 0, size);
+      bg.stroke({ width: isMobile ? 2 : 4, color: 0xFFFFFF });
 
       const text = bubble.children[1] as Text;
       text.style.fontSize = fontSize;

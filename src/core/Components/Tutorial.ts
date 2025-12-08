@@ -130,9 +130,8 @@ export class Tutorial extends Container {
     const h = window.innerHeight;
 
     this.overlay.clear();
-    this.overlay.fill(0x000000, 0.5);
     this.overlay.rect(0, 0, w, h);
-    this.overlay.endFill();
+    this.overlay.fill(0x000000, 0.5);
 
     this.panel.position.set(w / 2, h / 2);
 
@@ -145,11 +144,9 @@ export class Tutorial extends Container {
     const halfH = this.panelHeight / 2;
 
     this.panelBg.clear();
+    this.panelBg.roundRect(-halfW, -halfH, this.panelWidth, this.panelHeight, 15);
     this.panelBg.fill(0x2c5f2d, 1);
-    this.panelBg.roundRect(-halfW, -halfH, this.panelWidth, this.panelHeight, 15);
     this.panelBg.stroke({ width: 4, color: 0xFFD700 });
-    this.panelBg.roundRect(-halfW, -halfH, this.panelWidth, this.panelHeight, 15);
-    this.panelBg.endFill();
 
     const titleSize = this.isMobile ? 24 : 32;
     const descSize = this.isMobile ? 17 : 22;
@@ -179,11 +176,9 @@ export class Tutorial extends Container {
       const txt = btn.txt;
 
       bg.clear();
+      bg.roundRect(-btnW / 2, -btnH / 2, btnW, btnH, 10);
       bg.fill(txt.text === 'Next' || txt.text === 'Start!' ? 0x4CAF50 : 0x666666);
-      bg.roundRect(-btnW / 2, -btnH / 2, btnW, btnH, 10);
       bg.stroke({ width: 3, color: 0xFFFFFF });
-      bg.roundRect(-btnW / 2, -btnH / 2, btnW, btnH, 10);
-      bg.endFill();
 
       txt.style.fontSize = this.isMobile ? 17 : 22;
 

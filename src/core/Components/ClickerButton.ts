@@ -71,11 +71,9 @@ export class ClickerButton extends Container {
     const coinSize = this.isMobile ? 16 : 24;
 
     this.button.clear();
+    this.button.circle(0, 0, size / 2);
     this.button.fill(0xFFD700, 1);
-    this.button.circle(0, 0, size / 2);
     this.button.stroke({ width: this.isMobile ? 4 : 6, color: 0xFF8C00 });
-    this.button.circle(0, 0, size / 2);
-    this.button.endFill();
 
     this.buttonText.style.fontSize = textSize;
 

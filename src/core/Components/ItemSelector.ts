@@ -129,11 +129,9 @@ export class ItemSelector extends Container {
     const iconSize = isMobile ? 34 : 50;
 
     const bg = new Graphics();
+    bg.roundRect(-half, -half + 5, box, box, 10);
     bg.fill(canAfford ? 0x4CAF50 : 0x666666, canAfford ? 0.9 : 0.5);
-    bg.roundRect(-half, -half + 5, box, box, 10);
-    bg.endFill();
     bg.stroke({ width: isMobile ? 3 : 4, color: canAfford ? 0xFFFFFF : 0x333333 });
-    bg.roundRect(-half, -half + 5, box, box, 10);
     shake.addChild(bg);
 
 
@@ -226,7 +224,7 @@ export class ItemSelector extends Container {
 
   public resize(width: number, height: number): void {
     if (!this.visible) return;
-    this.overlay.clear().fill(0x000000, 0.7).rect(0, 0, width, height).endFill();
+    this.overlay.clear().rect(0, 0, width, height).fill(0x000000, 0.7);
     this.panelScale();
   }
 }

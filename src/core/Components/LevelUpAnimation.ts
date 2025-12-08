@@ -6,9 +6,8 @@ export class LevelUpAnimation {
     const container = new Container();
 
     const glow = new Graphics();
-    glow.fill(0xFFD700, 0.3);
     glow.circle(0, 0, 100);
-    glow.endFill();
+    glow.fill(0xFFD700, 0.3);
     container.addChild(glow);
 
     const levelNumber = new Text(level.toString(), new TextStyle({

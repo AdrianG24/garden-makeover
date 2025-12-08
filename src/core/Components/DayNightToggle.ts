@@ -20,9 +20,8 @@ export class DayNightToggle extends Container {
     const fontSize = isMobile ? 22 : 32;
 
     this.background = new Graphics();
-    this.background.fill(0x000000, 0.6);
     this.background.roundRect(0, 0, this.buttonSize, this.buttonSize, 10);
-    this.background.endFill();
+    this.background.fill(0x000000, 0.6);
     this.addChild(this.background);
 
     this.iconText = new Text(
