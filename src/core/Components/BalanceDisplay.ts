@@ -21,7 +21,7 @@ export class BalanceDisplay extends Container {
     const fontSize = isMobile ? 16 : 22;
 
     this.background = new Graphics();
-    this.background.fill(0x000000, 0.6);
+    this.background.fill(0x2c5f2d, 0.85);
     this.background.roundRect(0, 0, width, height, 10);
     this.background.endFill();
     this.addChild(this.background);
@@ -71,7 +71,7 @@ export class BalanceDisplay extends Container {
     const paddingY = 10;
 
     this.background.clear();
-    this.background.fill(0x000000, 0.6);
+    this.background.fill(0x2c5f2d, 0.85);
     this.background.roundRect(0, 0, width, height, 8);
     this.background.endFill();
 

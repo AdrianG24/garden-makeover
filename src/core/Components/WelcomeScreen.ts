@@ -64,7 +64,7 @@ export class WelcomeScreen extends Container {
     this.buyButton.on('pointerout', () => gsap.to(this.buyButton.scale, { x: 1, y: 1, duration: 0.15, ease: 'power2.in' }));
 
     this.alpha = 0;
-    gsap.to(this, { alpha: 1, duration: 0.3 });
+    gsap.to(this, { alpha: 1, duration: 0.5, ease: 'power2.out' });
   }
 
   private layout(): void {

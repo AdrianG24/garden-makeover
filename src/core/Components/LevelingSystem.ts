@@ -133,7 +133,7 @@ export class LevelingSystem extends Container {
     const panelHeight = this.isMobile ? 55 : 75;
 
     this.panel.clear();
-    this.panel.fill(0x000000, 0.6);
+    this.panel.fill(0x2c5f2d, 0.85);
     this.panel.roundRect(0, 0, panelWidth, panelHeight, 8);
     this.panel.endFill();
 
@@ -143,7 +143,7 @@ export class LevelingSystem extends Container {
     const barY = this.padding + (this.isMobile ? 28 : 35);
 
     this.progressBackground.clear();
-    this.progressBackground.fill(0x333333, 0.8);
+    this.progressBackground.fill(0x1a3a1b, 0.9);
     this.progressBackground.roundRect(
         this.padding,
         barY,

@@ -37,8 +37,11 @@ export class Tutorial extends Container {
     this.panelWidth = this.isMobile ? Math.min(window.innerWidth - 40, 360) : 500;
     this.panelHeight = this.isMobile ? 260 : 300;
 
+    this.alpha = 0;
     this.createUI();
     this.updateStepContent();
+
+    gsap.to(this, { alpha: 1, duration: 0.4, delay: 0.1, ease: 'power2.out' });
   }
 
   private createUI(): void {
@@ -194,25 +197,33 @@ export class Tutorial extends Container {
   private updateStepContent(): void {
     const step = this.steps[this.currentStep];
 
-    gsap.to([this.titleText, this.descriptionText], {
-      alpha: 0,
-      duration: 0.15,
-      onComplete: () => {
-        this.titleText.text = step.title;
-        this.descriptionText.text = step.description;
-        this.stepIndicator.text = `${this.currentStep + 1} / ${this.steps.length}`;
+    if (this.currentStep === 0) {
+      this.titleText.text = step.title;
+      this.descriptionText.text = step.description;
+      this.stepIndicator.text = `${this.currentStep + 1} / ${this.steps.length}`;
+      this.nextButtonText.text = 'Next';
+      this.layout();
+    } else {
+      gsap.to([this.titleText, this.descriptionText], {
+        alpha: 0,
+        duration: 0.15,
+        onComplete: () => {
+          this.titleText.text = step.title;
+          this.descriptionText.text = step.description;
+          this.stepIndicator.text = `${this.currentStep + 1} / ${this.steps.length}`;
 
-        this.nextButtonText.text =
-            this.currentStep === this.steps.length - 1 ? 'Start!' : 'Next';
+          this.nextButtonText.text =
+              this.currentStep === this.steps.length - 1 ? 'Start!' : 'Next';
 
-        this.layout();
+          this.layout();
 
-        gsap.to([this.titleText, this.descriptionText], {
-          alpha: 1,
-          duration: 0.15
-        });
-      }
-    });
+          gsap.to([this.titleText, this.descriptionText], {
+            alpha: 1,
+            duration: 0.15
+          });
+        }
+      });
+    }
   }
 
   private nextStep(): void {

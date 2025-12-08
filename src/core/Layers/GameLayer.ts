@@ -90,10 +90,26 @@ export class GameLayer {
     await this.sceneController.displayScene('Base');
 
     const ground = this.sceneController.namedModelsMap.get('ground');
-    if (ground) ground.visible = false;
+    if (ground) {
+      ground.visible = false;
+      ground.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material.transparent = true;
+          child.material.opacity = 0;
+        }
+      });
+    }
 
     const objects = this.sceneController.namedModelsMap.get('objects');
-    if (objects) objects.visible = false;
+    if (objects) {
+      objects.visible = false;
+      objects.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material.transparent = true;
+          child.material.opacity = 0;
+        }
+      });
+    }
 
     this.lightingController = new LightingController(this.threeScene);
     this.addSceneLighting();
@@ -110,23 +126,66 @@ export class GameLayer {
 
     if (ground) {
       ground.visible = true;
+    }
+
+    if (objects) {
+      objects.visible = true;
+    }
+
+    const allMeshes: THREE.Mesh[] = [];
+
+    if (ground) {
       ground.traverse(child => {
         if (child instanceof THREE.Mesh) {
-          child.material.transparent = false;
-          child.material.opacity = 1;
+          allMeshes.push(child);
         }
       });
     }
 
     if (objects) {
-      objects.visible = true;
       objects.traverse(child => {
         if (child instanceof THREE.Mesh) {
-          child.material.transparent = false;
-          child.material.opacity = 1;
+          allMeshes.push(child);
         }
       });
     }
+
+    allMeshes.forEach(mesh => {
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      materials.forEach(mat => {
+        mat.transparent = true;
+        mat.opacity = 0;
+      });
+    });
+
+    const duration = 800;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      allMeshes.forEach(mesh => {
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach(mat => {
+          mat.opacity = progress;
+        });
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        allMeshes.forEach(mesh => {
+          const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          materials.forEach(mat => {
+            mat.transparent = false;
+            mat.opacity = 1;
+          });
+        });
+      }
+    };
+
+    animate();
 
     this.setInitialCameraPosition();
     this.orbitControls.enabled = false;
