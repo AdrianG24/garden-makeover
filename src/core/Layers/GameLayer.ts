@@ -75,7 +75,7 @@ export class GameLayer {
       antialias: RENDERER.antialias,
       canvas: canvasElement,
       powerPreference: 'high-performance',
-      stencil: false,
+      stencil: true,
     });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
