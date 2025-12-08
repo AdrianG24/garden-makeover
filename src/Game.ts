@@ -112,11 +112,11 @@ async function initializePixiRenderer(
   threeRenderer: THREE.WebGLRenderer
 ): Promise<WebGLRenderer> {
   const pixiRenderer = new WebGLRenderer();
-  const context = threeRenderer.getContext();
+  const context = threeRenderer.getContext() as WebGL2RenderingContext;
 
   await pixiRenderer.init({
     canvas: canvasElement,
-    context: context as any,
+    context: context,
     width: window.innerWidth,
     height: window.innerHeight,
     resolution: Math.min(window.devicePixelRatio, 2),

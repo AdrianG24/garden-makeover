@@ -41,7 +41,7 @@ export default (_env, argv) => {
         new TerserPlugin({
           terserOptions: {
             ecma: 6,
-            compress: { drop_console: true },
+            compress: { drop_console: false },
             output: { comments: false, beautify: false },
           },
         }),

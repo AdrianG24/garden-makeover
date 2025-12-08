@@ -96,7 +96,7 @@ export class ItemSelector extends Container {
       const col = index % cols;
 
       let x = startX + col * spacingX;
-      let y = startY + row * spacingY;
+      const y = startY + row * spacingY;
 
       const isLast = index === this.itemOptions.length - 1;
       const aloneInRow = row === 2 && this.itemOptions.length % cols === 1;
