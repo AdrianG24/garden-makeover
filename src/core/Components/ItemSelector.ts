@@ -41,7 +41,7 @@ export class ItemSelector extends Container {
     const h = window.innerHeight;
     const isMobile = Math.min(w, h) < 900;
 
-    this.overlay = new Graphics().fill(0x000000, 0.7).rect(0, 0, w, h).endFill();
+    this.overlay = new Graphics().rect(0, 0, w, h).fill(0x000000, 0.7);
     this.overlay.eventMode = 'static';
     this.overlay.on('pointerdown', () => this.hideSelector());
     this.addChild(this.overlay);
