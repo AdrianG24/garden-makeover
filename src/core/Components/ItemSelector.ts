@@ -51,48 +51,102 @@ export class ItemSelector extends Container {
     gsap.to(this, { alpha: 1, duration: 0.3, ease: 'power2.out' });
   }
 
+  // private createSelectorUI(): void {
+  //   const w = window.innerWidth;
+  //   const h = window.innerHeight;
+  //   const isMobile = Math.min(w, h) < 900;
+  //
+  //   this.overlay = new Graphics();
+  //   this.overlay.fill(0x000000, 0.7);
+  //   this.overlay.rect(0, 0, w, h);
+  //   this.overlay.endFill();
+  //   this.overlay.eventMode = 'static';
+  //   this.overlay.on('pointerdown', () => this.hideSelector());
+  //   this.addChild(this.overlay);
+  //
+  //   this.panel = new Container();
+  //   this.panel.position.set(w / 2, h / 2);
+  //
+  //   const panelWidth = Math.min(isMobile ? w - 40 : 560, w * 0.95);
+  //   const panelHeight = Math.min(isMobile ? 260 : 280, h * 0.85);
+  //   const halfWidth = panelWidth / 2;
+  //   const halfHeight = panelHeight / 2;
+  //
+  //   const panelBg = new Graphics();
+  //   panelBg.fill(0x2c5f2d, 1);
+  //   panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 14);
+  //   panelBg.endFill();
+  //   panelBg.stroke({ width: 4, color: 0xFFD700 });
+  //   panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 14);
+  //   this.panel.addChild(panelBg);
+  //
+  //   const title = new Text(
+  //       'Select Item',
+  //       new TextStyle({
+  //         fontFamily: 'Arial',
+  //         fontSize: isMobile ? 20 : 32,
+  //         fontWeight: 'bold',
+  //         fill: '#FFD700',
+  //         stroke: { color: '#000000', width: isMobile ? 3 : 4 }
+  //       })
+  //   );
+  //   title.anchor.set(0.5);
+  //   title.position.set(0, -halfHeight + 28);
+  //   this.panel.addChild(title);
+  //
+  //   this.itemOptions = [
+  //     { type: 'cow', textureKey: 'cow', modelId: 'cow_1', label: 'Cow' },
+  //     { type: 'sheep', textureKey: 'sheep', modelId: 'sheep_1', label: 'Sheep' },
+  //     { type: 'chicken', textureKey: 'chicken', modelId: 'chicken_1', label: 'Chicken' },
+  //     { type: 'corn', textureKey: 'corn', modelId: 'corn_1', label: 'Corn' },
+  //     { type: 'tomato', textureKey: 'tomato', modelId: 'tomato_1', label: 'Tomato' },
+  //     { type: 'strawberry', textureKey: 'strawberry', modelId: 'strawberry_1', label: 'Strawberry' },
+  //     { type: 'grape', textureKey: 'grape', modelId: 'grape_1', label: 'Grape' }
+  //   ];
+  //
+  //   const itemsPerRow = 3;
+  //   const itemSpacingX = isMobile ? 85 : 130;
+  //   const itemSpacingY = isMobile ? 70 : 110;
+  //
+  //   const totalRows = Math.ceil(this.itemOptions.length / itemsPerRow);
+  //   const startY = -((totalRows - 1) * itemSpacingY) / 2 + 5;
+  //   const startX = -((itemsPerRow - 1) * itemSpacingX) / 2;
+  //
+  //   this.itemOptions.forEach((option, index) => {
+  //     const row = Math.floor(index / itemsPerRow);
+  //     const col = index % itemsPerRow;
+  //     const x = startX + col * itemSpacingX;
+  //     const y = startY + row * itemSpacingY;
+  //     const itemContainer = this.createItemOption(option, x, y, isMobile);
+  //     this.panel.addChild(itemContainer);
+  //   });
+  //
+  //   this.addChild(this.panel);
+  //
+  //   this.panelScale();
+  //
+  //   const targetScale = this.panel.scale.x;
+  //   this.panel.scale.set(targetScale * 0.5);
+  //   gsap.to(this.panel.scale, {
+  //     x: targetScale,
+  //     y: targetScale,
+  //     duration: 0.4,
+  //     ease: 'back.out(1.7)'
+  //   });
+  // }
   private createSelectorUI(): void {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const isMobile = Math.min(w, h) < 900;
 
     this.overlay = new Graphics();
-    this.overlay.fill(0x000000, 0.7);
-    this.overlay.rect(0, 0, w, h);
-    this.overlay.endFill();
+    this.overlay.fill(0x000000, 0.7).rect(0, 0, w, h).endFill();
     this.overlay.eventMode = 'static';
     this.overlay.on('pointerdown', () => this.hideSelector());
     this.addChild(this.overlay);
 
     this.panel = new Container();
     this.panel.position.set(w / 2, h / 2);
-
-    const panelWidth = Math.min(isMobile ? w - 40 : 560, w * 0.95);
-    const panelHeight = Math.min(isMobile ? 260 : 280, h * 0.85);
-    const halfWidth = panelWidth / 2;
-    const halfHeight = panelHeight / 2;
-
-    const panelBg = new Graphics();
-    panelBg.fill(0x2c5f2d, 1);
-    panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 14);
-    panelBg.endFill();
-    panelBg.stroke({ width: 4, color: 0xFFD700 });
-    panelBg.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 14);
-    this.panel.addChild(panelBg);
-
-    const title = new Text(
-        'Select Item',
-        new TextStyle({
-          fontFamily: 'Arial',
-          fontSize: isMobile ? 20 : 32,
-          fontWeight: 'bold',
-          fill: '#FFD700',
-          stroke: { color: '#000000', width: isMobile ? 3 : 4 }
-        })
-    );
-    title.anchor.set(0.5);
-    title.position.set(0, -halfHeight + 28);
-    this.panel.addChild(title);
 
     this.itemOptions = [
       { type: 'cow', textureKey: 'cow', modelId: 'cow_1', label: 'Cow' },
@@ -104,19 +158,53 @@ export class ItemSelector extends Container {
       { type: 'grape', textureKey: 'grape', modelId: 'grape_1', label: 'Grape' }
     ];
 
-    const itemsPerRow = 3;
-    const itemSpacingX = isMobile ? 85 : 130;
-    const itemSpacingY = isMobile ? 70 : 110;
+    let cols = 3;
+    if (w < 360) cols = 2;
+    else if (w > 600) cols = 4;
 
-    const totalRows = Math.ceil(this.itemOptions.length / itemsPerRow);
-    const startY = -((totalRows - 1) * itemSpacingY) / 2 + 5;
-    const startX = -((itemsPerRow - 1) * itemSpacingX) / 2;
+    const rows = Math.ceil(this.itemOptions.length / cols);
+
+    const itemSize = isMobile ? 70 : 110;
+    const spacingX = itemSize * 1.2;
+    const spacingY = itemSize * 1.25;
+
+    const panelWidth = cols * spacingX + 60;
+    const panelHeight = rows * spacingY + 120;
+
+    const halfWidth = panelWidth / 2;
+    const halfHeight = panelHeight / 2;
+
+    const panelBg = new Graphics();
+    panelBg
+        .roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, 16)
+        .fill(0x2c5f2d)
+        .stroke({ width: 4, color: 0xFFD700 });
+    this.panel.addChild(panelBg);
+
+    const title = new Text(
+        'Select Item',
+        new TextStyle({
+          fontFamily: 'Arial',
+          fontSize: isMobile ? 22 : 30,
+          fontWeight: 'bold',
+          fill: '#FFD700',
+          stroke: { color: '#000000', width: isMobile ? 2 : 3 }
+        })
+    );
+    title.anchor.set(0.5);
+    title.position.set(0, -halfHeight + 40);
+    this.panel.addChild(title);
+
+    const startX = -((cols - 1) * spacingX) / 2;
+    const startY = -((rows - 1) * spacingY) / 2 + 20;
 
     this.itemOptions.forEach((option, index) => {
-      const row = Math.floor(index / itemsPerRow);
-      const col = index % itemsPerRow;
-      const x = startX + col * itemSpacingX;
-      const y = startY + row * itemSpacingY;
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+
+      const x = startX + col * spacingX;
+      const y = startY + row * spacingY;
+
       const itemContainer = this.createItemOption(option, x, y, isMobile);
       this.panel.addChild(itemContainer);
     });
