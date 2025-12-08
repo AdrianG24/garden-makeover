@@ -11,6 +11,7 @@ import { BalanceDisplay } from './core/Components/BalanceDisplay';
 import { ItemSelector } from './core/Components/ItemSelector';
 import { DayNightToggle } from './core/Components/DayNightToggle';
 import { ClickerButton } from './core/Components/ClickerButton';
+import { Tutorial } from './core/Components/Tutorial';
 import { eventEmitter } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
@@ -153,7 +154,7 @@ function showWelcomeScreen(
   stageContainer.addChild(welcomeScreen);
 
   const handleResize = () => {
-    welcomeScreen.resize(window.innerWidth, window.innerHeight);
+    welcomeScreen.resize();
   };
   window.addEventListener('resize', handleResize);
 
@@ -221,9 +222,10 @@ function createUILayers(
     duration: 0.4,
     delay: 1,
     ease: 'power2.out',
+    onComplete: () => {
+      showTutorial(stageContainer);
+    }
   });
-
-  eventEmitter.emit('HELPER:SHOW');
 
   itemService.saveStartBalance();
 
@@ -241,6 +243,34 @@ function createUILayers(
     gridItemPlacement.resizeIcons();
     itemSelector.resize(width, height);
   });
+}
+
+function showTutorial(stageContainer: Container): void {
+  const shouldShowTutorial = !localStorage.getItem('tutorial_completed');
+
+  console.log('Tutorial check:', { shouldShowTutorial, hasKey: !!localStorage.getItem('tutorial_completed') });
+
+  console.log('Creating tutorial...');
+  const tutorial = new Tutorial(() => {
+    console.log('Tutorial completed callback');
+    localStorage.setItem('tutorial_completed', 'true');
+    eventEmitter.emit('HELPER:SHOW');
+  });
+  stageContainer.addChild(tutorial);
+  console.log('Tutorial added to stage');
+
+  const handleResize = () => {
+    tutorial.resize();
+  };
+  window.addEventListener('resize', handleResize);
+
+  tutorial.once('destroyed', () => {
+    window.removeEventListener('resize', handleResize);
+  });
+
+  if (!shouldShowTutorial) {
+    eventEmitter.emit('HELPER:SHOW');
+  }
 }
 
 function setupAnimationLoop(

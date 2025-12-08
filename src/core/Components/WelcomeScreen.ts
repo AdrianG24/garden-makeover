@@ -5,172 +5,149 @@ import gsap from 'gsap';
 export class WelcomeScreen extends Container {
   private onBuyCallback: () => void;
 
+  private overlay!: Graphics;
+  private panel!: Container;
+  private panelBg!: Graphics;
+  private title!: Text;
+  private description!: Text;
+  private buyButton!: Container;
+  private buyButtonBg!: Graphics;
+  private buyButtonText!: Text;
+
   constructor(
-    onBuy: () => void,
-    private audioService: AudioService
+      onBuy: () => void,
+      private audioService: AudioService
   ) {
     super();
     this.onBuyCallback = onBuy;
-    this.createWelcomeInterface();
+
+    this.create();
+    this.layout();
   }
 
-  private createWelcomeInterface(): void {
-    const backgroundOverlay = this.createBackgroundOverlay();
-    this.addChild(backgroundOverlay);
+  private create(): void {
+    this.overlay = new Graphics();
+    this.addChild(this.overlay);
 
-    const welcomePanel = this.createWelcomePanel();
-    this.addChild(welcomePanel);
+    this.panel = new Container();
+    this.addChild(this.panel);
 
-    this.animateEntrance();
-  }
+    this.panelBg = new Graphics();
+    this.panel.addChild(this.panelBg);
 
-  private createBackgroundOverlay(): Graphics {
-    const overlay = new Graphics();
-    overlay.rect(0, 0, window.innerWidth, window.innerHeight);
-    overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
-    return overlay;
-  }
+    this.title = new Text('', {});
+    this.title.anchor.set(0.5);
+    this.panel.addChild(this.title);
 
-  private createWelcomePanel(): Container {
-    const panel = new Container();
-    const isMobile = window.innerWidth < 968;
+    this.description = new Text('', {});
+    this.description.anchor.set(0.5);
+    this.panel.addChild(this.description);
 
-    const panelWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 600;
-    const panelHeight = isMobile ? Math.min(window.innerHeight - 80, 320) : 500;
-    const halfWidth = panelWidth / 2;
-    const halfHeight = panelHeight / 2;
+    this.buyButton = new Container();
+    this.buyButton.eventMode = 'static';
+    this.buyButton.cursor = 'pointer';
 
-    const panelBackground = new Graphics();
-    panelBackground.roundRect(-halfWidth, -halfHeight, panelWidth, panelHeight, isMobile ? 15 : 20);
-    panelBackground.fill({ color: 0x4a7c59 });
-    panelBackground.stroke({ width: isMobile ? 5 : 8, color: 0xf4e4c1 });
+    this.buyButtonBg = new Graphics();
+    this.buyButton.addChild(this.buyButtonBg);
 
-    panel.addChild(panelBackground);
+    this.buyButtonText = new Text('', {});
+    this.buyButtonText.anchor.set(0.5);
+    this.buyButton.addChild(this.buyButtonText);
 
-    const titleText = new Text({
-      text: '🌾 Welcome to Garden Makeover! 🌾',
-      style: {
-        fontFamily: 'Arial',
-        fontSize: isMobile ? 18 : 28,
-        fill: '#f4e4c1',
-        fontWeight: 'bold',
-        align: 'center',
-        stroke: { color: '#2c5f2d', width: isMobile ? 3 : 4 },
-      }
-    });
-    titleText.anchor.set(0.5);
-    titleText.position.set(0, isMobile ? -halfHeight + 40 : -150);
-    panel.addChild(titleText);
+    this.panel.addChild(this.buyButton);
 
-    const descriptionText = new Text({
-      text: isMobile ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?' : 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready to begin?',
-      style: {
-        fontFamily: 'Arial',
-        fontSize: isMobile ? 14 : 24,
-        fill: '#ffffff',
-        align: 'center',
-        lineHeight: isMobile ? 12 : 24,
-        stroke: { color: '#2c5f2d', width: 2 },
-      }
-    });
-    descriptionText.anchor.set(0.5);
-    descriptionText.position.set(0, isMobile ? -10 : -20);
-    panel.addChild(descriptionText);
-
-    const buyButton = this.createBuyButton();
-    buyButton.position.set(0, isMobile ? halfHeight - 50 : 150);
-    panel.addChild(buyButton);
-
-    panel.position.set(window.innerWidth / 2, window.innerHeight / 2);
-
-    return panel;
-  }
-
-  private createBuyButton(): Container {
-    const button = new Container();
-    button.eventMode = 'static';
-    button.cursor = 'pointer';
-
-    const isMobile = window.innerWidth < 968;
-    const buttonWidth = isMobile ? 220 : 300;
-    const buttonHeight = isMobile ? 55 : 80;
-    const halfWidth = buttonWidth / 2;
-    const halfHeight = buttonHeight / 2;
-
-    const buttonBackground = new Graphics();
-    buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-    buttonBackground.fill({ color: 0x86c232 });
-    buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
-
-    button.addChild(buttonBackground);
-
-    const buttonText = new Text({
-      text: '🏡 BUY YOUR FARM 🏡',
-      style: {
-        fontFamily: 'Arial',
-        fontSize: isMobile ? 20 : 32,
-        fill: '#ffffff',
-        fontWeight: 'bold',
-        stroke: { color: '#2c5f2d', width: isMobile ? 2 : 3 },
-      }
-    });
-    buttonText.anchor.set(0.5);
-    button.addChild(buttonText);
-
-    button.on('pointerover', () => {
-      gsap.to(button.scale, { x: 1.1, y: 1.1, duration: 0.2 });
-      buttonBackground.clear();
-      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-      buttonBackground.fill({ color: 0x9ed63a });
-      buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
-    });
-
-    button.on('pointerout', () => {
-      gsap.to(button.scale, { x: 1, y: 1, duration: 0.2 });
-      buttonBackground.clear();
-      buttonBackground.roundRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, 15);
-      buttonBackground.fill({ color: 0x86c232 });
-      buttonBackground.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
-    });
-
-    button.on('pointerdown', () => {
+    this.buyButton.on('pointerdown', () => {
       this.audioService.playSound('sound_click');
-      this.handleBuyClick();
+      this.handleBuy();
     });
+    this.buyButton.on('pointerover', () => gsap.to(this.buyButton.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
+    this.buyButton.on('pointerout', () => gsap.to(this.buyButton.scale, { x: 1, y: 1, duration: 0.2 }));
 
-    return button;
-  }
-
-  private animateEntrance(): void {
     this.alpha = 0;
-    gsap.to(this, {
-      alpha: 1,
-      duration: 0,
-      ease: 'power2.out',
-    });
+    gsap.to(this, { alpha: 1, duration: 0.3 });
   }
 
-  private handleBuyClick(): void {
-    this.audioService.playSound('sound_popup_chest');
+  private layout(): void {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const isMobile = w < 968;
 
+    this.overlay.clear();
+    this.overlay.rect(0, 0, w, h);
+    this.overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
+
+    const panelWidth = isMobile ? Math.min(w - 40, 340) : 600;
+    const panelHeight = isMobile ? Math.min(h - 80, 330) : 520;
+    const halfW = panelWidth / 2;
+    const halfH = panelHeight / 2;
+
+    this.panelBg.clear();
+    this.panelBg.roundRect(-halfW, -halfH, panelWidth, panelHeight, isMobile ? 14 : 20);
+    this.panelBg.fill({ color: 0x4a7c59 });
+    this.panelBg.stroke({ width: isMobile ? 4 : 7, color: 0xf4e4c1 });
+
+    this.title.text = 'Welcome to Garden Makeover!';
+    this.title.style = {
+      fontFamily: 'Arial',
+      fontSize: isMobile ? 16 : 30,
+      fill: '#f4e4c1',
+      fontWeight: 'bold',
+      align: 'center',
+      stroke: { color: '#2c5f2d', width: isMobile ? 3 : 5 }
+    };
+    this.title.position.set(0, isMobile ? -halfH + 45 : -halfH + 70);
+
+    this.description.text = isMobile
+        ? 'Start your farming adventure!\n\nBuild your dream farm,\ngrow crops, and raise animals.\n\nAre you ready?'
+        : 'Start your farming adventure!\n\nBuild your dream farm, grow crops,\nand raise animals.\n\nAre you ready to begin?';
+
+    this.description.style = {
+      fontFamily: 'Arial',
+      fontSize: isMobile ? 14 : 22,
+      fill: '#ffffff',
+      align: 'center',
+      lineHeight: isMobile ? 12 : 26,
+      stroke: { color: '#2c5f2d', width: 2 }
+    };
+    this.description.position.set(0, isMobile ? -10 : 0);
+
+    const btnW = isMobile ? 210 : 300;
+    const btnH = isMobile ? 55 : 80;
+    const btnHW = btnW / 2;
+    const btnHH = btnH / 2;
+
+    this.buyButtonBg.clear();
+    this.buyButtonBg.roundRect(-btnHW, -btnHH, btnW, btnH, 15);
+    this.buyButtonBg.fill({ color: 0x86c232 });
+    this.buyButtonBg.stroke({ width: isMobile ? 3 : 4, color: 0xf4e4c1 });
+
+    this.buyButtonText.text = '🏡 BUY YOUR FARM 🏡';
+    this.buyButtonText.style = {
+      fontFamily: 'Arial',
+      fontSize: isMobile ? 18 : 28,
+      fill: '#ffffff',
+      fontWeight: 'bold',
+      stroke: { color: '#2c5f2d', width: isMobile ? 2 : 4 }
+    };
+
+    this.buyButton.position.set(0, halfH - (isMobile ? 50 : 70));
+
+    this.panel.position.set(w / 2, h / 2);
+  }
+
+  private handleBuy(): void {
     gsap.to(this, {
       alpha: 0,
-      duration: 0.6,
+      duration: 0.5,
       ease: 'power2.in',
       onComplete: () => {
         this.onBuyCallback();
         this.destroy({ children: true });
-      },
+      }
     });
   }
 
-  public resize(width: number, height: number): void {
-    const overlay = this.children[0] as Graphics;
-    overlay.clear();
-    overlay.rect(0, 0, width, height);
-    overlay.fill({ color: 0x2c5f2d, alpha: 0.95 });
-
-    const panel = this.children[1] as Container;
-    panel.position.set(width / 2, height / 2);
+  public resize(): void {
+    this.layout();
   }
 }
