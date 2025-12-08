@@ -31,10 +31,10 @@ export class GridItemPlacement extends Container {
 
 
     { id: 'cow_2', modelId: 'cow_1', position: { x: -11.8, y: 4.2, z:  7.3 }, level: 4 },
-    { id: 'tomato_2', modelId: 'tomato_1', position: { x: -3.2,  y: 4.2, z: 12.1 }, level: 4 },
-    { id: 'corn_2', modelId: 'corn_1', position: { x:  4.1,  y: 4.2, z:  10.2 }, level: 4 },
+    { id: 'tomato_2', modelId: 'tomato_1', position: { x: -4.2,  y: 4.2, z: 13.1 }, level: 4 },
+    { id: 'corn_2', modelId: 'corn_1', position: { x:  4.1,  y: 4.2, z:  14.2 }, level: 4 },
     { id: 'strawberry_2', modelId: 'strawberry_1', position: { x:  2.3,  y: 4.2, z: 0.5 }, level: 4 },
-    { id: 'grape_2', modelId: 'grape_1', position: { x: -7.6,  y: 4.2, z:  9.8 }, level: 4 },
+    { id: 'grape_2', modelId: 'grape_1', position: { x: -7.6,  y: 4.2, z:  10.8 }, level: 4 },
 
   ];
 
@@ -151,6 +151,27 @@ export class GridItemPlacement extends Container {
       this.currentLevel = level as number;
       this.showBubbles();
     });
+    eventEmitter.on('GRID_ITEMS:RESET', () => this.resetAllItems());
+  }
+
+  private resetAllItems(): void {
+    // Remove all placed objects from scene
+    this.placedObjects.forEach((obj) => {
+      if (this.scene) {
+        this.scene.remove(obj);
+      }
+    });
+    this.placedObjects.clear();
+
+    // Reset all bubbles to visible for level 1
+    this.currentLevel = 1;
+    this.bubbles.forEach(bubble => {
+      bubble.visible = false;
+      bubble.alpha = 0;
+    });
+
+    // Show level 1 bubbles
+    this.showBubbles();
   }
 
 

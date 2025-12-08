@@ -52,7 +52,7 @@ export class ItemSelector extends Container {
   }
 
   private createSelectorUI(): void {
-    const isMobile = Math.min(window.innerWidth, window.innerHeight) < 600;
+    const isMobile = Math.min(window.innerWidth, window.innerHeight) < 900;
 
     this.overlay = new Graphics();
     this.overlay.fill(0x000000, 0.7);

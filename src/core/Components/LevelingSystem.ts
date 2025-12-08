@@ -53,33 +53,33 @@ export class LevelingSystem extends Container {
           { id: 'chicken_1', description: 'Place a chicken', completed: false }
         ]
       },
-      {
-        level: 2,
-        goals: [
-          { id: 'sheep_1', description: 'Place a sheep', completed: false },
-          { id: 'corn_1', description: 'Place corn', completed: false },
-          { id: 'tomato_1', description: 'Place a tomato', completed: false }
-        ]
-      },
-      {
-        level: 3,
-        goals: [
-          { id: 'strawberry_1', description: 'Place strawberries', completed: false },
-          { id: 'grape_1', description: 'Place grapes', completed: false },
-          { id: 'chicken_2', description: 'Place another chicken', completed: false },
-          { id: 'sheep_2', description: 'Place another sheep', completed: false }
-        ]
-      },
-      {
-        level: 4,
-        goals: [
-          { id: 'cow_2', description: 'Place another cow', completed: false },
-          { id: 'tomato_2', description: 'Place more tomatoes', completed: false },
-          { id: 'corn_2', description: 'Place more corn', completed: false },
-          { id: 'strawberry_2', description: 'Place more strawberries', completed: false },
-          { id: 'grape_2', description: 'Place more grapes', completed: false }
-        ]
-      }
+      // {
+      //   level: 2,
+      //   goals: [
+      //     { id: 'sheep_1', description: 'Place a sheep', completed: false },
+      //     { id: 'corn_1', description: 'Place corn', completed: false },
+      //     { id: 'tomato_1', description: 'Place a tomato', completed: false }
+      //   ]
+      // },
+      // {
+      //   level: 3,
+      //   goals: [
+      //     { id: 'strawberry_1', description: 'Place strawberries', completed: false },
+      //     { id: 'grape_1', description: 'Place grapes', completed: false },
+      //     { id: 'chicken_2', description: 'Place another chicken', completed: false },
+      //     { id: 'sheep_2', description: 'Place another sheep', completed: false }
+      //   ]
+      // },
+      // {
+      //   level: 4,
+      //   goals: [
+      //     { id: 'cow_2', description: 'Place another cow', completed: false },
+      //     { id: 'tomato_2', description: 'Place more tomatoes', completed: false },
+      //     { id: 'corn_2', description: 'Place more corn', completed: false },
+      //     { id: 'strawberry_2', description: 'Place more strawberries', completed: false },
+      //     { id: 'grape_2', description: 'Place more grapes', completed: false }
+      //   ]
+      // }
     ];
 
     this.currentGoals = [...this.levels[0].goals];
@@ -165,6 +165,7 @@ export class LevelingSystem extends Container {
     eventEmitter.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {
       this.completeGoal(goalId as string);
     });
+    eventEmitter.on('LEVEL:RESET', () => this.resetProgress());
   }
 
   private completeGoal(goalId: string): void {
@@ -247,6 +248,21 @@ export class LevelingSystem extends Container {
       { alpha: 0.5 },
       { alpha: 1, duration: 0.3, ease: 'power2.out' }
     );
+  }
+
+  private resetProgress(): void {
+    this.currentLevel = 0;
+    this.currentGoals = [...this.levels[0].goals];
+    this.currentGoals.forEach(g => g.completed = false);
+    this.updateDisplay();
+
+    // Emit events to reset other game components
+    eventEmitter.emit('GRID:UPDATE_LEVEL', 1);
+    eventEmitter.emit('GRID_ITEMS:CHANGE_LEVEL', 1);
+    eventEmitter.emit('GRID_ITEMS:RESET');
+
+    // Save reset balance
+    this.itemService.saveStartBalance();
   }
 
   private updateTextStyles(): void {
