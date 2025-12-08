@@ -5,7 +5,6 @@ import { Container, WebGLRenderer } from 'pixi.js';
 import gsap from 'gsap';
 import { LightingController } from '../Controllers/LightingController';
 import { SceneController } from '../Controllers/SceneController';
-import { CameraController } from '../Controllers/CameraController';
 import { eventEmitter } from '../Services/EventBusService';
 import { AudioService } from '../Services/AudioService';
 import { SCENE, CAMERA, RENDERER, sceneManagerConfig } from '../../config';
@@ -19,7 +18,6 @@ export class GameLayer {
 
   lightingController: LightingController | null = null;
   sceneController: SceneController | null = null;
-  cameraController!: CameraController;
 
   private orbitControls!: OrbitControls;
   private particleSystem: BatchedRenderer;
@@ -69,7 +67,6 @@ export class GameLayer {
 
     this.camera.updateProjectionMatrix();
 
-    // this.cameraController = new CameraController(this.camera);
   }
 
 
