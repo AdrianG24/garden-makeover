@@ -76,12 +76,17 @@ export class GameLayer {
       canvas: canvasElement,
       powerPreference: 'high-performance',
       stencil: true,
+      depth: true,
     });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.webglRenderer.shadowMap.enabled = RENDERER.shadow.enabled;
     this.webglRenderer.shadowMap.type = RENDERER.shadow.type;
+
+    const gl = this.webglRenderer.getContext();
+    const stencilBits = gl.getParameter(gl.STENCIL_BITS);
+    console.log('Stencil buffer bits:', stencilBits);
   }
 
   async setupGameWorld(): Promise<void> {

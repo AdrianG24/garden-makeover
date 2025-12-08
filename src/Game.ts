@@ -122,7 +122,6 @@ async function initializePixiRenderer(
     resolution: Math.min(window.devicePixelRatio, 2),
     clearBeforeRender: false,
     antialias: false,
-    stencil: true,
   });
 
   return pixiRenderer;
