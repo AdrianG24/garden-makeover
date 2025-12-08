@@ -69,7 +69,7 @@ export class GameLayer {
 
     this.camera.updateProjectionMatrix();
 
-    this.cameraController = new CameraController(this.camera);
+    // this.cameraController = new CameraController(this.camera);
   }
 
 
@@ -277,18 +277,8 @@ export class GameLayer {
   handleResize(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
+this.setInitialCameraPosition()
 
-    const targetPosition = this.getCameraPositionForCurrentScreen();
-    gsap.to(this.camera.position, {
-      x: targetPosition.x,
-      y: targetPosition.y,
-      z: targetPosition.z,
-      duration: ANIMATION_TIMINGS.CAMERA_MOVE_DURATION,
-      ease: 'power2.inOut',
-      onUpdate: () => {
-        this.camera.lookAt(this.cameraLookAtTarget);
-      },
-    });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
     this.webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

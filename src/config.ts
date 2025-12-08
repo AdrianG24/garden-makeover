@@ -150,14 +150,6 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
 };
 
 
-export type CameraAnimationConfiguration = {
-  duration: number;
-  delay: number;
-  ease: string;
-};
 
-export const DEFAULT_CAMERA_ANIMATION_CONFIG: CameraAnimationConfiguration = {
-  duration: 0.8,
-  delay: 0,
-  ease: 'power2.inOut',
-};
+
+

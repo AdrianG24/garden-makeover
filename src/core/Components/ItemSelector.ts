@@ -123,7 +123,7 @@ export class ItemSelector extends Container {
 
     this.addChild(this.panel);
 
-    this.applySafeScaleForPanel();
+    this.panelScale();
 
     const targetScale = this.panel.scale.x;
     this.panel.scale.set(targetScale * 0.5);
@@ -228,7 +228,7 @@ export class ItemSelector extends Container {
     });
   }
 
-  private applySafeScaleForPanel(): void {
+  private panelScale(): void {
     if (!this.panel) return;
 
     const screenW = window.innerWidth;
@@ -259,7 +259,7 @@ export class ItemSelector extends Container {
     }
 
     if (this.isCurrentlyVisible) {
-      this.applySafeScaleForPanel();
+      this.panelScale();
     }
   }
 }
