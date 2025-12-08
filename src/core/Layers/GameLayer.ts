@@ -112,20 +112,8 @@ export class GameLayer {
       ground.visible = true;
       ground.traverse(child => {
         if (child instanceof THREE.Mesh) {
-          child.material.transparent = true;
-          child.material.opacity = 0;
-        }
-      });
-
-      gsap.to({}, {
-        duration: 1.5,
-        onUpdate: function (this: { progress: () => number }) {
-          const progress = this.progress();
-          ground.traverse(child => {
-            if (child instanceof THREE.Mesh && child.material.transparent) {
-              child.material.opacity = progress;
-            }
-          });
+          child.material.transparent = false;
+          child.material.opacity = 1;
         }
       });
     }
@@ -134,28 +122,14 @@ export class GameLayer {
       objects.visible = true;
       objects.traverse(child => {
         if (child instanceof THREE.Mesh) {
-          child.material.transparent = true;
-          child.material.opacity = 0;
-        }
-      });
-
-      gsap.to({}, {
-        duration: 1.5,
-        delay: 0.3,
-        onUpdate: function (this: { progress: () => number }) {
-          const progress = this.progress();
-          objects.traverse(child => {
-            if (child instanceof THREE.Mesh && child.material.transparent) {
-              child.material.opacity = progress;
-            }
-          });
+          child.material.transparent = false;
+          child.material.opacity = 1;
         }
       });
     }
 
     this.setInitialCameraPosition();
-
-      this.orbitControls.enabled = false;
+    this.orbitControls.enabled = false;
 
     gsap.delayedCall(ANIMATION_TIMINGS.LEVEL_UP_DELAY, () => {
       eventEmitter.emit('GRID_ITEMS:SHOW');

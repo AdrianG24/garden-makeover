@@ -169,7 +169,7 @@ async function startGame(
   itemService: ItemService,
   audioService: AudioService
 ): Promise<void> {
-  gameLayer.revealFarm();
+ gameLayer.revealFarm();
 
   createUILayers(stageContainer, gameLayer, itemService, audioService);
 }

@@ -6,13 +6,7 @@ import { AudioService } from '../Services/AudioService';
 import { SceneController } from '../Controllers/SceneController';
 import { worldToScreen, animateScaleTo } from '../Utils/UtilityFunctions';
 import { GAME_GRID_CONFIG } from '../../config';
-
-interface ItemData {
-  id: string;
-  modelId: string;
-  position: { x: number; y: number; z: number };
-  level: number;
-}
+import { ItemData } from '../interfaces';
 
 export class GridItemPlacement extends Container {
   private items: ItemData[] = [

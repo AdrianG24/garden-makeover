@@ -99,7 +99,7 @@ export const RENDERER = {
     height: 1080,
   },
   shadow: {
-    enabled: false,
+    enabled: true,
     type: THREE.BasicShadowMap,
   },
 };

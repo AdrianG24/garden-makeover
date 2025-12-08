@@ -26,11 +26,6 @@ export class ItemService {
     this.levelStartBalance = this.balance;
   }
 
-  restoreStartBalance(): void {
-    this.balance = this.levelStartBalance;
-    eventEmitter.emit('BALANCE:UPDATED', this.balance);
-  }
-
   spend(amount: number): boolean {
     if (this.balance >= amount) {
       this.balance -= amount;

@@ -1,16 +1,7 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import gsap from 'gsap';
 import { eventEmitter } from '../Services/EventBusService';
-
-interface TutorialStep {
-  title: string;
-  description: string;
-}
-
-interface ButtonContainer extends Container {
-  bg: Graphics;
-  txt: Text;
-}
+import { TutorialStep, ButtonContainer } from '../interfaces';
 
 export class Tutorial extends Container {
   private overlay!: Graphics;

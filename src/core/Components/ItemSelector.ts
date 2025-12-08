@@ -3,21 +3,7 @@ import gsap from 'gsap';
 import { eventEmitter } from '../Services/EventBusService';
 import { ItemService } from '../Services/ItemService';
 import { AudioService } from '../Services/AudioService';
-
-interface ItemOption {
-  type: string;
-  textureKey: string;
-  modelId: string;
-  label: string;
-}
-
-interface ItemPlacement {
-  id: string;
-  modelId: string;
-  textureKey: string;
-  gridPosition: { row: number; col: number };
-  label: string;
-}
+import { ItemOption, ItemPlacement } from '../interfaces';
 
 export class ItemSelector extends Container {
   private overlay!: Graphics;
