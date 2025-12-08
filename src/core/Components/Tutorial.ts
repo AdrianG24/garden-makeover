@@ -49,6 +49,9 @@ export class Tutorial extends Container {
     this.overlay = new Graphics();
     this.addChild(this.overlay);
 
+    this.overlay.eventMode = 'static';
+    this.overlay.on('pointerdown', () => {});
+
     this.panel = new Container();
     this.addChild(this.panel);
 

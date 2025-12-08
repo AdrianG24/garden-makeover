@@ -120,39 +120,44 @@ export class LevelingSystem extends Container {
   }
 
   private updateLayoutValues(width: number): void {
-    this.isMobile = width < 968;
-    this.padding = this.isMobile ? 12 : 20;
-    this.barWidth = this.isMobile ? 150 : 200;
-    this.barHeight = this.isMobile ? 15 : 20;
-    this.position.set(this.isMobile ? 10 : 20, this.isMobile ? 10 : 20);
+    this.isMobile = width < 420;
+    this.padding = this.isMobile ? 6 : 12;
+    this.barWidth = this.isMobile ? 110 : 150;
+    this.barHeight = this.isMobile ? 12 : 15;
+
+    this.position.set(this.isMobile ? 6 : 10, this.isMobile ? 6 : 10);
   }
 
   private redrawUI(): void {
-    const panelWidth = this.isMobile ? 200 : 260;
-    const panelHeight = this.isMobile ? 75 : 100;
+    const panelWidth = this.isMobile ? 135 : 200;
+    const panelHeight = this.isMobile ? 55 : 75;
 
     this.panel.clear();
     this.panel.fill(0x000000, 0.6);
-    this.panel.roundRect(0, 0, panelWidth, panelHeight, 10);
+    this.panel.roundRect(0, 0, panelWidth, panelHeight, 8);
     this.panel.endFill();
+
+    this.levelText.style.fontSize = this.isMobile ? 14 : 18;
+    this.levelText.position.set(this.padding, this.padding);
 
     this.progressBackground.clear();
     this.progressBackground.fill(0x333333, 0.8);
     this.progressBackground.roundRect(
-      this.padding,
-      this.padding + (this.isMobile ? 28 : 35),
-      this.barWidth,
-      this.barHeight,
-      this.barHeight / 2
+        this.padding,
+        this.padding + (this.isMobile ? 18 : 24),
+        this.barWidth,
+        this.barHeight,
+        this.barHeight / 2
     );
     this.progressBackground.endFill();
 
-    this.levelText.position.set(this.padding, this.padding);
+    this.progressText.style.fontSize = this.isMobile ? 10 : 12;
     this.progressText.position.set(
-      this.padding + this.barWidth / 2,
-      this.padding + (this.isMobile ? 28 : 35) + this.barHeight / 2
+        this.padding + this.barWidth / 2,
+        this.padding + (this.isMobile ? 18 : 24) + this.barHeight / 2
     );
   }
+
 
   private setupEvents(): void {
     eventEmitter.on('LEVEL:GOAL_COMPLETED', (goalId: unknown) => {

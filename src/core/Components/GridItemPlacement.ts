@@ -17,7 +17,7 @@ interface ItemData {
 export class GridItemPlacement extends Container {
   private items: ItemData[] = [
     { id: 'cow_1', modelId: 'cow_1', position: { x: -13, y: 4.2, z: 0 }, level: 1 },
-    { id: 'chicken_1', modelId: 'chicken_1', position: { x: 10, y: 4.2, z: 13 }, level: 1 },
+    { id: 'chicken_1', modelId: 'chicken_1', position: { x: 8, y: 4.2, z: 13 }, level: 1 },
 
     { id: 'sheep_1', modelId: 'sheep_1', position: { x: -10.5, y: 4.2, z: 4.2 }, level: 2 },
     { id: 'corn_1', modelId: 'corn_1', position: { x: -5.5,  y: 4.2, z: 10.8 }, level: 2 },

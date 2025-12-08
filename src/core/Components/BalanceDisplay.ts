@@ -62,20 +62,23 @@ export class BalanceDisplay extends Container {
   }
 
   public resize(screenWidth: number): void {
-    const isMobile = screenWidth < 968;
-    const width = isMobile ? 150 : 210;
-    const height = isMobile ? 45 : 60;
-    const fontSize = isMobile ? 16 : 22;
-    const padding = isMobile ? 10 : 20;
+    const isMobile = screenWidth < 420;
+
+    const width = isMobile ? 120 : 150;
+    const height = isMobile ? 36 : 45;
+    const fontSize = isMobile ? 12 : 16;
+    const paddingX = isMobile ? 8 : 10;
+    const paddingY = 10;
 
     this.background.clear();
     this.background.fill(0x000000, 0.6);
-    this.background.roundRect(0, 0, width, height, 10);
+    this.background.roundRect(0, 0, width, height, 8);
     this.background.endFill();
 
     this.balanceText.style.fontSize = fontSize;
     this.balanceText.position.set(width / 2, height / 2);
 
-    this.position.set(screenWidth - width - padding, padding);
+    this.position.set(screenWidth - width - paddingX, paddingY);
   }
+
 }
