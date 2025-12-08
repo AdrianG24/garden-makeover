@@ -2,8 +2,8 @@ import { createGameScene } from './Game';
 
 (async (): Promise<void> => {
   const canvas = document.createElement('canvas');
-  const gl2 = canvas.getContext('webgl2');
-  const gl1 = !gl2 && canvas.getContext('webgl');
+  const gl2 = canvas.getContext('webgl2', { stencil: true });
+  const gl1 = !gl2 && canvas.getContext('webgl', { stencil: true });
 
   if (gl2 || gl1) {
     const testContext = gl2 || gl1;
