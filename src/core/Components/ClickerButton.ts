@@ -85,7 +85,7 @@ export class ClickerButton extends Container {
       width: this.isMobile ? 2 : 3
     };
 
-    this.coinText.position.set(0, this.isMobile ? 45 : 70);
+    this.coinText.position.set(0, this.isMobile ? 55 : 80);
   }
 
   private onClick(): void {

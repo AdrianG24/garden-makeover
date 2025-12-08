@@ -54,7 +54,6 @@ async function initializePixiStage(): Promise<Container> {
   await Assets.init({ manifest });
   return stageContainer;
 }
-
 function ensureLoaderStyles(): void {
   if (document.getElementById('gm-loader-styles')) return;
 
@@ -219,7 +218,7 @@ function createUILayers(
 
   gsap.to(uiLayer, {
     alpha: 1,
-    duration: 0.8,
+    duration: 0.2,
     delay: 0.3,
     ease: 'power2.out',
     onComplete: () => {

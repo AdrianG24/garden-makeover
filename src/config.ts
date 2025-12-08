@@ -100,7 +100,7 @@ export const RENDERER = {
   },
   shadow: {
     enabled: true,
-    type: THREE.BasicShadowMap,
+    type: THREE.PCFSoftShadowMap,
   },
 };
 
@@ -118,8 +118,8 @@ export const DIRECTIONAL_LIGHT_PRESETS = {
         near: 0.0,
         far: 1000,
       },
-      bias: -0.0004,
-      normalBias: 0.005,
+      bias: -0.001,
+      normalBias: 0.02,
       mapSize: {
         x: window.innerWidth < 768 ? 1024 : 2048,
         y: window.innerWidth < 768 ? 1024 : 2048

@@ -41,7 +41,7 @@ export class Tutorial extends Container {
     this.createUI();
     this.updateStepContent();
 
-    gsap.to(this, { alpha: 1, duration: 0.4, delay: 0.1, ease: 'power2.out' });
+    gsap.to(this, { alpha: 1, duration: 0.05, delay: 0.1, ease: 'power2.out' });
   }
 
   private createUI(): void {
