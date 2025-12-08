@@ -119,10 +119,10 @@ export class Tutorial extends Container {
     if (label === 'Next') this.nextButtonText = txt;
 
     container.on('pointerover', () =>
-        gsap.to(container.scale, { x: 1.05, y: 1.05, duration: 0.2 })
+        gsap.to(container.scale, { x: 1.05, y: 1.05, duration: 0.12, ease: 'power2.out' })
     );
     container.on('pointerout', () =>
-        gsap.to(container.scale, { x: 1, y: 1, duration: 0.2 })
+        gsap.to(container.scale, { x: 1, y: 1, duration: 0.12, ease: 'power2.in' })
     );
 
     container.bg = bg;
@@ -144,8 +144,8 @@ export class Tutorial extends Container {
 
     this.isMobile = w < 420;
 
-    this.panelWidth = this.isMobile ? Math.min(w - 40, 360) : 500;
-    this.panelHeight = this.isMobile ? 300 : 300;
+    this.panelWidth = Math.min(this.isMobile ? w - 40 : 500, w * 0.95);
+    this.panelHeight = Math.min(this.isMobile ? 300 : 300, h * 0.85);
 
     const halfW = this.panelWidth / 2;
     const halfH = this.panelHeight / 2;

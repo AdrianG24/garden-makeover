@@ -96,9 +96,10 @@ export class ClickerButton extends Container {
     gsap.to(this.scale, {
       x: 0.9,
       y: 0.9,
-      duration: 0.1,
+      duration: 0.08,
       yoyo: true,
-      repeat: 1
+      repeat: 1,
+      ease: 'power2.out'
     });
 
     const float = new Text(`+${this.clickValue}$`, {
@@ -117,24 +118,24 @@ export class ClickerButton extends Container {
     gsap.to(float, {
       y: -100,
       alpha: 1,
-      duration: 0.5,
+      duration: 0.4,
       ease: 'power2.out'
     });
 
     gsap.to(float, {
       alpha: 0,
-      duration: 0.3,
-      delay: 0.5,
+      duration: 0.2,
+      delay: 0.4,
       onComplete: () => float.destroy()
     });
   }
 
   private onHover(): void {
-    gsap.to(this.scale, { x: 1.1, y: 1.1, duration: 0.2 });
+    gsap.to(this.scale, { x: 1.1, y: 1.1, duration: 0.15, ease: 'power2.out' });
   }
 
   private onHoverOut(): void {
-    gsap.to(this.scale, { x: 1, y: 1, duration: 0.2 });
+    gsap.to(this.scale, { x: 1, y: 1, duration: 0.15, ease: 'power2.in' });
   }
 
   private updatePosition(width: number, height: number): void {

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { SceneControllerConfiguration } from './core/Controllers/SceneController';
 
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 export const SCENE = {
   backgroundColor: 0xa0a0a0,
@@ -99,8 +99,8 @@ export const RENDERER = {
     height: 1080,
   },
   shadow: {
-    enabled: true,
-    type: THREE.PCFShadowMap,
+    enabled: false,
+    type: THREE.BasicShadowMap,
   },
 };
 

@@ -24,7 +24,6 @@ export class CongratsPopup extends Container {
   constructor() {
     super();
     this.create();
-    // this.layout();
     this.alpha = 0;
     gsap.to(this, { alpha: 1, duration: 0.35 });
   }

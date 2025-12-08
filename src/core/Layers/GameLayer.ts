@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import Stats from 'stats.js';
 import { BatchedRenderer } from 'three.quarks';
 import { Container, WebGLRenderer } from 'pixi.js';
 import gsap from 'gsap';
@@ -17,7 +16,6 @@ export class GameLayer {
   camera!: THREE.PerspectiveCamera;
   webglRenderer!: THREE.WebGLRenderer;
   clock: THREE.Clock;
-  stats!: Stats;
 
   lightingController: LightingController | null = null;
   sceneController: SceneController | null = null;
@@ -34,25 +32,15 @@ export class GameLayer {
   constructor(
     canvasElement: HTMLCanvasElement,
     private audioService: AudioService,
-    showDebug: boolean = false
   ) {
     this.clock = new THREE.Clock();
 
-    this.initializeStats(showDebug);
     this.initializeScene();
     this.initializeCamera();
     this.initializeRenderer(canvasElement);
 
     this.particleSystem = new BatchedRenderer();
     this.threeScene.add(this.particleSystem);
-  }
-
-  private initializeStats(showDebug: boolean): void {
-    if (showDebug) {
-      this.stats = new Stats();
-      this.stats.showPanel(0);
-      document.body.appendChild(this.stats.dom);
-    }
   }
 
   private initializeScene(): void {
@@ -86,13 +74,11 @@ export class GameLayer {
 
 
   private initializeRenderer(canvasElement: HTMLCanvasElement): void {
-    const isMobile = window.innerWidth < 768;
-
     this.webglRenderer = new THREE.WebGLRenderer({
       antialias: RENDERER.antialias,
       canvas: canvasElement,
-      powerPreference: isMobile ? 'default' : 'high-performance',
-      stencil: true,
+      powerPreference: 'high-performance',
+      stencil: false,
     });
 
     this.webglRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -261,16 +247,21 @@ export class GameLayer {
   }
 
   update(pixiRenderer: WebGLRenderer, pixiStage: Container): void {
-    if (this.stats) this.stats.begin();
 
     const delta = this.clock.getDelta();
 
-    if (this.sceneController && this.sceneController.animationMixers.length > 0) {
-      this.sceneController.animationMixers.forEach(mixer => mixer.update(delta));
+    if (this.sceneController?.animationMixers?.length) {
+      for (let i = 0; i < this.sceneController.animationMixers.length; i++) {
+        this.sceneController.animationMixers[i].update(delta);
+      }
     }
 
     if (this.particleSystem) {
       this.particleSystem.update(delta);
+    }
+
+    if (this.orbitControls) {
+      this.orbitControls.update();
     }
 
     eventEmitter.emit('GAME:UPDATE');
@@ -281,7 +272,6 @@ export class GameLayer {
     pixiRenderer.resetState();
     pixiRenderer.render({ container: pixiStage });
 
-    if (this.stats) this.stats.end();
   }
 
   handleResize(): void {

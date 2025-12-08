@@ -15,7 +15,7 @@ import { Tutorial } from './core/Components/Tutorial';
 import { eventEmitter } from './core/Services/EventBusService';
 import { ItemService } from './core/Services/ItemService';
 import { AudioService } from './core/Services/AudioService';
-import { manifest, DEBUG } from './config';
+import { manifest } from './config';
 
 export async function createGameScene(): Promise<void> {
   const loaderOverlay = showLoadingOverlay();
@@ -30,7 +30,7 @@ export async function createGameScene(): Promise<void> {
     canvasElement.style.inset = '0';
     document.body.appendChild(canvasElement);
 
-    const gameLayer = new GameLayer(canvasElement, audioService, DEBUG);
+    const gameLayer = new GameLayer(canvasElement, audioService);
 
     const pixiRenderer = await initializePixiRenderer(
         canvasElement,
@@ -117,7 +117,7 @@ async function initializePixiRenderer(
 
   await pixiRenderer.init({
     canvas: canvasElement,
-    context: context as unknown as WebGL2RenderingContext,
+    context: context as any,
     width: window.innerWidth,
     height: window.innerHeight,
     resolution: Math.min(window.devicePixelRatio, 2),
@@ -246,20 +246,17 @@ function createUILayers(
 }
 
 function showTutorial(stageContainer: Container): void {
-  const shouldShowTutorial = !localStorage.getItem('tutorial_completed');
 
-  console.log('Tutorial check:', { shouldShowTutorial, hasKey: !!localStorage.getItem('tutorial_completed') });
-
-  console.log('Creating tutorial...');
   const tutorial = new Tutorial(() => {
-    console.log('Tutorial completed callback');
-    localStorage.setItem('tutorial_completed', 'true');
     eventEmitter.emit('HELPER:SHOW');
   });
   stageContainer.addChild(tutorial);
-  console.log('Tutorial added to stage');
 
   const handleResize = () => {
+    if (tutorial.destroyed) {
+      window.removeEventListener('resize', handleResize);
+      return;
+    }
     tutorial.resize();
   };
   window.addEventListener('resize', handleResize);
@@ -267,10 +264,6 @@ function showTutorial(stageContainer: Container): void {
   tutorial.once('destroyed', () => {
     window.removeEventListener('resize', handleResize);
   });
-
-  if (!shouldShowTutorial) {
-    eventEmitter.emit('HELPER:SHOW');
-  }
 }
 
 function setupAnimationLoop(

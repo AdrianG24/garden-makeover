@@ -60,8 +60,8 @@ export class WelcomeScreen extends Container {
       this.audioService.playSound('sound_click');
       this.handleBuy();
     });
-    this.buyButton.on('pointerover', () => gsap.to(this.buyButton.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
-    this.buyButton.on('pointerout', () => gsap.to(this.buyButton.scale, { x: 1, y: 1, duration: 0.2 }));
+    this.buyButton.on('pointerover', () => gsap.to(this.buyButton.scale, { x: 1.1, y: 1.1, duration: 0.15, ease: 'power2.out' }));
+    this.buyButton.on('pointerout', () => gsap.to(this.buyButton.scale, { x: 1, y: 1, duration: 0.15, ease: 'power2.in' }));
 
     this.alpha = 0;
     gsap.to(this, { alpha: 1, duration: 0.3 });

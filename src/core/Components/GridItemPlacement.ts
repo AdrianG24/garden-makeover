@@ -93,8 +93,8 @@ export class GridItemPlacement extends Container {
 
       bubble.eventMode = 'static';
       bubble.cursor = 'pointer';
-      bubble.on('pointerover', () => gsap.to(bubble.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
-      bubble.on('pointerout', () => gsap.to(bubble.scale, { x: 1, y: 1, duration: 0.2 }));
+      bubble.on('pointerover', () => gsap.to(bubble.scale, { x: 1.1, y: 1.1, duration: 0.15, ease: 'power2.out' }));
+      bubble.on('pointerout', () => gsap.to(bubble.scale, { x: 1, y: 1, duration: 0.15, ease: 'power2.in' }));
       bubble.on('pointerdown', () => this.onBubbleClick(bubble));
 
       bubble.visible = false;
@@ -128,20 +128,20 @@ export class GridItemPlacement extends Container {
   }
 
   public updatePositions(): void {
-    if (!this.camera) return;
+    if (!this.camera || !this.isEnabled) return;
 
-    this.bubbles.forEach(bubble => {
-      if (!bubble.visible) return;
+    for (const [, bubble] of this.bubbles) {
+      if (!bubble.visible) continue;
 
       const worldPos = new THREE.Vector3(
         bubble.itemData.position.x,
         GAME_GRID_CONFIG.GAME_OBJECT_Y,
         bubble.itemData.position.z
       );
-      const screenPos = worldToScreen(worldPos, this.camera!);
+      const screenPos = worldToScreen(worldPos, this.camera);
 
       bubble.position.set(screenPos.x, screenPos.y);
-    });
+    }
   }
 
   private setupEvents(): void {
@@ -155,7 +155,6 @@ export class GridItemPlacement extends Container {
   }
 
   private resetAllItems(): void {
-    // Remove all placed objects from scene
     this.placedObjects.forEach((obj) => {
       if (this.scene) {
         this.scene.remove(obj);
@@ -163,14 +162,12 @@ export class GridItemPlacement extends Container {
     });
     this.placedObjects.clear();
 
-    // Reset all bubbles to visible for level 1
     this.currentLevel = 1;
     this.bubbles.forEach(bubble => {
       bubble.visible = false;
       bubble.alpha = 0;
     });
 
-    // Show level 1 bubbles
     this.showBubbles();
   }
 

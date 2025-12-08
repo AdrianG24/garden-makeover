@@ -52,21 +52,23 @@ export class ItemSelector extends Container {
   }
 
   private createSelectorUI(): void {
-    const isMobile = Math.min(window.innerWidth, window.innerHeight) < 900;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const isMobile = Math.min(w, h) < 900;
 
     this.overlay = new Graphics();
     this.overlay.fill(0x000000, 0.7);
-    this.overlay.rect(0, 0, window.innerWidth, window.innerHeight);
+    this.overlay.rect(0, 0, w, h);
     this.overlay.endFill();
     this.overlay.eventMode = 'static';
     this.overlay.on('pointerdown', () => this.hideSelector());
     this.addChild(this.overlay);
 
     this.panel = new Container();
-    this.panel.position.set(window.innerWidth / 2, window.innerHeight / 2);
+    this.panel.position.set(w / 2, h / 2);
 
-    const panelWidth = isMobile ? Math.min(window.innerWidth - 30, 300) : 560;
-    const panelHeight = isMobile ? 260 : 280;
+    const panelWidth = Math.min(isMobile ? w - 40 : 560, w * 0.95);
+    const panelHeight = Math.min(isMobile ? 260 : 280, h * 0.85);
     const halfWidth = panelWidth / 2;
     const halfHeight = panelHeight / 2;
 
@@ -177,8 +179,8 @@ export class ItemSelector extends Container {
     if (canAfford) {
       container.eventMode = 'static';
       container.cursor = 'pointer';
-      container.on('pointerover', () => gsap.to(container.scale, { x: 1.1, y: 1.1, duration: 0.2 }));
-      container.on('pointerout', () => gsap.to(container.scale, { x: 1, y: 1, duration: 0.2 }));
+      container.on('pointerover', () => gsap.to(container.scale, { x: 1.1, y: 1.1, duration: 0.15, ease: 'power2.out' }));
+      container.on('pointerout', () => gsap.to(container.scale, { x: 1, y: 1, duration: 0.15, ease: 'power2.in' }));
       container.on('pointerdown', () => this.selectItem(option, cost));
     } else {
       container.eventMode = 'static';
